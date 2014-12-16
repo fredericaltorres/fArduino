@@ -16,8 +16,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="TrinketLedAndSwitch.ino" />
-    <None Include="TrinketLedAndSwitch.OnOff.ino" />
-    <None Include="TrinketLedAndSwitch.3StateLed.ino" />
     <None Include="fArduino.ino" />
     <None Include="fArduino.lib.ino" />
   </ItemGroup>

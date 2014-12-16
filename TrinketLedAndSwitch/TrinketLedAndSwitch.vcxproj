@@ -74,13 +74,7 @@
     <None Include="fArduino.lib.ino">
       <FileType>CppCode</FileType>
     </None>
-    <None Include="TrinketLedAndSwitch.3StateLed.ino">
-      <FileType>CppCode</FileType>
-    </None>
     <None Include="TrinketLedAndSwitch.ino">
-      <FileType>CppCode</FileType>
-    </None>
-    <None Include="TrinketLedAndSwitch.OnOff.ino">
       <FileType>CppCode</FileType>
     </None>
   </ItemGroup>
