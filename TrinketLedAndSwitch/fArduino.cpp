@@ -17,6 +17,7 @@ BoardClass::~BoardClass() {
 
 }
 void BoardClass::LedOn(int pin, boolean state, int delay) {
+
     this->LedOn(pin, state);
     this->Delay(delay);
 }
@@ -113,7 +114,8 @@ void Led::Blink() {
     this->_state = !this->_state;
     this->SetState(this->_state);
     this->_blinkStartTime = millis();
-    Board.Delay(this->_rate);*/
+    Board.Delay(this->_rate);
+    */
 }
 
 //////////////////////////////////////////////////////
@@ -121,15 +123,14 @@ void Led::Blink() {
 ///
 MultiStateButton::MultiStateButton(int pin, Led * led, int maxState, const int * ledIntensityArray) {
 
-    this->_pin               = pin;
-    this->_previousPin       = UNDEFINED_PIN; // not used
-    this->_maxState          = maxState;
-    this->_ledIntensityArray = ledIntensityArray;
-    this->LedInstance        = led;
-    this->StateIndex         = 0;
-
-    this->_buttonLastStateInLoop = false;
-    this->_previousButtonLastStateInLoop = false;
+    this->_pin                          = pin;
+    this->_previousPin                  = UNDEFINED_PIN; 
+    this->_maxState                     = maxState;
+    this->_ledIntensityArray            = ledIntensityArray;
+    this->LedInstance                   = led;
+    this->StateIndex                    = 0;
+    this->NextButtonLastStateInLoop     = false;
+    this->PreviousButtonLastStateInLoop = false;
 }
 MultiStateButton::~MultiStateButton() {
 
@@ -154,7 +155,7 @@ boolean MultiStateButton::GetButtonStateDebounced() {
 
     boolean state = digitalRead(this->_pin) == HIGH;
 
-    if (state != this->_buttonLastStateInLoop) {
+    if (state != this->NextButtonLastStateInLoop) {
 
         delay(5);
         state = digitalRead(this->_pin) == HIGH;
@@ -167,7 +168,7 @@ boolean MultiStateButton::GetPreviousButtonStateDebounced() {
 
         boolean state = digitalRead(this->_previousPin) == HIGH;
 
-        if (state != this->_previousButtonLastStateInLoop) {
+        if (state != this->PreviousButtonLastStateInLoop) {
 
             delay(5);
             state = digitalRead(this->_previousPin) == HIGH;

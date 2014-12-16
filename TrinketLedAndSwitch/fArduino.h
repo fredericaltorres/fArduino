@@ -64,19 +64,17 @@ public:
 class MultiStateButton {
 
 private:
-    int  _pin;
-    int  _previousPin;
-    int  _maxState;
-    
-    const int * _ledIntensityArray;
-protected:
+    int         _pin;
+    int         _previousPin;
+    int         _maxState;
+    const int  *_ledIntensityArray;  // Point to an array of int mapping the intensity of the led with the StateIndex
+
 public:
-    Led *LedInstance;
-    int LastState;
-    int LastStatePreviousButton;
-    int StateIndex;
-    boolean _buttonLastStateInLoop;
-    boolean _previousButtonLastStateInLoop;
+    Led     *LedInstance;
+    int     StateIndex;
+    boolean NextButtonLastStateInLoop;
+    boolean PreviousButtonLastStateInLoop;
+
     MultiStateButton(int pin, Led * led, int maxState, const int * ledIntensityArray);
     ~MultiStateButton();
     boolean GetButtonStateDebounced();

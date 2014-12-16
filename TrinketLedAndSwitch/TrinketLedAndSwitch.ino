@@ -28,25 +28,31 @@
 
 #include "fArduino.h"
 
-const int SWITCH_PIN                  = 0;
-const int SWITCH_PIN_PREVIOUS         = 1;
-const int LED_PIN                     = 1;  // Red LED on the Trinket
+#if BACK_BUTTON
+const int SWITCH_PIN_PREVIOUS         = 2; // Only used if add a back button
+#endif
+
+const int SWITCH_PIN                  = 0; // should be 0
+const int LED_PIN                     = 1; // Red LED on the Trinket
 const int LED_LIGTH_STEP_VALUES[]     = { 0, 20, 200, 255, 255 }; // Define the led intensity, 255 we will blink
-const int LED_BLINKING_RATES[]        = { 100, 400 }; 
+const int LED_BLINKING_RATES[]        = { 100, 400 };
 
 const int   _blinking1LevelIndex      = 3;
 const int   _blinking2LevelIndex      = 4;
 
-Led              _onBoardLed(LED_PIN);
+Led              _onBoardLed(LED_PIN);  // The led representing the User Interface
+
 MultiStateButton _5StatesButton(SWITCH_PIN, &_onBoardLed, ArraySize(LED_LIGTH_STEP_VALUES), &LED_LIGTH_STEP_VALUES[0]);
 
 void setup() {
 
     Board.SetPinMode(SWITCH_PIN,            INPUT);
-    Board.SetPinMode(SWITCH_PIN_PREVIOUS,   INPUT);
     Board.SetPinMode(LED_PIN,               OUTPUT);
 
-    // _5StatesButton.SetPreviousButton(SWITCH_PIN_PREVIOUS);
+    #if BACK_BUTTON
+        Board.SetPinMode(SWITCH_PIN_PREVIOUS, INPUT);
+        _5StatesButton.SetPreviousButton(SWITCH_PIN_PREVIOUS);
+    #endif
 }
 
 void CheckToActivateBlinkingMode() {
@@ -66,36 +72,33 @@ void loopNextOnly() {
 
     boolean buttonPressed = _5StatesButton.GetButtonStateDebounced();
 
-    if (buttonPressed == true && _5StatesButton._buttonLastStateInLoop == false) {
+    if (buttonPressed == true && _5StatesButton.NextButtonLastStateInLoop == false) {
 
         _5StatesButton.NextState();
         CheckToActivateBlinkingMode();
     }
-    _5StatesButton._buttonLastStateInLoop = buttonPressed;
+    _5StatesButton.NextButtonLastStateInLoop = buttonPressed;
+    // Update the led associated with the MultiStateButton including managing the
+    // blinking without using delay()
     _5StatesButton.UpdateUI();
 }
 
-void loopPreviousOnly() {
 
-    boolean previousButtonPressed = _5StatesButton.GetPreviousButtonStateDebounced();
+void loop() {
 
-    if (previousButtonPressed == true && _5StatesButton._previousButtonLastStateInLoop == false) {
-
-        _5StatesButton.PreviousState();
-        CheckToActivateBlinkingMode();
-    }
-    _5StatesButton._previousButtonLastStateInLoop = previousButtonPressed;
-    _5StatesButton.UpdateUI();
+    loopNextOnly();
 }
+
+#if BACK_BUTTON
 
 /// See blog post about using 2 switch
 // http://www.varesano.net/blog/fabio/serial-communication-arduino-and-processing-simple-examples-and-arduino-based-gamepad-int
 void loopBoth() {
 
-    boolean buttonPressed         = _5StatesButton.GetButtonStateDebounced();
+    boolean buttonPressed = _5StatesButton.GetButtonStateDebounced();
     boolean previousButtonPressed = false;
 
-    if (buttonPressed == true && _5StatesButton._buttonLastStateInLoop == false) {
+    if (buttonPressed == true && _5StatesButton.NextButtonLastStateInLoop == false) {
 
         _5StatesButton.NextState();
         CheckToActivateBlinkingMode();
@@ -103,18 +106,15 @@ void loopBoth() {
     else {
 
         previousButtonPressed = _5StatesButton.GetPreviousButtonStateDebounced();
-        /*
-        if (previousButtonPressed == true && _5StatesButton._previousButtonLastStateInLoop == false) {
+        if (previousButtonPressed == true && _5StatesButton.PreviousButtonLastStateInLoop == false) {
 
             _5StatesButton.PreviousState();
             CheckToActivateBlinkingMode();
-        }*/
+        }
     }
-    _5StatesButton._previousButtonLastStateInLoop = previousButtonPressed;
-    _5StatesButton._buttonLastStateInLoop         = buttonPressed;
+    _5StatesButton.PreviousButtonLastStateInLoop = previousButtonPressed;
+    _5StatesButton.NextButtonLastStateInLoop = buttonPressed;
     _5StatesButton.UpdateUI();
 }
 
-void loop() {
-    loopNextOnly();
-}
+#endif
