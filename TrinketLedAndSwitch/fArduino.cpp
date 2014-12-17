@@ -283,3 +283,30 @@ void MultiStateButton::UpdateUI() {
         this->LedInstance->SetLevel(this->_ledIntensityArray[this->StateIndex]);
     }
 }
+
+
+
+//////////////////////////////////////////////////////
+/// TimeOut
+///
+TimeOut::TimeOut(unsigned long duration) {
+
+    this->Counter   = -1;
+    this->_duration = duration;
+    this->Reset();
+}
+TimeOut::~TimeOut() {
+}
+boolean TimeOut::IsTimeOut() {
+
+    boolean b = (millis() - this->_time) > this->_duration;
+    if (b) {
+        this->Reset();
+    }
+    return b;
+}
+void TimeOut::Reset() {
+
+    this->_time = millis();
+    this->Counter++;
+}

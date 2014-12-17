@@ -108,3 +108,19 @@ public:
 };
 
 #endif
+
+//////////////////////////////////////////////////////
+/// TimeOut
+///
+class TimeOut {
+private:
+    unsigned long _time;
+    unsigned long _duration;
+public:
+    unsigned long Counter;
+
+    TimeOut(unsigned long duration);
+    ~TimeOut();
+    void Reset();
+    boolean IsTimeOut();
+};

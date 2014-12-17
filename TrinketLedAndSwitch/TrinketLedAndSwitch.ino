@@ -53,8 +53,8 @@ const int   _blinking1LevelIndex      = 3;
 const int   _blinking2LevelIndex      = 4;
 
 Led              _onBoardLed(LED_PIN);  // The led representing the User Interface
-
 MultiStateButton _5StatesButton(SWITCH_PIN, &_onBoardLed, ArraySize(LED_LIGTH_STEP_VALUES), &LED_LIGTH_STEP_VALUES[0]);
+TimeOut _oneSecondTimeOut(1000);
 
 #define USER_INPUT_STATE 0
 
@@ -130,6 +130,7 @@ void loopNextOnly() {
         }
         Board.ClearKeyboard();
     }
+    //if (_oneSecondTimeOut.IsTimeOut()) { Board.TraceFormat("Time: %d", (int)_oneSecondTimeOut.Counter); }
 }
 
 void loop() {
