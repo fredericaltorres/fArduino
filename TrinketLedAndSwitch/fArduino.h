@@ -12,11 +12,15 @@
 #define ArraySize(x) sizeof(x) / sizeof(x[0])
 #define UNDEFINED_PIN -1
 
+#define MAX_FORMAT_SIZE 128
+
 //////////////////////////////////////////////////////
 /// Represet the Trinket/Arduino board
 ///
 class BoardClass {
 
+    private:
+        boolean _serialCommunicationInitialized;
     protected:
     public:
         BoardClass();
@@ -27,6 +31,16 @@ class BoardClass {
         void LedSet(int pin, int level);
         void SetPinMode(uint8_t, uint8_t);
         void Delay(unsigned long);
+
+        void InitializeComputerCommunication(unsigned long speed, char * message);
+        void Trace(char * msg);
+        void TraceHeader(char * msg);
+        void TraceFormat(char * format, int d1);
+        void TraceFormat(char * format, int d1, int d2);
+        void TraceFormat(char * format, char *s);
+        void TraceFormat(char * format, char d1);
+
+        void ClearKeyboard();
 };
 
 // Global Signleton
@@ -68,21 +82,29 @@ private:
     int         _previousPin;
     int         _maxState;
     const int  *_ledIntensityArray;  // Point to an array of int mapping the intensity of the led with the StateIndex
+    bool        _statedChanged;
 
 public:
     Led     *LedInstance;
     int     StateIndex;
+    
     boolean NextButtonLastStateInLoop;
     boolean PreviousButtonLastStateInLoop;
 
     MultiStateButton(int pin, Led * led, int maxState, const int * ledIntensityArray);
     ~MultiStateButton();
+
     boolean GetButtonStateDebounced();
     boolean GetPreviousButtonStateDebounced();
     void NextState();
     void PreviousState();
     void UpdateUI();
     void SetPreviousButton(int pin);
+
+    boolean StateChangeFor(int state);
+    
+
+    
 };
 
 #endif

@@ -28,13 +28,25 @@
 
 #include "fArduino.h"
 
+#define ARDUINO 1
+
 #if BACK_BUTTON
 const int SWITCH_PIN_PREVIOUS         = 2; // Only used if add a back button
 #endif
 
-const int SWITCH_PIN                  = 0; // should be 0
-const int LED_PIN                     = 1; // Red LED on the Trinket
-const int LED_LIGTH_STEP_VALUES[]     = { 0, 20, 200, 255, 255 }; // Define the led intensity, 255 we will blink
+#if ARDUINO
+const int SWITCH_PIN                  = 3;
+const int LED_PIN                     = 13; // Arduino Uno on board led
+const int LED_LIGTH_STEP_VALUES[]     = { 0, 128, 255, 255, 255 }; // Define the led intensity, 255 we will blink
+#endif
+
+#if TRINKET
+const int SWITCH_PIN = 0; // should be 0
+const int LED_PIN    = 1; // Red LED on the Trinket
+const int INTENSITY01 = 20;
+const int LED_LIGTH_STEP_VALUES[] = { 0, 20, 200, 255, 255 }; // Define the led intensity, 255 we will blink
+#endif
+
 const int LED_BLINKING_RATES[]        = { 100, 400 };
 
 const int   _blinking1LevelIndex      = 3;
@@ -44,7 +56,12 @@ Led              _onBoardLed(LED_PIN);  // The led representing the User Interfa
 
 MultiStateButton _5StatesButton(SWITCH_PIN, &_onBoardLed, ArraySize(LED_LIGTH_STEP_VALUES), &LED_LIGTH_STEP_VALUES[0]);
 
+#define USER_INPUT_STATE 0
+
 void setup() {
+    
+    Board.InitializeComputerCommunication(115200, "Initializing...");
+    Board.TraceHeader("5 State App");
 
     Board.SetPinMode(SWITCH_PIN,            INPUT);
     Board.SetPinMode(LED_PIN,               OUTPUT);
@@ -53,6 +70,10 @@ void setup() {
         Board.SetPinMode(SWITCH_PIN_PREVIOUS, INPUT);
         _5StatesButton.SetPreviousButton(SWITCH_PIN_PREVIOUS);
     #endif
+
+    Board.ClearKeyboard();
+    Board.Trace("Ready...");
+    Board.TraceFormat("State Changed :%d", _5StatesButton.StateIndex);
 }
 
 void CheckToActivateBlinkingMode() {
@@ -76,13 +97,40 @@ void loopNextOnly() {
 
         _5StatesButton.NextState();
         CheckToActivateBlinkingMode();
+        Board.TraceFormat("State Changed :%d", _5StatesButton.StateIndex);
     }
     _5StatesButton.NextButtonLastStateInLoop = buttonPressed;
     // Update the led associated with the MultiStateButton including managing the
     // blinking without using delay()
     _5StatesButton.UpdateUI();
-}
 
+    if (_5StatesButton.StateChangeFor(USER_INPUT_STATE)) {
+
+        Board.TraceHeader("Menu");
+        Board.Trace("1) Function 1");
+        Board.Trace("2) Function 2");
+        Board.Trace("");
+    }
+
+    if (Serial.available() != 0) {
+
+        int c = Serial.read();
+        int k = c - '0';
+
+        if (_5StatesButton.StateIndex == USER_INPUT_STATE) {
+
+            switch (c) {
+                case '1': Board.Trace("User call function 1"); break;
+                case '2': Board.Trace("User call function 2"); break;
+                default: Board.TraceFormat("Unknown command:%c", c); break;
+            }
+        }
+        else {
+            Board.TraceFormat("The app do not accept user input in state :%d", _5StatesButton.StateIndex);
+        }
+        Board.ClearKeyboard();
+    }
+}
 
 void loop() {
 

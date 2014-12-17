@@ -12,9 +12,90 @@
 
 BoardClass::BoardClass() {
 
+    this->_serialCommunicationInitialized = false;
 }
 BoardClass::~BoardClass() {
 
+}
+
+void BoardClass::ClearKeyboard() {
+    while (Serial.available())
+        Serial.read();
+}
+
+// http://arduino.stackexchange.com/questions/176/how-do-i-print-multiple-variables-in-a-string
+void BoardClass::Trace(char * msg) {
+
+    if (this->_serialCommunicationInitialized) {
+        Serial.println(msg);
+        Serial.flush();
+    }
+}
+
+char * PadRight(char * s, char * padding, int max) {
+
+    while (strlen(s) < max) {
+        s = strcat(s, padding);
+    }
+    return s;
+}
+
+void BoardClass::TraceHeader(char * msg) {
+
+    int maxPad = 64;
+
+    char barString[MAX_FORMAT_SIZE];
+    memset(barString, 0, MAX_FORMAT_SIZE);
+    PadRight(barString, "*", maxPad);
+
+    char msg2[MAX_FORMAT_SIZE];
+    memset(msg2, 0, MAX_FORMAT_SIZE);
+    strcpy(msg2, "* ");
+    strcat(msg2, msg);
+    PadRight(msg2, " ", maxPad - 1);
+    PadRight(msg2, "*", maxPad);
+
+    this->Trace(barString);
+    this->Trace(msg2);
+    this->Trace(barString);
+}
+
+void BoardClass::TraceFormat(char * format, char *s) {
+
+    char buffer[MAX_FORMAT_SIZE];
+    snprintf(buffer, MAX_FORMAT_SIZE, format, s);
+    this->Trace(buffer);
+}
+
+void BoardClass::TraceFormat(char * format, char d1) {
+
+    char buffer[MAX_FORMAT_SIZE];
+    snprintf(buffer, MAX_FORMAT_SIZE, format, d1);
+    this->Trace(buffer);
+}
+
+void BoardClass::TraceFormat(char * format, int d1) {
+
+    char buffer[MAX_FORMAT_SIZE];
+    snprintf(buffer, MAX_FORMAT_SIZE, format, d1);
+    this->Trace(buffer);
+}
+
+
+void BoardClass::TraceFormat(char * format, int d1, int d2) {
+
+    char buffer[MAX_FORMAT_SIZE];
+    snprintf(buffer, MAX_FORMAT_SIZE, format, d1, d2);
+    this->Trace(buffer);
+}
+
+void BoardClass::InitializeComputerCommunication(unsigned long speed, char * message) {
+
+    Serial.begin(speed);
+    this->_serialCommunicationInitialized = true;
+    if (message) {
+        this->Trace(message);
+    }
 }
 void BoardClass::LedOn(int pin, boolean state, int delay) {
 
@@ -139,17 +220,32 @@ void MultiStateButton::SetPreviousButton(int pin) {
 
     this->_previousPin = pin;
 }
+// Return true if the user switch to state state and we never queried it before
+boolean MultiStateButton::StateChangeFor(int state) {
+
+    if (this->StateIndex == state) {
+
+        boolean r = this->_statedChanged;
+        if (r) {
+            this->_statedChanged = false;
+        }
+        return r;
+    }
+    else return false;
+}
 void MultiStateButton::NextState() {
 
     this->StateIndex++;
     if (this->StateIndex >= this->_maxState)
         this->StateIndex = 0;
+    this->_statedChanged = true;
 }
 void MultiStateButton::PreviousState() {
 
     this->StateIndex--;
     if (this->StateIndex < 0)
         this->StateIndex = this->_maxState-1;
+    this->_statedChanged = true;
 }
 boolean MultiStateButton::GetButtonStateDebounced() {
 
