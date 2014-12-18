@@ -16,11 +16,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="TrinketLedAndSwitch.ino" />
-    <None Include="fArduino.ino" />
     <None Include="fArduino.lib.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Visual Micro\.TrinketLedAndSwitch.vsarduino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\fArduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="fArduino.h">
@@ -28,6 +30,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\source\fArduino.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="fArduino.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

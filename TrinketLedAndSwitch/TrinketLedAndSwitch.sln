@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrinketLedAndSwitch", "Trin
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Ard01", "..\..\arduino-1.0.6\libraries\Ard01\Ard01.vcxproj", "{E3849B74-9D56-4ED8-89F7-7B1B46200462}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TempCensorDS18B20", "..\TempCensorDS18B20\TempCensorDS18B20.vcxproj", "{70BDE9F1-99F1-4C5A-95CA-7E247B3D9C4A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -21,6 +23,10 @@ Global
 		{E3849B74-9D56-4ED8-89F7-7B1B46200462}.Debug|Win32.Build.0 = Debug|Win32
 		{E3849B74-9D56-4ED8-89F7-7B1B46200462}.Release|Win32.ActiveCfg = Release|Win32
 		{E3849B74-9D56-4ED8-89F7-7B1B46200462}.Release|Win32.Build.0 = Release|Win32
+		{70BDE9F1-99F1-4C5A-95CA-7E247B3D9C4A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{70BDE9F1-99F1-4C5A-95CA-7E247B3D9C4A}.Debug|Win32.Build.0 = Debug|Win32
+		{70BDE9F1-99F1-4C5A-95CA-7E247B3D9C4A}.Release|Win32.ActiveCfg = Release|Win32
+		{70BDE9F1-99F1-4C5A-95CA-7E247B3D9C4A}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

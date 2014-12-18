@@ -43,6 +43,5 @@ extern "C" void __cxa_pure_virtual() {;}
 #include "D:\DVT\Arduino\fArduino\TrinketLedAndSwitch\TrinketLedAndSwitch.ino"
 #include "D:\DVT\Arduino\fArduino\TrinketLedAndSwitch\fArduino.cpp"
 #include "D:\DVT\Arduino\fArduino\TrinketLedAndSwitch\fArduino.h"
-#include "D:\DVT\Arduino\fArduino\TrinketLedAndSwitch\fArduino.ino"
 #include "D:\DVT\Arduino\fArduino\TrinketLedAndSwitch\fArduino.lib.ino"
 #endif

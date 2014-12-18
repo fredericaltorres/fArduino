@@ -68,9 +68,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="fArduino.ino">
-      <FileType>CppCode</FileType>
-    </None>
     <None Include="fArduino.lib.ino">
       <FileType>CppCode</FileType>
     </None>
@@ -79,10 +76,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\source\fArduino.h" />
     <ClInclude Include="fArduino.h" />
     <ClInclude Include="Visual Micro\.TrinketLedAndSwitch.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\source\fArduino.cpp" />
     <ClCompile Include="fArduino.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
