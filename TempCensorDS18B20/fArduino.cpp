@@ -8,14 +8,100 @@
 // MIT License
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <stdarg.h>
+#include <stdio.h>
 #include "fArduino.h"
 
 BoardClass::BoardClass() {
 
+    this->_startTime = millis();
     this->_serialCommunicationInitialized = false;
 }
 BoardClass::~BoardClass() {
 
+}
+
+
+
+String BoardClass::Format(char *format, ...) {
+
+    String formated = String("");
+    char tmpBuf[16]; // temp buffer to format number
+    va_list argptr;
+    va_start(argptr, format);
+
+    while (*format != '\0') {
+
+        if (*format == '%') {
+            format++;
+            if (*format == '%') { // string
+                formated.concat("%");
+            }
+            else if (*format == 's') { // string
+                char* s = va_arg(argptr, char *);
+                formated.concat(String(s));
+            }
+            else if (*format == 'c') { // character
+                char c = (char)va_arg(argptr, int);
+                formated.concat(String(c));
+            }
+            else if (*format == 'd') { // integer
+                int d = va_arg(argptr, int);
+                formated.concat(String(d));
+            }
+            else if (*format == 'u') { // un signed integer
+                unsigned int ui = va_arg(argptr, unsigned int);
+                formated.concat(String(ui));
+            }
+            else if (*format == 'x') { // un signed integer hexa
+                unsigned int ui = va_arg(argptr, unsigned int);
+                snprintf(tmpBuf, sizeof(tmpBuf), "%x", ui);
+                formated.concat(String(tmpBuf));
+            }
+            else if (*format == 'X') { // un signed integer hexa uppercase
+                unsigned int ui = va_arg(argptr, unsigned int);
+                snprintf(tmpBuf, sizeof(tmpBuf), "%X", ui);
+                formated.concat(String(tmpBuf));
+            }
+            else if (*format == 'f') { // float
+                double d = va_arg(argptr, double);
+                formated.concat(String(d));
+            }
+            else if (*format == 'b') { // boolean not standard
+
+                //bool d = va_arg(argptr, bool);
+                int d = va_arg(argptr, int);
+                if (d)
+                    strcpy(tmpBuf, "true");
+                else
+                    strcpy(tmpBuf, "false");
+                formated.concat(String(tmpBuf));
+            }
+        }
+        else {
+            char c = format[0];
+            formated.concat(String(c));
+        }
+        format++;
+    }
+    va_end(argptr);
+    return formated;
+}
+
+char * BoardClass::GetTime() {
+
+    static char buffer[MAX_FORMAT_SIZE];
+
+    unsigned long secSinceStart = (millis() - this->_startTime) / 1000;
+
+    int hours      = secSinceStart / 3600;
+    secSinceStart -= hours * 3600;
+    int minutes    = secSinceStart / 60;
+    secSinceStart -= minutes * 60;
+    int seconds    = secSinceStart;
+        
+    snprintf(buffer, MAX_FORMAT_SIZE, "%02d:%02d:%02d", hours, minutes, seconds);
+    return buffer;
 }
 
 void BoardClass::ClearKeyboard() {
@@ -23,7 +109,14 @@ void BoardClass::ClearKeyboard() {
         Serial.read();
 }
 
+void BoardClass::Trace(String msg) {
+
+    this->Trace(msg.c_str());
+}
 // http://arduino.stackexchange.com/questions/176/how-do-i-print-multiple-variables-in-a-string
+void BoardClass::Trace(const char * msg) {
+    Trace((char*)msg);
+}
 void BoardClass::Trace(char * msg) {
 
     if (this->_serialCommunicationInitialized) {
@@ -67,6 +160,20 @@ void BoardClass::TraceFormat(char * format, char *s) {
     this->Trace(buffer);
 }
 
+void BoardClass::TraceFormat(char * format, char *s1, char *s2) {
+
+    char buffer[MAX_FORMAT_SIZE];
+    snprintf(buffer, MAX_FORMAT_SIZE, format, s1, s2);
+    this->Trace(buffer);
+}
+
+void BoardClass::TraceFormat(char * format, char *s1, char *s2, char * s3) {
+
+    char buffer[MAX_FORMAT_SIZE];
+    snprintf(buffer, MAX_FORMAT_SIZE, format, s1, s2, s3);
+    this->Trace(buffer);
+}
+
 void BoardClass::TraceFormat(char * format, char d1) {
 
     char buffer[MAX_FORMAT_SIZE];
@@ -97,7 +204,7 @@ void BoardClass::TraceFormat(char * format, float f1) {
     this->Trace(buffer);
 }
 
-void BoardClass::TraceFormat(char * format, float f1, float f2) {
+void BoardClass::TraceFormat(char * format, double f1, double f2) {
 
     char buffer [MAX_FORMAT_SIZE];
     char bufferFloat1[MAX_FORMAT_SIZE];
@@ -109,6 +216,19 @@ void BoardClass::TraceFormat(char * format, float f1, float f2) {
     snprintf(buffer, MAX_FORMAT_SIZE, format, f1s.c_str(), f2s.c_str());
     this->Trace(buffer);
 }
+
+
+/// snprintf fr float does not work for the Arduino
+//char * BoardClass::ToString(double d) {
+//
+//    char buffer[MAX_FORMAT_SIZE];
+//    String f1s = dtostrf(d, 2, 2, buffer);
+//    return (char*)f1s.c_str();
+//}
+//char * BoardClass::ToString(float f) {
+//
+//    return this->ToString((double)f);
+//}
 
 void BoardClass::InitializeComputerCommunication(unsigned long speed, char * message) {
 

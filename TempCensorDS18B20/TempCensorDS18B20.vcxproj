@@ -68,18 +68,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="main.ino">
+      <FileType>CppCode</FileType>
+    </None>
     <None Include="TempCensorDS18B20.ino">
       <FileType>CppCode</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DallasTemperature.h" />
+    <ClInclude Include="DS18B20TemperatureSensor.h" />
     <ClInclude Include="fArduino.h" />
     <ClInclude Include="OneWire.h" />
     <ClInclude Include="Visual Micro\.TempCensorDS18B20.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DallasTemperature.cpp" />
+    <ClCompile Include="DS18B20TemperatureSensor.cpp" />
     <ClCompile Include="fArduino.cpp" />
     <ClCompile Include="OneWire.cpp" />
   </ItemGroup>
