@@ -20,8 +20,14 @@
 #define DS18S20_ID 0x10
 #define DS18B20_ID 0x28
 
+#define DS18X20_WAIT_TIME_FOR_GET_TEMPERATURE 800
 
+/******************************************************************************************
+DS18B20TemperatureSensor
 
+    DataSheet: http://datasheets.maximintegrated.com/en/ds/DS18B20.pdf
+    Comparing the DS18S20 and the DS18B20: http://www.maximintegrated.com/en/app-notes/index.mvp/id/4377
+*/
 class DS18B20TemperatureSensor {
     private:
         OneWire * _oneWire;
@@ -34,6 +40,7 @@ class DS18B20TemperatureSensor {
         char * GetSensorName();
         double GetTemperature();
         double CelsiusToFahrenheit(double celsius);
+        String GetSensorUniqueIdsOn1Wire();
 };
 #endif
 

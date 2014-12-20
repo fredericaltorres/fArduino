@@ -14,7 +14,6 @@ DS18B20TemperatureSensor::DS18B20TemperatureSensor(OneWire * oneWire) {
 DS18B20TemperatureSensor::~DS18B20TemperatureSensor(){
 
 }
-
 char * DS18B20TemperatureSensor::GetSensorName(){
 
     int index = DS18X20_UNKNOWN_ID;
@@ -56,15 +55,12 @@ int DS18B20TemperatureSensor::GetSensorId(){
 
     return this->_sensorId;
 }
-
 double DS18B20TemperatureSensor::GetTemperature() {
-
     byte i;
-    byte present = 0;
     byte data[12];
     byte addr[8];
-    //find a device
-    if (!this->_oneWire->search(addr)) {
+    
+    if (!this->_oneWire->search(addr)) { // Find the sensor
         this->_oneWire->reset_search();
         return DS18B20TemperatureSensor_GetTemperatureError;
     }
@@ -77,18 +73,51 @@ double DS18B20TemperatureSensor::GetTemperature() {
     this->_oneWire->reset();
     this->_oneWire->select(addr);
     
-    this->_oneWire->write(0x44, 1); // Start conversion
-    delay(850); // Wait some time...
-    present = this->_oneWire->reset();
+    this->_oneWire->write(0x44, 1);
+
+    delay(DS18X20_WAIT_TIME_FOR_GET_TEMPERATURE);
+
+    byte available = this->_oneWire->reset();
     this->_oneWire->select(addr);
-    this->_oneWire->write(0xBE); // Issue Read scratchpad command
-    for (i = 0; i < 9; i++) { // Receive 9 bytes
+    this->_oneWire->write(0xBE); // Send read scratchpad command
+    for (i = 0; i < 9; i++) {
         data[i] = this->_oneWire->read();
     }
-    // Calculate temperature value
     double temp = ((data[1] << 8) + data[0])*0.0625;
-
     this->_oneWire->reset_search(); // Always reset the search
-
     return temp;
+}
+
+String DS18B20TemperatureSensor::GetSensorUniqueIdsOn1Wire() {
+
+    byte i;
+    byte present = 0;
+    byte data[12];
+    byte addr[8];
+    String sensorUniqueId("");
+
+    this->_oneWire->reset_search();
+
+    while(this->_oneWire->search(addr)) {
+                
+        sensorUniqueId += "{ ";
+
+        for(i = 0; i < 8; i++) {
+
+            if(addr[i] < 16) {
+                sensorUniqueId += "0";
+            }
+            sensorUniqueId += addr[i];
+            if(i < 7) {
+                sensorUniqueId += ", ";
+            }
+        }
+        if(OneWire::crc8(addr, 7) != addr[7]) {
+            return "CRC is not valid!";
+        }
+        sensorUniqueId += " }";
+    }
+    //Serial.println(sensorUniqueId);
+    this->_oneWire->reset_search();
+    return sensorUniqueId;
 }

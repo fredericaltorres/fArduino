@@ -11,15 +11,18 @@
 
 #define ONE_WIRE_BUS 2
 
-TimeOut                  _oneSecondTimeOut(1000);
 OneWire                  _oneWire(ONE_WIRE_BUS);
 DS18B20TemperatureSensor _DS18B20(&_oneWire);
+TimeOut                  _oneSecondTimeOut(1000);
 
 void setup() {
 
     Board.InitializeComputerCommunication(9600, "Initializing...");
-    Board.TraceHeader("Tempetature Sensor DS18B20");
-    Board.Trace(Board.Format("Tempetature Sensor ID:%d, Name:%s", _DS18B20.GetSensorId(), _DS18B20.GetSensorName()));
+    Board.TraceHeader("Temperature Sensor DS18B20");
+    Board.Trace(Board.Format("Sensor ID:%d, Name:%s",
+                _DS18B20.GetSensorId(), _DS18B20.GetSensorName()));
+
+    Board.Trace(Board.Format("Sensor Unique Ids:%s", _DS18B20.GetSensorUniqueIdsOn1Wire().c_str()));
     Board.Trace("Ready...");
 }
 
