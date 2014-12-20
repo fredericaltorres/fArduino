@@ -16,7 +16,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="TrinketLedAndSwitch.ino" />
-    <None Include="fArduino.lib.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Visual Micro\.TrinketLedAndSwitch.vsarduino.h">

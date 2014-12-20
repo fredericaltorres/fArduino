@@ -68,9 +68,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="fArduino.lib.ino">
-      <FileType>CppCode</FileType>
-    </None>
     <None Include="TrinketLedAndSwitch.ino">
       <FileType>CppCode</FileType>
     </None>
