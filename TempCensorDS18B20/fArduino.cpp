@@ -21,7 +21,44 @@ BoardClass::~BoardClass() {
 
 }
 
+extern unsigned int __bss_end;
+extern unsigned int __heap_start;
+extern void *__brkval;
+extern struct __freelist *__flp; /* The head of the free list structure */
 
+/*
+* The free list structure as maintained by the
+* avr-libc memory allocation routines.
+*/
+struct __freelist {
+    size_t sz;
+    struct __freelist *nx;
+};
+
+/* Calculates the size of the free list */
+int freeListSize() {
+    struct __freelist* current;
+    int total = 0;
+    for (current = __flp; current; current = current->nx) {
+        total += 2; /* Add two bytes for the memory block's header  */
+        total += (int)current->sz;
+    }
+    return total;
+}
+
+
+int BoardClass::GetFreeMemory() {
+
+    int free_memory;
+    if ((int)__brkval == 0) {
+        free_memory = ((int)&free_memory) - ((int)&__heap_start);
+    }
+    else {
+        free_memory = ((int)&free_memory) - ((int)__brkval);
+        free_memory += freeListSize();
+    }
+    return free_memory;
+}
 
 String BoardClass::Format(char *format, ...) {
 
@@ -105,6 +142,7 @@ char * BoardClass::GetTime() {
 }
 
 void BoardClass::ClearKeyboard() {
+
     while (Serial.available())
         Serial.read();
 }
@@ -445,6 +483,10 @@ boolean TimeOut::IsTimeOut() {
         this->Reset();
     }
     return b;
+}
+boolean TimeOut::EveryCalls(unsigned long callCount) {
+
+    return this->Counter % callCount == 0;
 }
 void TimeOut::Reset() {
 

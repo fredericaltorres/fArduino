@@ -17,6 +17,7 @@
   <ItemGroup>
     <None Include="TempCensorDS18B20.ino" />
     <None Include="main.ino" />
+    <None Include="main.FirstWiringSolution.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Visual Micro\.TempCensorDS18B20.vsarduino.h">

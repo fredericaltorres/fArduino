@@ -4,6 +4,8 @@
 
 #include "DS18B20TemperatureSensor.h"
 
+char * __DS18X20_TEMP_SENSORS[] = { "UNKNOWN", "DS18S20", "DS18B20" };
+
 DS18B20TemperatureSensor::DS18B20TemperatureSensor(OneWire * oneWire) {
 
     this->_oneWire = oneWire;
@@ -11,6 +13,23 @@ DS18B20TemperatureSensor::DS18B20TemperatureSensor(OneWire * oneWire) {
 }
 DS18B20TemperatureSensor::~DS18B20TemperatureSensor(){
 
+}
+
+char * DS18B20TemperatureSensor::GetSensorName(){
+
+    int index = DS18X20_UNKNOWN_ID;
+    int id    = this->GetSensorId();
+
+    switch (id) {
+
+        case DS18S20_ID: index = 1; break;
+        case DS18B20_ID: index = 2; break;
+    }
+    return __DS18X20_TEMP_SENSORS[index];
+}
+double DS18B20TemperatureSensor::CelsiusToFahrenheit(double celsius) {
+
+    return (9.0 / 5.0 * celsius) + 32.0;
 }
 int DS18B20TemperatureSensor::GetSensorId(){
 
@@ -32,10 +51,14 @@ int DS18B20TemperatureSensor::GetSensorId(){
         return DS18B20TemperatureSensor_UnknownSensor;
     }
     this->_sensorId = this->_addr[0];
+
+    this->_oneWire->reset_search(); // Always reset the search
+
     return this->_sensorId;
 }
 
 double DS18B20TemperatureSensor::GetTemperature() {
+
     byte i;
     byte present = 0;
     byte data[12];
@@ -43,13 +66,13 @@ double DS18B20TemperatureSensor::GetTemperature() {
     //find a device
     if (!this->_oneWire->search(addr)) {
         this->_oneWire->reset_search();
-        return -32768;
+        return DS18B20TemperatureSensor_GetTemperatureError;
     }
     if (OneWire::crc8(addr, 7) != addr[7]) {
-        return -32768;
+        return DS18B20TemperatureSensor_GetTemperatureError;
     }
     if (addr[0] != DS18S20_ID && addr[0] != DS18B20_ID) {
-        return -32768;
+        return DS18B20TemperatureSensor_GetTemperatureError;
     }
     this->_oneWire->reset();
     this->_oneWire->select(addr);
@@ -64,5 +87,8 @@ double DS18B20TemperatureSensor::GetTemperature() {
     }
     // Calculate temperature value
     double temp = ((data[1] << 8) + data[0])*0.0625;
-    return true;
+
+    this->_oneWire->reset_search(); // Always reset the search
+
+    return temp;
 }

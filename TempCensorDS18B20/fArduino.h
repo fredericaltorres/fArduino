@@ -28,6 +28,7 @@ class BoardClass {
 
         char * GetTime();
         String Format(char *format, ...);
+        int GetFreeMemory();
 
         boolean GetButtonStateDebounced(int pin, boolean lastState);
         void LedOn(int pin, boolean state);
@@ -136,6 +137,7 @@ public:
     ~TimeOut();
     void Reset();
     boolean IsTimeOut();
+    boolean EveryCalls(unsigned long callCount);
 };
 
 
@@ -145,7 +147,6 @@ public:
 class TemperatureManager {
 private:
 public:
-
     TemperatureManager();
     ~TemperatureManager();
     float CelsiusToFahrenheit(float celsius);
