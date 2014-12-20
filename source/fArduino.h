@@ -18,13 +18,18 @@
 /// Represet the Trinket/Arduino board
 ///
 class BoardClass {
-
     private:
         boolean _serialCommunicationInitialized;
+        unsigned long _startTime;
     protected:
     public:
         BoardClass();
         ~BoardClass();
+
+        char * GetTime();
+        String Format(char *format, ...);
+        int GetFreeMemory();
+
         boolean GetButtonStateDebounced(int pin, boolean lastState);
         void LedOn(int pin, boolean state);
         void LedOn(int pin, boolean state, int delay);
@@ -34,15 +39,22 @@ class BoardClass {
 
         void InitializeComputerCommunication(unsigned long speed, char * message);
         void Trace(char * msg);
+        void Trace(const char * msg);
+        void Trace(String msg);
         void TraceHeader(char * msg);
         void TraceFormat(char * format, int d1);
         void TraceFormat(char * format, int d1, int d2);
         void TraceFormat(char * format, char *s);
+        void TraceFormat(char * format, char *s1, char *s2);
+        void TraceFormat(char * format, char *s1, char *s2, char * s3);
         void TraceFormat(char * format, char d1);
         void TraceFormat(char * format, float f1);
-        void TraceFormat(char * format, float f1, float f2);
+        void TraceFormat(char * format, double f1, double f2);
 
         void ClearKeyboard();
+
+        //char * ToString(double d);
+        //char * ToString(float f);
 };
 
 // Global Signleton
@@ -125,6 +137,7 @@ public:
     ~TimeOut();
     void Reset();
     boolean IsTimeOut();
+    boolean EveryCalls(unsigned long callCount);
 };
 
 
@@ -134,7 +147,6 @@ public:
 class TemperatureManager {
 private:
 public:
-
     TemperatureManager();
     ~TemperatureManager();
     float CelsiusToFahrenheit(float celsius);
