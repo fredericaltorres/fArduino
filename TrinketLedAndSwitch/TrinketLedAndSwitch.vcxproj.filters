@@ -21,9 +21,6 @@
     <ClInclude Include="Visual Micro\.TrinketLedAndSwitch.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\fArduino.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="fArduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>

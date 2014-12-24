@@ -6,16 +6,29 @@
 // Torres Frederic 2014
 //
 // MIT License
+//
+// Remarks the SpeakerManager class require to be compiled for Trinket 8Mhz
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <stdarg.h>
 #include <stdio.h>
 #include "fArduino.h"
 
-BoardClass::BoardClass() {
+#define TRINKET 1 // On the trinket there is no Serial communication
+
+#if defined(TRINKET)
+    //#define SERIAL_AVAILABLE 0
+#else
+    #define SERIAL_AVAILABLE 1
+#endif 
+
+BoardClass::BoardClass() { 
 
     this->_startTime = millis();
+    #if defined(SERIAL_AVAILABLE)
     this->_serialCommunicationInitialized = false;
+    #endif
 }
 BoardClass::~BoardClass() {
 
@@ -101,8 +114,12 @@ String BoardClass::Format(char *format, ...) {
                 formated.concat(String(tmpBuf));
             }
             else if (*format == 'f') { // float
-                double d = va_arg(argptr, double);
+
+                #if !defined(TRINKET)
+                // Cannot be compiled on the Trinket. Will fix it later
+                double d = va_arg(argptr, double); 
                 formated.concat(String(d));
+                #endif
             }
             else if (*format == 'b') { // boolean not standard
 
@@ -131,20 +148,22 @@ char * BoardClass::GetTime() {
 
     unsigned long secSinceStart = (millis() - this->_startTime) / 1000;
 
-    int hours      = secSinceStart / 3600;
+    int hours = secSinceStart / 3600;
     secSinceStart -= hours * 3600;
-    int minutes    = secSinceStart / 60;
+    int minutes = secSinceStart / 60;
     secSinceStart -= minutes * 60;
-    int seconds    = secSinceStart;
-        
+    int seconds = secSinceStart;
+
     snprintf(buffer, MAX_FORMAT_SIZE, "%02d:%02d:%02d", hours, minutes, seconds);
     return buffer;
 }
 
 void BoardClass::ClearKeyboard() {
 
+#if defined(SERIAL_AVAILABLE)
     while (Serial.available())
         Serial.read();
+#endif
 }
 
 void BoardClass::Trace(String msg) {
@@ -157,10 +176,12 @@ void BoardClass::Trace(const char * msg) {
 }
 void BoardClass::Trace(char * msg) {
 
+#if defined(SERIAL_AVAILABLE)
     if (this->_serialCommunicationInitialized) {
         Serial.println(msg);
         Serial.flush();
     }
+#endif
 }
 
 char * PadRight(char * s, char * padding, int max) {
@@ -221,9 +242,11 @@ void BoardClass::TraceFormat(char * format, char d1) {
 
 void BoardClass::TraceFormat(char * format, int d1) {
 
-    char buffer[MAX_FORMAT_SIZE];
-    snprintf(buffer, MAX_FORMAT_SIZE, format, d1);
-    this->Trace(buffer);
+    #if defined(SERIAL_AVAILABLE)
+        char buffer[MAX_FORMAT_SIZE];
+        snprintf(buffer, MAX_FORMAT_SIZE, format, d1);
+        this->Trace(buffer);
+    #endif
 }
 
 void BoardClass::TraceFormat(char * format, int d1, int d2) {
@@ -244,7 +267,7 @@ void BoardClass::TraceFormat(char * format, float f1) {
 
 void BoardClass::TraceFormat(char * format, double f1, double f2) {
 
-    char buffer [MAX_FORMAT_SIZE];
+    char buffer[MAX_FORMAT_SIZE];
     char bufferFloat1[MAX_FORMAT_SIZE];
     char bufferFloat2[MAX_FORMAT_SIZE];
 
@@ -270,11 +293,13 @@ void BoardClass::TraceFormat(char * format, double f1, double f2) {
 
 void BoardClass::InitializeComputerCommunication(unsigned long speed, char * message) {
 
+#if defined(SERIAL_AVAILABLE)
     Serial.begin(speed);
     this->_serialCommunicationInitialized = true;
     if (message) {
         this->Trace(message);
     }
+#endif
 }
 void BoardClass::LedOn(int pin, boolean state, int delay) {
 
@@ -302,7 +327,7 @@ void BoardClass::Delay(unsigned long l) {
 // function execution and the previous one, we wait and re reread 
 // the value
 boolean BoardClass::GetButtonStateDebounced(int pin, boolean lastState) {
-    
+
     boolean state = digitalRead(pin) == HIGH;
     if (state != lastState) {
         delay(5);
@@ -319,9 +344,9 @@ BoardClass Board;
 /// without blocking the controller loop
 Led::Led(int pin) {
 
-    this->_pin   = pin;
+    this->_pin = pin;
     this->_state = false;
-    this->_rate  = 0;
+    this->_rate = 0;
 }
 Led::~Led() {
 
@@ -342,9 +367,9 @@ void Led::SetLevel(int level) {
 }
 void Led::SetBlinkMode(unsigned long rate) {
 
-    this->_rate           = rate;
+    this->_rate = rate;
     this->_blinkStartTime = millis();
-    this->_state          = true;
+    this->_state = true;
     this->SetState(this->_state);
 }
 unsigned long Led::GetBlinkDurationCycle() {
@@ -353,7 +378,7 @@ unsigned long Led::GetBlinkDurationCycle() {
 }
 void Led::SetBlinkModeOff() {
 
-    this->_rate  = 0;
+    this->_rate = 0;
     this->_state = false;
     this->SetLevel(0);
 }
@@ -362,14 +387,14 @@ boolean Led::IsBlinking() {
     return this->_rate != 0;
 }
 void Led::Blink() {
-    
+
     if (GetBlinkDurationCycle() > this->_rate)  { // We need to reverse the mode of the led
 
         this->_state = !this->_state;
         this->SetState(this->_state);
         this->_blinkStartTime = millis();
     }
-    
+
     /*
     this->_state = !this->_state;
     this->SetState(this->_state);
@@ -383,13 +408,13 @@ void Led::Blink() {
 ///
 MultiStateButton::MultiStateButton(int pin, Led * led, int maxState, const int * ledIntensityArray) {
 
-    this->_pin                          = pin;
-    this->_previousPin                  = UNDEFINED_PIN; 
-    this->_maxState                     = maxState;
-    this->_ledIntensityArray            = ledIntensityArray;
-    this->LedInstance                   = led;
-    this->StateIndex                    = 0;
-    this->NextButtonLastStateInLoop     = false;
+    this->_pin = pin;
+    this->_previousPin = UNDEFINED_PIN;
+    this->_maxState = maxState;
+    this->_ledIntensityArray = ledIntensityArray;
+    this->LedInstance = led;
+    this->StateIndex = 0;
+    this->NextButtonLastStateInLoop = false;
     this->PreviousButtonLastStateInLoop = false;
 }
 MultiStateButton::~MultiStateButton() {
@@ -423,7 +448,7 @@ void MultiStateButton::PreviousState() {
 
     this->StateIndex--;
     if (this->StateIndex < 0)
-        this->StateIndex = this->_maxState-1;
+        this->StateIndex = this->_maxState - 1;
     this->_statedChanged = true;
 }
 boolean MultiStateButton::GetButtonStateDebounced() {
@@ -470,7 +495,7 @@ void MultiStateButton::UpdateUI() {
 ///
 TimeOut::TimeOut(unsigned long duration) {
 
-    this->Counter   = -1;
+    this->Counter = -1;
     this->_duration = duration;
     this->Reset();
 }
@@ -509,5 +534,134 @@ float TemperatureManager::CelsiusToFahrenheit(float celsius) {
 }
 void TemperatureManager::Add(float celsius) {
 
+}
+
+
+
+//////////////////////////////////////////////////////
+///  SpeakerManager
+/// based on http://www.instructables.com/id/Arduino-Basics-Making-Sound/step2/Playing-A-Melody/
+///
+
+SpeakerManager::SpeakerManager(byte pin) {
+
+    this->_pin = pin;
+    this->BackGroundOn = false;
+}
+SpeakerManager::~SpeakerManager() {
+
+}
+void SpeakerManager::PlaySequence(int size, int * noteDurationSequence) {
+
+    this->PlaySequence(size, noteDurationSequence, SPEAKERMANAGER_PLAY_SEQUENCE_NORMAL, false);
+}
+void SpeakerManager::PlaySequence(int size, int * noteDurationSequence, int speed) {
+
+    this->PlaySequence(size, noteDurationSequence, speed, false);
+}
+
+void SpeakerManager::StartSequenceBackGround(int size, int * noteDurationSequence) {
+
+    this->_backGroundNoteDurationSequence     = noteDurationSequence;
+    this->_backGroundNoteDurationSequenceSize = size;
+    this->_backGroundNoteDurationIndex        = 0;
+    this->BackGroundOn                        = true;
+
+    this->StartBackgroundNote();
+}
+
+void SpeakerManager::StartBackgroundNote() {
+
+    this->Play(this->_backGroundNoteDurationSequence[this->_backGroundNoteDurationIndex], this->_backGroundNoteDurationSequence[this->_backGroundNoteDurationIndex+1], SPEAKERMANAGER_PLAY_SEQUENCE_NORMAL);
+}
+
+void SpeakerManager::BackGroundUpdate() {
+        
+    if (this->BackGroundOn) {
+
+        this->_backGroundNoteDurationIndex += 2;
+        if (this->_backGroundNoteDurationIndex >= this->_backGroundNoteDurationSequenceSize) {
+            this->BackGroundOn = false;
+            return;
+        }
+        else this->StartBackgroundNote();
+    }
+}
+
+void SpeakerManager::PlaySequence(int size, int * noteDurationSequence, int speed, boolean reverse) {
+
+    if (reverse) {
+
+        for (int i = size - 1; i >= 0; i -= 2) {
+
+            this->Play(noteDurationSequence[i - 1], noteDurationSequence[i], speed);
+        }
+    }
+    else {
+        for (int i = 0; i < size; i += 2) {
+
+            this->Play(noteDurationSequence[i], noteDurationSequence[i + 1], speed);
+        }
+    }
+}
+void SpeakerManager::Play(int note, int duration) {
+
+    this->Play(note, duration, SPEAKERMANAGER_PLAY_SEQUENCE_NORMAL);
+}
+void SpeakerManager::Play(int note, int duration, int speed) {
+
+    this->Play(note, duration, speed, true);
+}
+void SpeakerManager::Play(int note, int duration, int speed, boolean stop) {
+
+    // to calculate the note duration, take one second divided by the note type. e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+
+    float speedAdjustment = 1.0;
+    #if defined(TRINKET)
+        speedAdjustment = 1.8;
+    #endif
+
+    int noteDuration = 1000 / ((duration / speed) * speedAdjustment);
+    this->Tone(note, noteDuration);
+
+    // To distinguish the notes, set a minimum time between them. 
+    // the note's duration + 30% seems to work well:
+    #if defined(TRINKET)
+        delay(noteDuration * 1.30);
+    #else
+        delay(noteDuration * 1.30);
+    #endif
+
+    if (stop)
+        this->Off();
+}
+void SpeakerManager::Off() {
+    #if defined(TRINKET)
+    #else
+        noTone(this->_pin);
+    #endif
+}
+
+// the sound producing function <6>
+void Trinket_Tone(unsigned char speakerPin, int frequencyInHertz, long timeInMilliseconds) {
+
+    long delayAmount = (long)(1000000 / frequencyInHertz);
+    long loopTime    = (long)((timeInMilliseconds * 1000) / (delayAmount * 2));
+
+    for (int x = 0; x<loopTime; x++) {
+
+        digitalWrite(speakerPin, HIGH);
+        delayMicroseconds(delayAmount);
+        digitalWrite(speakerPin, LOW);
+        delayMicroseconds(delayAmount);
+    }
+}
+
+void SpeakerManager::Tone(int note, int duration) {
+    #if defined(TRINKET)
+        Trinket_Tone(this->_pin, note, duration);
+    #else
+        tone(this->_pin, note, duration);
+    #endif
 }
 

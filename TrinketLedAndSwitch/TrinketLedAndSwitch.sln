@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrinketLedAndSwitch", "TrinketLedAndSwitch.vcxproj", "{6F5E739A-67C6-496C-BA6B-D78021196C01}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Ard01", "..\..\arduino-1.0.6\libraries\Ard01\Ard01.vcxproj", "{E3849B74-9D56-4ED8-89F7-7B1B46200462}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TempCensorDS18B20", "..\TempCensorDS18B20\TempCensorDS18B20.vcxproj", "{70BDE9F1-99F1-4C5A-95CA-7E247B3D9C4A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrinketChristmasTree", "..\..\arduino-1.0.6\libraries\TrinketChristmasTree\TrinketChristmasTree.vcxproj", "{79A9D664-3387-4254-A6F3-FA8BB3A97008}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrinketLedAndSwitch", "TrinketLedAndSwitch.vcxproj", "{6F5E739A-67C6-496C-BA6B-D78021196C01}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,10 +17,6 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6F5E739A-67C6-496C-BA6B-D78021196C01}.Debug|Win32.ActiveCfg = Debug|Win32
-		{6F5E739A-67C6-496C-BA6B-D78021196C01}.Debug|Win32.Build.0 = Debug|Win32
-		{6F5E739A-67C6-496C-BA6B-D78021196C01}.Release|Win32.ActiveCfg = Release|Win32
-		{6F5E739A-67C6-496C-BA6B-D78021196C01}.Release|Win32.Build.0 = Release|Win32
 		{E3849B74-9D56-4ED8-89F7-7B1B46200462}.Debug|Win32.ActiveCfg = Debug|Win32
 		{E3849B74-9D56-4ED8-89F7-7B1B46200462}.Debug|Win32.Build.0 = Debug|Win32
 		{E3849B74-9D56-4ED8-89F7-7B1B46200462}.Release|Win32.ActiveCfg = Release|Win32
@@ -27,6 +25,14 @@ Global
 		{70BDE9F1-99F1-4C5A-95CA-7E247B3D9C4A}.Debug|Win32.Build.0 = Debug|Win32
 		{70BDE9F1-99F1-4C5A-95CA-7E247B3D9C4A}.Release|Win32.ActiveCfg = Release|Win32
 		{70BDE9F1-99F1-4C5A-95CA-7E247B3D9C4A}.Release|Win32.Build.0 = Release|Win32
+		{79A9D664-3387-4254-A6F3-FA8BB3A97008}.Debug|Win32.ActiveCfg = Debug|Win32
+		{79A9D664-3387-4254-A6F3-FA8BB3A97008}.Debug|Win32.Build.0 = Debug|Win32
+		{79A9D664-3387-4254-A6F3-FA8BB3A97008}.Release|Win32.ActiveCfg = Release|Win32
+		{79A9D664-3387-4254-A6F3-FA8BB3A97008}.Release|Win32.Build.0 = Release|Win32
+		{6F5E739A-67C6-496C-BA6B-D78021196C01}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6F5E739A-67C6-496C-BA6B-D78021196C01}.Debug|Win32.Build.0 = Debug|Win32
+		{6F5E739A-67C6-496C-BA6B-D78021196C01}.Release|Win32.ActiveCfg = Release|Win32
+		{6F5E739A-67C6-496C-BA6B-D78021196C01}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

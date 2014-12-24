@@ -12,7 +12,7 @@
 #define _VSARDUINO_H_
 #define __AVR_ATmega328p__
 #define __AVR_ATmega328P__
-#define ARDUINO 106
+#define ARDUINO 105
 #define ARDUINO_MAIN
 #define __AVR__
 #define __avr__
@@ -38,8 +38,8 @@
             
 typedef unsigned char byte;
 extern "C" void __cxa_pure_virtual() {;}
-#include "D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\cores\arduino\arduino.h"
-#include "D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\variants\standard\pins_arduino.h" 
+#include "D:\DVT\Arduino\windows\hardware\arduino\cores\arduino\arduino.h"
+#include "D:\DVT\Arduino\windows\hardware\arduino\variants\standard\pins_arduino.h" 
 #include "D:\DVT\Arduino\fArduino\TrinketLedAndSwitch\TrinketLedAndSwitch.ino"
 #include "D:\DVT\Arduino\fArduino\TrinketLedAndSwitch\fArduino.cpp"
 #include "D:\DVT\Arduino\fArduino\TrinketLedAndSwitch\fArduino.h"

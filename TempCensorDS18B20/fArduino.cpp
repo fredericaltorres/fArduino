@@ -511,3 +511,60 @@ void TemperatureManager::Add(float celsius) {
 
 }
 
+
+
+//////////////////////////////////////////////////////
+///  SpeakerManager
+/// based on http://www.instructables.com/id/Arduino-Basics-Making-Sound/step2/Playing-A-Melody/
+///
+
+SpeakerManager::SpeakerManager(byte pin) {
+    this->_pin = pin;
+}
+SpeakerManager::~SpeakerManager() {
+
+}
+void SpeakerManager::PlaySequence(int size, int * noteDurationSequence) {
+
+    this->PlaySequence(size, noteDurationSequence, SPEAKERMANAGER_PLAY_SEQUENCE_NORMAL, false);
+}
+void SpeakerManager::PlaySequence(int size, int * noteDurationSequence, int speed) {
+
+    this->PlaySequence(size, noteDurationSequence, speed, false);
+}
+void SpeakerManager::PlaySequence(int size, int * noteDurationSequence, int speed, boolean reverse) {
+
+    if (reverse) {
+
+        for (int i = size-1; i >= 0 ; i -= 2) {
+
+            this->Play(noteDurationSequence[i-1], noteDurationSequence[i], speed);
+        }
+    }
+    else {
+        for (int i = 0; i < size; i += 2) {
+
+            this->Play(noteDurationSequence[i], noteDurationSequence[i + 1], speed);
+        }
+    }
+}
+void SpeakerManager::Play(int note, int duration) {
+
+    this->Play(note, duration, SPEAKERMANAGER_PLAY_SEQUENCE_NORMAL);
+}
+void SpeakerManager::Play(int note, int duration, int speed) {
+    
+    // to calculate the note duration, take one second divided by the note type. e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+    int noteDuration = 1000 / (duration / speed);
+    tone(this->_pin, note, noteDuration);
+
+    // To distinguish the notes, set a minimum time between them. 
+    // the note's duration + 30% seems to work well:
+    delay(noteDuration * 1.30);
+
+    this->Off();
+}
+void SpeakerManager::Off() {
+
+    noTone(this->_pin);
+}
