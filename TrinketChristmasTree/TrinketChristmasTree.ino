@@ -1,4 +1,5 @@
-/*
+/************************************
+
 http://arduino.cc/en/Reference/HomePage
 https://learn.adafruit.com/introducing-trinket/pinouts
 
