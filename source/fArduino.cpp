@@ -15,20 +15,20 @@
 #include <stdio.h>
 #include "fArduino.h"
 
-#define TRINKET 1 // On the trinket there is no Serial communication
+//#define TRINKET 1 // On the trinket there is no Serial communication
 
 #if defined(TRINKET)
-    //#define SERIAL_AVAILABLE 0
+//#define SERIAL_AVAILABLE 0
 #else
-    #define SERIAL_AVAILABLE 1
+#define SERIAL_AVAILABLE 1
 #endif 
 
-BoardClass::BoardClass() { 
+BoardClass::BoardClass() {
 
     this->_startTime = millis();
-    #if defined(SERIAL_AVAILABLE)
+#if defined(SERIAL_AVAILABLE)
     this->_serialCommunicationInitialized = false;
-    #endif
+#endif
 }
 BoardClass::~BoardClass() {
 
@@ -58,7 +58,6 @@ int freeListSize() {
     }
     return total;
 }
-
 
 int BoardClass::GetFreeMemory() {
 
@@ -115,11 +114,11 @@ String BoardClass::Format(char *format, ...) {
             }
             else if (*format == 'f') { // float
 
-                #if !defined(TRINKET)
+#if !defined(TRINKET)
                 // Cannot be compiled on the Trinket. Will fix it later
-                double d = va_arg(argptr, double); 
+                double d = va_arg(argptr, double);
                 formated.concat(String(d));
-                #endif
+#endif
             }
             else if (*format == 'b') { // boolean not standard
 
@@ -148,11 +147,11 @@ char * BoardClass::GetTime() {
 
     unsigned long secSinceStart = (millis() - this->_startTime) / 1000;
 
-    int hours = secSinceStart / 3600;
-    secSinceStart -= hours * 3600;
-    int minutes = secSinceStart / 60;
-    secSinceStart -= minutes * 60;
-    int seconds = secSinceStart;
+    int hours       = secSinceStart / 3600;
+    secSinceStart  -= hours * 3600;
+    int minutes     = secSinceStart / 60;
+    secSinceStart  -= minutes * 60;
+    int seconds     = secSinceStart;
 
     snprintf(buffer, MAX_FORMAT_SIZE, "%02d:%02d:%02d", hours, minutes, seconds);
     return buffer;
@@ -172,16 +171,17 @@ void BoardClass::Trace(String msg) {
 }
 // http://arduino.stackexchange.com/questions/176/how-do-i-print-multiple-variables-in-a-string
 void BoardClass::Trace(const char * msg) {
+
     Trace((char*)msg);
 }
 void BoardClass::Trace(char * msg) {
 
-#if defined(SERIAL_AVAILABLE)
+    #if defined(SERIAL_AVAILABLE)
     if (this->_serialCommunicationInitialized) {
         Serial.println(msg);
         Serial.flush();
     }
-#endif
+    #endif
 }
 
 char * PadRight(char * s, char * padding, int max) {
@@ -198,17 +198,20 @@ void BoardClass::TraceHeader(char * msg) {
 
     char barString[MAX_FORMAT_SIZE];
     memset(barString, 0, MAX_FORMAT_SIZE);
-    PadRight(barString, "*", maxPad);
+    PadRight(barString, TRACE_HEADER_CHAR, maxPad);
 
     char msg2[MAX_FORMAT_SIZE];
     memset(msg2, 0, MAX_FORMAT_SIZE);
-    strcpy(msg2, "* ");
+    strcpy(msg2, TRACE_HEADER_CHAR);
+    strcat(msg2, " ");
     strcat(msg2, msg);
     PadRight(msg2, " ", maxPad - 1);
-    PadRight(msg2, "*", maxPad);
+    PadRight(msg2, TRACE_HEADER_CHAR, maxPad);
 
     this->Trace(barString);
+    this->Delay(100);
     this->Trace(msg2);
+    this->Delay(100);
     this->Trace(barString);
 }
 
@@ -242,11 +245,11 @@ void BoardClass::TraceFormat(char * format, char d1) {
 
 void BoardClass::TraceFormat(char * format, int d1) {
 
-    #if defined(SERIAL_AVAILABLE)
-        char buffer[MAX_FORMAT_SIZE];
-        snprintf(buffer, MAX_FORMAT_SIZE, format, d1);
-        this->Trace(buffer);
-    #endif
+#if defined(SERIAL_AVAILABLE)
+    char buffer[MAX_FORMAT_SIZE];
+    snprintf(buffer, MAX_FORMAT_SIZE, format, d1);
+    this->Trace(buffer);
+#endif
 }
 
 void BoardClass::TraceFormat(char * format, int d1, int d2) {
@@ -562,21 +565,21 @@ void SpeakerManager::PlaySequence(int size, int * noteDurationSequence, int spee
 
 void SpeakerManager::StartSequenceBackGround(int size, int * noteDurationSequence) {
 
-    this->_backGroundNoteDurationSequence     = noteDurationSequence;
+    this->_backGroundNoteDurationSequence = noteDurationSequence;
     this->_backGroundNoteDurationSequenceSize = size;
-    this->_backGroundNoteDurationIndex        = 0;
-    this->BackGroundOn                        = true;
+    this->_backGroundNoteDurationIndex = 0;
+    this->BackGroundOn = true;
 
     this->StartBackgroundNote();
 }
 
 void SpeakerManager::StartBackgroundNote() {
 
-    this->Play(this->_backGroundNoteDurationSequence[this->_backGroundNoteDurationIndex], this->_backGroundNoteDurationSequence[this->_backGroundNoteDurationIndex+1], SPEAKERMANAGER_PLAY_SEQUENCE_NORMAL);
+    this->Play(this->_backGroundNoteDurationSequence[this->_backGroundNoteDurationIndex], this->_backGroundNoteDurationSequence[this->_backGroundNoteDurationIndex + 1], SPEAKERMANAGER_PLAY_SEQUENCE_NORMAL);
 }
 
 void SpeakerManager::BackGroundUpdate() {
-        
+
     if (this->BackGroundOn) {
 
         this->_backGroundNoteDurationIndex += 2;
@@ -617,36 +620,36 @@ void SpeakerManager::Play(int note, int duration, int speed, boolean stop) {
     // to calculate the note duration, take one second divided by the note type. e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
 
     float speedAdjustment = 1.0;
-    #if defined(TRINKET)
-        speedAdjustment = 1.8;
-    #endif
+#if defined(TRINKET)
+    speedAdjustment = 1.8;
+#endif
 
     int noteDuration = 1000 / ((duration / speed) * speedAdjustment);
     this->Tone(note, noteDuration);
 
     // To distinguish the notes, set a minimum time between them. 
     // the note's duration + 30% seems to work well:
-    #if defined(TRINKET)
-        delay(noteDuration * 1.30);
-    #else
-        delay(noteDuration * 1.30);
-    #endif
+#if defined(TRINKET)
+    delay(noteDuration * 1.30);
+#else
+    delay(noteDuration * 1.30);
+#endif
 
     if (stop)
         this->Off();
 }
 void SpeakerManager::Off() {
-    #if defined(TRINKET)
-    #else
-        noTone(this->_pin);
-    #endif
+#if defined(TRINKET)
+#else
+    noTone(this->_pin);
+#endif
 }
 
 // the sound producing function <6>
 void Trinket_Tone(unsigned char speakerPin, int frequencyInHertz, long timeInMilliseconds) {
 
     long delayAmount = (long)(1000000 / frequencyInHertz);
-    long loopTime    = (long)((timeInMilliseconds * 1000) / (delayAmount * 2));
+    long loopTime = (long)((timeInMilliseconds * 1000) / (delayAmount * 2));
 
     for (int x = 0; x<loopTime; x++) {
 
@@ -658,10 +661,10 @@ void Trinket_Tone(unsigned char speakerPin, int frequencyInHertz, long timeInMil
 }
 
 void SpeakerManager::Tone(int note, int duration) {
-    #if defined(TRINKET)
-        Trinket_Tone(this->_pin, note, duration);
-    #else
-        tone(this->_pin, note, duration);
-    #endif
+#if defined(TRINKET)
+    Trinket_Tone(this->_pin, note, duration);
+#else
+    tone(this->_pin, note, duration);
+#endif
 }
 

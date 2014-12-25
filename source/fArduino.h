@@ -14,6 +14,8 @@
 
 #define MAX_FORMAT_SIZE 128
 
+#define TRACE_HEADER_CHAR "~"
+
 //////////////////////////////////////////////////////
 /// Represet the Trinket/Arduino board
 ///
@@ -279,7 +281,7 @@ private:
     int           _backGroundNoteDurationIndex;
     int *         _backGroundNoteDurationSequence;
     int           _backGroundNoteDurationSequenceSize;
-    
+
 
 public:
     boolean       BackGroundOn;
