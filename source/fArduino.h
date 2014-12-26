@@ -62,7 +62,6 @@ public:
 // Global Signleton
 extern BoardClass Board;
 
-
 //////////////////////////////////////////////////////
 /// Led
 ///
@@ -252,7 +251,7 @@ public:
 #define SPEAKERMANAGER_PLAY_SEQUENCE_SLOW   2
 #define SPEAKERMANAGER_PLAY_SEQUENCE_REVERSE true
 
-#define _2_NOTE 1
+#define _1_NOTE 1
 #define _2_NOTE 2
 #define _4_NOTE 4
 #define _8_NOTE 8
@@ -267,7 +266,7 @@ Remark from Jeremy Blum about using the default Arduino tone() method
 http://www.jeremyblum.com/2010/09/05/driving-5-speakers-simultaneously-with-an-arduino
 The built-in tone() function allows you to generate a squarewave with 50% duty cycle of your
 selected frequency on any pin on the arduino.
-It relies on one of the arduino’s 3 timers to work in the background.
+It relies on one of the arduinoï¿½s 3 timers to work in the background.
 
 SPECIFICALLY, IT USES TIMER2, WHICH IS ALSO RESPONSIBLE FOR
 CONTROLLING PWM ON PINS 3 AND 11.
@@ -281,7 +280,6 @@ private:
     int           _backGroundNoteDurationIndex;
     int *         _backGroundNoteDurationSequence;
     int           _backGroundNoteDurationSequenceSize;
-
 
 public:
     boolean       BackGroundOn;
@@ -298,6 +296,6 @@ public:
     void Tone(int note, int duration);
 
     void StartSequenceBackGround(int size, int * noteDurationSequence);
-    void BackGroundUpdate();
+    boolean BackGroundUpdate();
     void StartBackgroundNote();
 };

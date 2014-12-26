@@ -1,145 +1,71 @@
-/************************************
+/*************************************************************************
 
-http://arduino.cc/en/Reference/HomePage
-https://learn.adafruit.com/introducing-trinket/pinouts
+    Christmas Tree Animation With A Trinket MicroController
 
-https://github.com/trinketbook/GettingStartedWithTrinket
+    Using 1 red led and 2 green leds, create a pseudo Christmas Tree animation with music.
+    
+    Functionality:
+        (1) Play a short music when starting
+        (2) While idle execute 3 differents leds animation every 6 seconds
+        (3) If user press button play "we wish you a merry christmas"
 
-Trinket: 
-    https://www.adafruit.com/products/1501
-    5 GPIO
-        2 Shared (3,4)
-        2 Pin have PWM need for Speaker
+    Remarks:
+        - Must be compiled at 8Mhz
+        - Because my pin #2 was not working I plugged the 2 green leds to the same pin.
 
-    Getting Started with Adafruit Trinket: 15 Projects with the Low-Cost AVR ..
-        https://books.google.com/books?id=SyuiBAAAQBAJ&pg=PT48&lpg=PT48&dq=TRINKET+SPEAKER&source=bl&ots=blIOuuvJU-&sig=F9UypcshplA8lb-sETa5L-4FFig&hl=en&sa=X&ei=RCqWVNS0K4GYgwTU9IPwBQ&ved=0CD0Q6AEwBQ#v=onepage&q=TRINKET%20SPEAKER&f=false
+    Torres Frederic 2014.12
 
-
-    http://www.instructables.com/id/Controlling-20-Leds-from-5-Arduino-pins-using-Cha/
-    http://www.instructables.com/id/How-to-access-5-buttons-through-1-Arduino-input/
-
-
-    Controlling 8 Led
-        http://www.arduino.cc/en/Tutorial/ShiftOut
-
-    Controlling InStyle LED LED Tape Using Arduino Uno
-        https://www.youtube.com/watch?v=zJAdzs3BqjE#t=259
-
-Torres Frederic 2014.12.10
-*/
+***************************************************************************/
 
 #include "fArduino.h"
 
+#define USE_LEDS 1
+
+// Pins Usage
+#define RED_LED_ONBAORD_PIN     13
+#define SWITCH_PIN              0    
+#define SPEAKER_PIN             1
+#define RED_LED_PIN             3
+#define GREEN_LEDS_PIN          4
+
+// Define/Keep track of 4 states to display the 3 leds (1 Red Led and 2 Greens Led coupled together)
 #define MAX_LED_STATE 4
-int ledState = 0; // 0..3
+int _ledState = 0; // 0..3
 
-#define RED_LED_ONBAORD_PIN 13
-#define SWITCH_PIN      0
-#define SPEAKER_PIN     1
-//#define RED_LED_1_PIN     3
-//#define GREEN_LED_1_PIN   4
+// If we are not playing, let's animate the leds every x seconds
+#define ANIMATE_LED_EVERY_X_SECOND 6
 
+// Keep track if the last time we played the song or animate the led
+long    _lastTimePlayedOrAnimate = 0;
+
+// Keep track of the last switch button state (debouncing)
 boolean _buttonLastStateInLoop = false;
 
-//int musicSequenceIntro[] = {
-//    NOTE_C4, 8,
-//    NOTE_C4, 8,
-//    NOTE_G3, 8,
-//    NOTE_G3, 8,
-//    NOTE_A3, 4,
-//    NOTE_G3, 4,
-//    NOTE_SILENCE, 4,
-//    NOTE_B3, 4,
-//    NOTE_C4, 8,
-//    NOTE_C3, 8,
-//    NOTE_C2, 8,
-//    NOTE_C1, 4,
-//};
-
+// Define music to start or stop something
 #define FACTOR 4
-
-int pivolDeNuitSeq01[] = {
-    NOTE_E4, 8 * FACTOR,
-    NOTE_FS4, 8 * FACTOR,
-    NOTE_A4, 8 * FACTOR,
-    NOTE_B4, 8 * (FACTOR/2),
-};
-int pivolDeNuitSeq01Reverse[] = {
-    
-    NOTE_B4, 8 * FACTOR,
-    NOTE_A4, 8 * FACTOR,
-    NOTE_FS4, 8 * FACTOR,
-    NOTE_E4, 8 * (FACTOR/2),
-};
+int musicStart[] = { NOTE_E4, 8 * FACTOR, NOTE_FS4, 8 * FACTOR, NOTE_A4, 8 * FACTOR, NOTE_B4, 8 * (FACTOR/2) };
+int musicEnd[]   = { NOTE_B4,  8 * FACTOR, NOTE_A4,  8 * FACTOR, NOTE_FS4, 8 * FACTOR, NOTE_E4,  8 * (FACTOR/2) };
 
 // http://www.unimusica-peru.com/partit21.gif
 
-int WeWishYouAMerryChristmas_Arduino[] = {
+#if defined(ARDUINO_UNO) 
+    // Sound better on a Arduino UNO
+    int WeWishYouAMerryChristmas_Arduino[] = {
 
-    NOTE_G2, 4,
-    NOTE_C3, 4,
-    NOTE_C3, 8,
-    NOTE_D3, 8,
-    NOTE_C3, 8,
-    NOTE_B2, 8,
-    NOTE_A2, 2,
+        NOTE_G2, 4, NOTE_C3, 4, NOTE_C3, 8, NOTE_D3, 8, NOTE_C3, 8, NOTE_B2, 8, NOTE_A2, 2,
+        NOTE_A2, 4, NOTE_D3, 4, NOTE_D3, 8, NOTE_E3, 8, NOTE_D3, 8, NOTE_C3, 8, NOTE_B2, 2, NOTE_G2, 4,
+        NOTE_E3, 4, NOTE_E3, 8, NOTE_F3, 8, NOTE_E3, 8, NOTE_D3, 8, NOTE_C3, 4, NOTE_A2, 4, NOTE_G2, 4, NOTE_A2, 4,
+        NOTE_D3, 4, NOTE_B2, 4, NOTE_C3, 2,
+    };
+#endif
 
-    NOTE_A2, 4,
-    NOTE_D3, 4,
-    NOTE_D3, 8,
-    NOTE_E3, 8,
-    NOTE_D3, 8,
-    NOTE_C3, 8,
-    NOTE_B2, 2,
-    NOTE_G2, 4,
-
-    NOTE_E3, 4,
-    NOTE_E3, 8,
-    NOTE_F3, 8,
-    NOTE_E3, 8,
-    NOTE_D3, 8,
-    NOTE_C3, 4,
-    NOTE_A2, 4,
-    NOTE_G2, 4,
-    NOTE_A2, 4,
-
-    NOTE_D3, 4,
-    NOTE_B2, 4,
-    NOTE_C3, 2,
-};
-
+// Sound bette on a Trinket at 8Mhz
 int WeWishYouAMerryChristmas[] = {
     
-    NOTE_G4, 4,
-    NOTE_C5, 4,
-    NOTE_C5, 8,
-    NOTE_D5, 8,
-    NOTE_C5, 8,
-    NOTE_B4, 8,
-    NOTE_A4, 2,
-    
-    NOTE_A4, 4,
-    NOTE_D5, 4,
-    NOTE_D5, 8,
-    NOTE_E5, 8,
-    NOTE_D5, 8,
-    NOTE_C5, 8,
-    NOTE_B4, 2,
-    NOTE_G4, 4,
-
-    NOTE_E5, 4,
-    NOTE_E5, 8,
-    NOTE_F5, 8,
-    NOTE_E5, 8,
-    NOTE_D5, 8,
-    NOTE_C5, 4,
-    NOTE_A4, 4,
-    NOTE_G4, 4,
-    NOTE_A4, 4,
-
-    NOTE_D5, 4,
-    NOTE_B4, 4,
-    NOTE_C5, 2,
+    NOTE_G4, 4, NOTE_C5, 4, NOTE_C5, 8, NOTE_D5, 8, NOTE_C5, 8, NOTE_B4, 8, NOTE_A4, 2,
+    NOTE_A4, 4, NOTE_D5, 4, NOTE_D5, 8, NOTE_E5, 8, NOTE_D5, 8, NOTE_C5, 8, NOTE_B4, 2, NOTE_G4, 4,
+    NOTE_E5, 4, NOTE_E5, 8, NOTE_F5, 8, NOTE_E5, 8, NOTE_D5, 8, NOTE_C5, 4, NOTE_A4, 4, NOTE_G4, 4, NOTE_A4, 4,
+    NOTE_D5, 4, NOTE_B4, 4, NOTE_C5, 2,
 };
 
 SpeakerManager _speakerManager(SPEAKER_PIN);
@@ -148,80 +74,149 @@ void setup() {
 
     Board.InitializeComputerCommunication(9600, "Initializing...");
     Board.TraceHeader("Christmas Tree");
-    Board.SetPinMode(SPEAKER_PIN, OUTPUT);
-    Board.SetPinMode(SWITCH_PIN, INPUT);
-    //Board.SetPinMode(RED_LED_1_PIN, OUTPUT);
-    //Board.SetPinMode(GREEN_LED_1_PIN, OUTPUT);
-    
-    _speakerManager.PlaySequence(ArraySize(pivolDeNuitSeq01), pivolDeNuitSeq01);
-}
-
-void PowerOff() {
-
-    //Board.LedOn(RED_LED_1_PIN  , false);
-    //Board.LedOn(GREEN_LED_1_PIN, false);
+    Board.SetPinMode(SPEAKER_PIN   , OUTPUT);
+    Board.SetPinMode(SWITCH_PIN    , INPUT);
+    #if defined(USE_LEDS)
+    Board.SetPinMode(RED_LED_PIN   , OUTPUT);
+    Board.SetPinMode(GREEN_LEDS_PIN, OUTPUT);
+    #endif
+    PowerOff();
+    _speakerManager.PlaySequence(ArraySize(musicStart), musicStart);
+    _speakerManager.BackGroundOn = false;
 }
 void PowerOn() {
 
-    //Board.LedOn(RED_LED_1_PIN, true);
-    //Board.LedOn(GREEN_LED_1_PIN, true);
+    PowerLed(2);
+}
+void PowerOff() {
+
+    _ledState = 0;
+    PowerLed(_ledState);
 }
 void PowerLed(int state) {
 
+    #if defined(USE_LEDS)
+
     switch (state) {
-        case 0:PowerOff(); break;
+        case 0:
+            Board.LedOn(RED_LED_PIN   , false);
+            Board.LedOn(GREEN_LEDS_PIN, false);
+            break;
         case 1:
-            //Board.LedOn(RED_LED_1_PIN, false);
-            //Board.LedOn(GREEN_LED_1_PIN, true);
+            Board.LedOn(RED_LED_PIN   , false);
+            Board.LedOn(GREEN_LEDS_PIN, true);
             break;
-        case 2:PowerOn(); break;
+        case 2:
+            Board.LedOn(RED_LED_PIN   , true);
+            Board.LedOn(GREEN_LEDS_PIN, true);
+            break;
         case 3:
-            //Board.LedOn(RED_LED_1_PIN, true);
-            //Board.LedOn(GREEN_LED_1_PIN, false);
+            Board.LedOn(RED_LED_PIN   , true);
+            Board.LedOn(GREEN_LEDS_PIN, false);
             break;
     }
+    #endif
 }
+void WaitForAnimation(int index) {
+  
+  Board.Delay(250);
+}
+void LedsAnimation1() {
 
-void AnimateLeds() {
+    for (int i = 0; i < 6; i++) {
 
-    ledState += 1;
-    if (ledState >= MAX_LED_STATE) {
-        ledState = 0;
+        PowerOff(); WaitForAnimation(i);
+        PowerOn();  WaitForAnimation(i);
     }
-    PowerLed(ledState);
+    PowerOff();
+}
+void LedsAnimation2() {
+
+    for (int i = 0; i < 6; i++) {
+
+        PowerLed(1); WaitForAnimation(i);
+        PowerLed(3); WaitForAnimation(i);
+    }
+    PowerOff();
+}
+void LedsAnimation3() {
+
+    for (int i = 0; i < 6; i++) {
+
+        PowerLed(3); WaitForAnimation(i);
+        PowerLed(1); WaitForAnimation(i);
+    }
+    PowerOff();
+}
+void LedsRandomAnimation() {
+  
+    static int _counter;
+
+    // If I use the ramdomSeed() and/or random() function, the deployment on the Trinket fail
+    // if (random(100) % 2 == 0)
+
+    if(_counter == 0)
+        LedsAnimation1();
+    else if(_counter == 1)
+      LedsAnimation2();
+    else if(_counter == 2)
+      LedsAnimation3();
+    
+    if ((_counter++) > 2)
+        _counter = 0;
+}
+void AnimateLedsWhilePaying() {
+
+    _ledState += 1;
+    if (_ledState >= MAX_LED_STATE)
+        _ledState = 0;
+    PowerLed(_ledState);
 }
 void loop() {
     /*
-    if (_speakerManager.BackGroundOn) {
-
+    if (_speakerManager.BackGroundOn) 
         _speakerManager.BackGroundUpdate();
-    }
-    else {
-        PowerOff();
-        ledState = 0;
-        Board.Delay(1000 * 4);
-        PowerLed(ledState);
+    else 
         _speakerManager.StartSequenceBackGround(ArraySize(WeWishYouAMerryChristmas), WeWishYouAMerryChristmas);
-    }
+    return;
+    */
 
+    /*
+    boolean buttonPressed = Board.GetButtonStateDebounced(SWITCH_PIN, _buttonLastStateInLoop);
+    if (buttonPressed == true && _buttonLastStateInLoop == false) {
+
+        _speakerManager.PlaySequence(ArraySize(musicStart), musicStart);
+    }
+    _buttonLastStateInLoop = buttonPressed;
     */
     
     boolean buttonPressed = Board.GetButtonStateDebounced(SWITCH_PIN, _buttonLastStateInLoop);
+
     if (buttonPressed == true && _buttonLastStateInLoop == false) {
-             
-        PowerOff();
-        ledState = 0;
-        PowerLed(ledState);
+        
+        PowerOn();
         _speakerManager.StartSequenceBackGround(ArraySize(WeWishYouAMerryChristmas), WeWishYouAMerryChristmas);
     }
     else {
         if (_speakerManager.BackGroundOn) {
 
-            AnimateLeds();
-            _speakerManager.BackGroundUpdate();
+            AnimateLedsWhilePaying();
+            if (!_speakerManager.BackGroundUpdate()) {
+
+                LedsRandomAnimation(); // We reach the end of the song
+                _lastTimePlayedOrAnimate = millis();
+                PowerOff();
+            }
+        }
+        else {                                                    
+            // If we are not playing
+            // and we did not play in the last 10 seconds, execute a random animation
+            if (millis() - _lastTimePlayedOrAnimate > ANIMATE_LED_EVERY_X_SECOND * 1000) {
+                
+                LedsRandomAnimation();
+                _lastTimePlayedOrAnimate = millis();
+            }
         }
     }
     _buttonLastStateInLoop = buttonPressed;
-    
 }
-

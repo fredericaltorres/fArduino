@@ -1,3 +1,5 @@
+#include <fArduino.h>
+
 ///////////////////////////////////////////////////////////////////////////////
 //  
 // fArduino.cpp
@@ -18,25 +20,23 @@
 #define TRINKET 1 // On the trinket there is no Serial communication
 
 #if defined(TRINKET)
-    //#define SERIAL_AVAILABLE 0
+    // #define SERIAL_AVAILABLE 0
 #else
     #define SERIAL_AVAILABLE 1
 #endif 
 
-BoardClass::BoardClass() { 
+BoardClass::BoardClass() {
 
     this->_startTime = millis();
-    #if defined(SERIAL_AVAILABLE)
     this->_serialCommunicationInitialized = false;
-    #endif
 }
 BoardClass::~BoardClass() {
 
 }
 
-extern unsigned int __bss_end;
-extern unsigned int __heap_start;
-extern void *__brkval;
+extern unsigned int       __bss_end;
+extern unsigned int       __heap_start;
+extern void *             __brkval;
 extern struct __freelist *__flp; /* The head of the free list structure */
 
 /*
@@ -50,6 +50,7 @@ struct __freelist {
 
 /* Calculates the size of the free list */
 int freeListSize() {
+
     struct __freelist* current;
     int total = 0;
     for (current = __flp; current; current = current->nx) {
@@ -58,8 +59,6 @@ int freeListSize() {
     }
     return total;
 }
-
-
 int BoardClass::GetFreeMemory() {
 
     int free_memory;
@@ -72,7 +71,6 @@ int BoardClass::GetFreeMemory() {
     }
     return free_memory;
 }
-
 String BoardClass::Format(char *format, ...) {
 
     String formated = String("");
@@ -115,11 +113,11 @@ String BoardClass::Format(char *format, ...) {
             }
             else if (*format == 'f') { // float
 
-                #if !defined(TRINKET)
+#if !defined(TRINKET)
                 // Cannot be compiled on the Trinket. Will fix it later
-                double d = va_arg(argptr, double); 
+                double d = va_arg(argptr, double);
                 formated.concat(String(d));
-                #endif
+#endif
             }
             else if (*format == 'b') { // boolean not standard
 
@@ -141,23 +139,21 @@ String BoardClass::Format(char *format, ...) {
     va_end(argptr);
     return formated;
 }
-
 char * BoardClass::GetTime() {
 
     static char buffer[MAX_FORMAT_SIZE];
 
     unsigned long secSinceStart = (millis() - this->_startTime) / 1000;
 
-    int hours = secSinceStart / 3600;
+    int hours      = secSinceStart / 3600;
     secSinceStart -= hours * 3600;
-    int minutes = secSinceStart / 60;
+    int minutes    = secSinceStart / 60;
     secSinceStart -= minutes * 60;
-    int seconds = secSinceStart;
+    int seconds    = secSinceStart;
 
     snprintf(buffer, MAX_FORMAT_SIZE, "%02d:%02d:%02d", hours, minutes, seconds);
     return buffer;
 }
-
 void BoardClass::ClearKeyboard() {
 
 #if defined(SERIAL_AVAILABLE)
@@ -165,25 +161,25 @@ void BoardClass::ClearKeyboard() {
         Serial.read();
 #endif
 }
-
 void BoardClass::Trace(String msg) {
 
     this->Trace(msg.c_str());
 }
 // http://arduino.stackexchange.com/questions/176/how-do-i-print-multiple-variables-in-a-string
 void BoardClass::Trace(const char * msg) {
+
     Trace((char*)msg);
 }
 void BoardClass::Trace(char * msg) {
 
-#if defined(SERIAL_AVAILABLE)
+    #if defined(SERIAL_AVAILABLE)
     if (this->_serialCommunicationInitialized) {
+
         Serial.println(msg);
         Serial.flush();
     }
-#endif
+    #endif
 }
-
 char * PadRight(char * s, char * padding, int max) {
 
     while (strlen(s) < max) {
@@ -191,71 +187,66 @@ char * PadRight(char * s, char * padding, int max) {
     }
     return s;
 }
-
 void BoardClass::TraceHeader(char * msg) {
 
     int maxPad = 64;
 
     char barString[MAX_FORMAT_SIZE];
     memset(barString, 0, MAX_FORMAT_SIZE);
-    PadRight(barString, "*", maxPad);
+    PadRight(barString, TRACE_HEADER_CHAR, maxPad);
 
     char msg2[MAX_FORMAT_SIZE];
     memset(msg2, 0, MAX_FORMAT_SIZE);
-    strcpy(msg2, "* ");
+    strcpy(msg2, TRACE_HEADER_CHAR);
+    strcat(msg2, " ");
     strcat(msg2, msg);
     PadRight(msg2, " ", maxPad - 1);
-    PadRight(msg2, "*", maxPad);
+    PadRight(msg2, TRACE_HEADER_CHAR, maxPad);
 
     this->Trace(barString);
+    this->Delay(10);
     this->Trace(msg2);
+    this->Delay(10);
     this->Trace(barString);
 }
-
 void BoardClass::TraceFormat(char * format, char *s) {
 
     char buffer[MAX_FORMAT_SIZE];
     snprintf(buffer, MAX_FORMAT_SIZE, format, s);
     this->Trace(buffer);
 }
-
 void BoardClass::TraceFormat(char * format, char *s1, char *s2) {
 
     char buffer[MAX_FORMAT_SIZE];
     snprintf(buffer, MAX_FORMAT_SIZE, format, s1, s2);
     this->Trace(buffer);
 }
-
 void BoardClass::TraceFormat(char * format, char *s1, char *s2, char * s3) {
 
     char buffer[MAX_FORMAT_SIZE];
     snprintf(buffer, MAX_FORMAT_SIZE, format, s1, s2, s3);
     this->Trace(buffer);
 }
-
 void BoardClass::TraceFormat(char * format, char d1) {
 
     char buffer[MAX_FORMAT_SIZE];
     snprintf(buffer, MAX_FORMAT_SIZE, format, d1);
     this->Trace(buffer);
 }
-
 void BoardClass::TraceFormat(char * format, int d1) {
 
-    #if defined(SERIAL_AVAILABLE)
-        char buffer[MAX_FORMAT_SIZE];
-        snprintf(buffer, MAX_FORMAT_SIZE, format, d1);
-        this->Trace(buffer);
-    #endif
+#if defined(SERIAL_AVAILABLE)
+    char buffer[MAX_FORMAT_SIZE];
+    snprintf(buffer, MAX_FORMAT_SIZE, format, d1);
+    this->Trace(buffer);
+#endif
 }
-
 void BoardClass::TraceFormat(char * format, int d1, int d2) {
 
     char buffer[MAX_FORMAT_SIZE];
     snprintf(buffer, MAX_FORMAT_SIZE, format, d1, d2);
     this->Trace(buffer);
 }
-
 /// snprintf fr float does not work for the Arduino
 void BoardClass::TraceFormat(char * format, float f1) {
 
@@ -264,7 +255,6 @@ void BoardClass::TraceFormat(char * format, float f1) {
     snprintf(buffer, MAX_FORMAT_SIZE, format, f1s.c_str());
     this->Trace(buffer);
 }
-
 void BoardClass::TraceFormat(char * format, double f1, double f2) {
 
     char buffer[MAX_FORMAT_SIZE];
@@ -277,7 +267,6 @@ void BoardClass::TraceFormat(char * format, double f1, double f2) {
     snprintf(buffer, MAX_FORMAT_SIZE, format, f1s.c_str(), f2s.c_str());
     this->Trace(buffer);
 }
-
 
 /// snprintf fr float does not work for the Arduino
 //char * BoardClass::ToString(double d) {
@@ -336,6 +325,7 @@ boolean BoardClass::GetButtonStateDebounced(int pin, boolean lastState) {
     return state;
 }
 
+// Global Signleton
 BoardClass Board;
 
 /////////////////////////////////////////////////////
@@ -344,9 +334,9 @@ BoardClass Board;
 /// without blocking the controller loop
 Led::Led(int pin) {
 
-    this->_pin = pin;
+    this->_pin   = pin;
     this->_state = false;
-    this->_rate = 0;
+    this->_rate  = 0;
 }
 Led::~Led() {
 
@@ -367,9 +357,9 @@ void Led::SetLevel(int level) {
 }
 void Led::SetBlinkMode(unsigned long rate) {
 
-    this->_rate = rate;
+    this->_rate           = rate;
     this->_blinkStartTime = millis();
-    this->_state = true;
+    this->_state          = true;
     this->SetState(this->_state);
 }
 unsigned long Led::GetBlinkDurationCycle() {
@@ -378,7 +368,7 @@ unsigned long Led::GetBlinkDurationCycle() {
 }
 void Led::SetBlinkModeOff() {
 
-    this->_rate = 0;
+    this->_rate  = 0;
     this->_state = false;
     this->SetLevel(0);
 }
@@ -394,13 +384,6 @@ void Led::Blink() {
         this->SetState(this->_state);
         this->_blinkStartTime = millis();
     }
-
-    /*
-    this->_state = !this->_state;
-    this->SetState(this->_state);
-    this->_blinkStartTime = millis();
-    Board.Delay(this->_rate);
-    */
 }
 
 //////////////////////////////////////////////////////
@@ -408,13 +391,13 @@ void Led::Blink() {
 ///
 MultiStateButton::MultiStateButton(int pin, Led * led, int maxState, const int * ledIntensityArray) {
 
-    this->_pin = pin;
-    this->_previousPin = UNDEFINED_PIN;
-    this->_maxState = maxState;
-    this->_ledIntensityArray = ledIntensityArray;
-    this->LedInstance = led;
-    this->StateIndex = 0;
-    this->NextButtonLastStateInLoop = false;
+    this->_pin                          = pin;
+    this->_previousPin                  = UNDEFINED_PIN;
+    this->_maxState                     = maxState;
+    this->_ledIntensityArray            = ledIntensityArray;
+    this->LedInstance                   = led;
+    this->StateIndex                    = 0;
+    this->NextButtonLastStateInLoop     = false;
     this->PreviousButtonLastStateInLoop = false;
 }
 MultiStateButton::~MultiStateButton() {
@@ -488,14 +471,12 @@ void MultiStateButton::UpdateUI() {
     }
 }
 
-
-
 //////////////////////////////////////////////////////
 /// TimeOut
 ///
 TimeOut::TimeOut(unsigned long duration) {
 
-    this->Counter = -1;
+    this->Counter   = -1;
     this->_duration = duration;
     this->Reset();
 }
@@ -537,15 +518,13 @@ void TemperatureManager::Add(float celsius) {
 }
 
 
-
 //////////////////////////////////////////////////////
 ///  SpeakerManager
 /// based on http://www.instructables.com/id/Arduino-Basics-Making-Sound/step2/Playing-A-Melody/
 ///
-
 SpeakerManager::SpeakerManager(byte pin) {
 
-    this->_pin = pin;
+    this->_pin         = pin;
     this->BackGroundOn = false;
 }
 SpeakerManager::~SpeakerManager() {
@@ -559,7 +538,6 @@ void SpeakerManager::PlaySequence(int size, int * noteDurationSequence, int spee
 
     this->PlaySequence(size, noteDurationSequence, speed, false);
 }
-
 void SpeakerManager::StartSequenceBackGround(int size, int * noteDurationSequence) {
 
     this->_backGroundNoteDurationSequence     = noteDurationSequence;
@@ -569,25 +547,24 @@ void SpeakerManager::StartSequenceBackGround(int size, int * noteDurationSequenc
 
     this->StartBackgroundNote();
 }
-
 void SpeakerManager::StartBackgroundNote() {
 
-    this->Play(this->_backGroundNoteDurationSequence[this->_backGroundNoteDurationIndex], this->_backGroundNoteDurationSequence[this->_backGroundNoteDurationIndex+1], SPEAKERMANAGER_PLAY_SEQUENCE_NORMAL);
+    this->Play(this->_backGroundNoteDurationSequence[this->_backGroundNoteDurationIndex], this->_backGroundNoteDurationSequence[this->_backGroundNoteDurationIndex + 1], SPEAKERMANAGER_PLAY_SEQUENCE_NORMAL);
 }
+boolean SpeakerManager::BackGroundUpdate() {
 
-void SpeakerManager::BackGroundUpdate() {
-        
     if (this->BackGroundOn) {
 
         this->_backGroundNoteDurationIndex += 2;
+
         if (this->_backGroundNoteDurationIndex >= this->_backGroundNoteDurationSequenceSize) {
+
             this->BackGroundOn = false;
-            return;
         }
         else this->StartBackgroundNote();
     }
+    return this->BackGroundOn;
 }
-
 void SpeakerManager::PlaySequence(int size, int * noteDurationSequence, int speed, boolean reverse) {
 
     if (reverse) {
@@ -617,36 +594,31 @@ void SpeakerManager::Play(int note, int duration, int speed, boolean stop) {
     // to calculate the note duration, take one second divided by the note type. e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
 
     float speedAdjustment = 1.0;
-    #if defined(TRINKET)
-        speedAdjustment = 1.8;
-    #endif
+#if defined(TRINKET)
+    speedAdjustment = 1.8;
+#endif
 
     int noteDuration = 1000 / ((duration / speed) * speedAdjustment);
     this->Tone(note, noteDuration);
 
     // To distinguish the notes, set a minimum time between them. 
     // the note's duration + 30% seems to work well:
-    #if defined(TRINKET)
-        delay(noteDuration * 1.30);
-    #else
-        delay(noteDuration * 1.30);
-    #endif
+    delay(noteDuration * 1.30);
 
     if (stop)
         this->Off();
 }
 void SpeakerManager::Off() {
+
     #if defined(TRINKET)
     #else
         noTone(this->_pin);
     #endif
 }
-
-// the sound producing function <6>
 void Trinket_Tone(unsigned char speakerPin, int frequencyInHertz, long timeInMilliseconds) {
 
     long delayAmount = (long)(1000000 / frequencyInHertz);
-    long loopTime    = (long)((timeInMilliseconds * 1000) / (delayAmount * 2));
+    long loopTime = (long)((timeInMilliseconds * 1000) / (delayAmount * 2));
 
     for (int x = 0; x<loopTime; x++) {
 
@@ -656,7 +628,6 @@ void Trinket_Tone(unsigned char speakerPin, int frequencyInHertz, long timeInMil
         delayMicroseconds(delayAmount);
     }
 }
-
 void SpeakerManager::Tone(int note, int duration) {
     #if defined(TRINKET)
         Trinket_Tone(this->_pin, note, duration);
@@ -664,4 +635,3 @@ void SpeakerManager::Tone(int note, int duration) {
         tone(this->_pin, note, duration);
     #endif
 }
-
