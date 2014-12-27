@@ -1,4 +1,4 @@
-// fArduino.h
+﻿// fArduino.h
 
 #ifndef _FARDUINO_h
 #define _FARDUINO_h
@@ -40,9 +40,15 @@ public:
     void Delay(unsigned long);
 
     void InitializeComputerCommunication(unsigned long speed, char * message);
+
+    void TraceNoNewLine(char * msg);
+    void TraceNoNewLine(const char * msg);
+    void TraceNoNewLine(const String &);
+
     void Trace(char * msg);
     void Trace(const char * msg);
     void Trace(String msg);
+
     void TraceHeader(char * msg);
     void TraceFormat(char * format, int d1);
     void TraceFormat(char * format, int d1, int d2);

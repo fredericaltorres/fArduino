@@ -17,12 +17,12 @@
 #include <stdio.h>
 #include "fArduino.h"
 
-#define TRINKET 1 // On the trinket there is no Serial communication
+//#define TRINKET 1 // On the trinket there is no Serial communication
 
 #if defined(TRINKET)
-    // #define SERIAL_AVAILABLE 0
+// #define SERIAL_AVAILABLE 0
 #else
-    #define SERIAL_AVAILABLE 1
+#define SERIAL_AVAILABLE 1
 #endif 
 
 BoardClass::BoardClass() {
@@ -81,8 +81,10 @@ String BoardClass::Format(char *format, ...) {
     while (*format != '\0') {
 
         if (*format == '%') {
+
             format++;
             if (*format == '%') { // string
+
                 formated.concat("%");
             }
             else if (*format == 's') { // string
@@ -145,11 +147,11 @@ char * BoardClass::GetTime() {
 
     unsigned long secSinceStart = (millis() - this->_startTime) / 1000;
 
-    int hours      = secSinceStart / 3600;
+    int hours = secSinceStart / 3600;
     secSinceStart -= hours * 3600;
-    int minutes    = secSinceStart / 60;
+    int minutes = secSinceStart / 60;
     secSinceStart -= minutes * 60;
-    int seconds    = secSinceStart;
+    int seconds = secSinceStart;
 
     snprintf(buffer, MAX_FORMAT_SIZE, "%02d:%02d:%02d", hours, minutes, seconds);
     return buffer;
@@ -161,15 +163,7 @@ void BoardClass::ClearKeyboard() {
         Serial.read();
 #endif
 }
-void BoardClass::Trace(String msg) {
 
-    this->Trace(msg.c_str());
-}
-// http://arduino.stackexchange.com/questions/176/how-do-i-print-multiple-variables-in-a-string
-void BoardClass::Trace(const char * msg) {
-
-    Trace((char*)msg);
-}
 void BoardClass::Trace(char * msg) {
 
     #if defined(SERIAL_AVAILABLE)
@@ -180,6 +174,37 @@ void BoardClass::Trace(char * msg) {
     }
     #endif
 }
+
+void BoardClass::TraceNoNewLine(char * msg) {
+
+    #if defined(SERIAL_AVAILABLE)
+    if (this->_serialCommunicationInitialized) {
+
+        Serial.print(msg);
+        Serial.flush();
+    }
+    #endif
+}
+
+void BoardClass::TraceNoNewLine(const char * msg) {
+
+    this->TraceNoNewLine((char *)msg);
+}
+
+void BoardClass::Trace(String msg) {
+
+    this->Trace(msg.c_str());
+}
+void BoardClass::Trace(const char * msg) {
+
+    Trace((char*)msg);
+}
+void BoardClass::TraceNoNewLine(const String & msg) {
+
+    this->TraceNoNewLine(msg.c_str());
+}
+
+
 char * PadRight(char * s, char * padding, int max) {
 
     while (strlen(s) < max) {
@@ -334,9 +359,9 @@ BoardClass Board;
 /// without blocking the controller loop
 Led::Led(int pin) {
 
-    this->_pin   = pin;
+    this->_pin = pin;
     this->_state = false;
-    this->_rate  = 0;
+    this->_rate = 0;
 }
 Led::~Led() {
 
@@ -357,9 +382,9 @@ void Led::SetLevel(int level) {
 }
 void Led::SetBlinkMode(unsigned long rate) {
 
-    this->_rate           = rate;
+    this->_rate = rate;
     this->_blinkStartTime = millis();
-    this->_state          = true;
+    this->_state = true;
     this->SetState(this->_state);
 }
 unsigned long Led::GetBlinkDurationCycle() {
@@ -368,7 +393,7 @@ unsigned long Led::GetBlinkDurationCycle() {
 }
 void Led::SetBlinkModeOff() {
 
-    this->_rate  = 0;
+    this->_rate = 0;
     this->_state = false;
     this->SetLevel(0);
 }
@@ -391,13 +416,13 @@ void Led::Blink() {
 ///
 MultiStateButton::MultiStateButton(int pin, Led * led, int maxState, const int * ledIntensityArray) {
 
-    this->_pin                          = pin;
-    this->_previousPin                  = UNDEFINED_PIN;
-    this->_maxState                     = maxState;
-    this->_ledIntensityArray            = ledIntensityArray;
-    this->LedInstance                   = led;
-    this->StateIndex                    = 0;
-    this->NextButtonLastStateInLoop     = false;
+    this->_pin = pin;
+    this->_previousPin = UNDEFINED_PIN;
+    this->_maxState = maxState;
+    this->_ledIntensityArray = ledIntensityArray;
+    this->LedInstance = led;
+    this->StateIndex = 0;
+    this->NextButtonLastStateInLoop = false;
     this->PreviousButtonLastStateInLoop = false;
 }
 MultiStateButton::~MultiStateButton() {
@@ -476,7 +501,7 @@ void MultiStateButton::UpdateUI() {
 ///
 TimeOut::TimeOut(unsigned long duration) {
 
-    this->Counter   = -1;
+    this->Counter = -1;
     this->_duration = duration;
     this->Reset();
 }
@@ -524,7 +549,7 @@ void TemperatureManager::Add(float celsius) {
 ///
 SpeakerManager::SpeakerManager(byte pin) {
 
-    this->_pin         = pin;
+    this->_pin = pin;
     this->BackGroundOn = false;
 }
 SpeakerManager::~SpeakerManager() {
@@ -540,10 +565,10 @@ void SpeakerManager::PlaySequence(int size, int * noteDurationSequence, int spee
 }
 void SpeakerManager::StartSequenceBackGround(int size, int * noteDurationSequence) {
 
-    this->_backGroundNoteDurationSequence     = noteDurationSequence;
+    this->_backGroundNoteDurationSequence = noteDurationSequence;
     this->_backGroundNoteDurationSequenceSize = size;
-    this->_backGroundNoteDurationIndex        = 0;
-    this->BackGroundOn                        = true;
+    this->_backGroundNoteDurationIndex = 0;
+    this->BackGroundOn = true;
 
     this->StartBackgroundNote();
 }
@@ -610,10 +635,10 @@ void SpeakerManager::Play(int note, int duration, int speed, boolean stop) {
 }
 void SpeakerManager::Off() {
 
-    #if defined(TRINKET)
-    #else
-        noTone(this->_pin);
-    #endif
+#if defined(TRINKET)
+#else
+    noTone(this->_pin);
+#endif
 }
 void Trinket_Tone(unsigned char speakerPin, int frequencyInHertz, long timeInMilliseconds) {
 
@@ -629,9 +654,9 @@ void Trinket_Tone(unsigned char speakerPin, int frequencyInHertz, long timeInMil
     }
 }
 void SpeakerManager::Tone(int note, int duration) {
-    #if defined(TRINKET)
-        Trinket_Tone(this->_pin, note, duration);
-    #else
-        tone(this->_pin, note, duration);
-    #endif
+#if defined(TRINKET)
+    Trinket_Tone(this->_pin, note, duration);
+#else
+    tone(this->_pin, note, duration);
+#endif
 }
