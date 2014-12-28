@@ -44,8 +44,7 @@ void loop() {
         if (_lightSensorButtons[s]->NeedReference || _lightSensorButtons[s]->ReferenceTimeOut()) {
 
             _lightSensorButtons[s]->UpdateReferences();
-            String info = _lightSensorButtons[s]->ToString();
-            Board.Trace(Board.Format("Getting reference - %s - Ready.", info.c_str()));
+            Board.Trace(Board.Format("Getting reference - %s - Ready.", _lightSensorButtons[s]->ToString().c_str()));
         }
     }
 
