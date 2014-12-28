@@ -9,12 +9,23 @@
 #include "WProgram.h"
 #endif
 
+// --- fArduino LIBRARY COMPILATION MODE ----------------------------------------------------------------------------
+// #define TRINKET 1 // On the trinket there is no Serial communication
+//#define LIGHTSENSORBUTTON_DEBUG 1
+// --- fArduino LIBRARY COMPILATION MODE ----------------------------------------------------------------------------
+
+
 #define ArraySize(x) sizeof(x) / sizeof(x[0])
 #define UNDEFINED_PIN -1
-
 #define MAX_FORMAT_SIZE 128
+#define TRACE_HEADER_CHAR "-"
 
-#define TRACE_HEADER_CHAR "~"
+
+#if defined(TRINKET)
+    // #define SERIAL_AVAILABLE 0
+#else
+    #define SERIAL_AVAILABLE 1
+#endif 
 
 //////////////////////////////////////////////////////
 /// Represet the Trinket/Arduino board
@@ -60,6 +71,9 @@ public:
     void TraceFormat(char * format, double f1, double f2);
 
     void ClearKeyboard();
+
+    bool InBetween(int newValue, int refValue, int plusOrMinuspercent);
+    bool InBetween(double newValue, double refValue, double plusOrMinuspercent);
 
     //char * ToString(double d);
     //char * ToString(float f);
@@ -304,4 +318,64 @@ public:
     void StartSequenceBackGround(int size, int * noteDurationSequence);
     boolean BackGroundUpdate();
     void StartBackgroundNote();
+};
+
+
+/**************************************************
+ LightSensorButton
+
+ - When used with a 1k resistor, simply passing the hand over the button 
+ will trigger the event.
+ - When used with a 10k resistor, the user will have to put the finger on
+ the light sensor
+ - Possiblity to implement : Put the finger on the button (FingerDown),
+ wait 3 seconds, remove finger
+
+    https://learn.adafruit.com/photocells/using-a-photocell
+*/
+
+class LightSensorButton {
+private:
+    byte          _pin;    
+    
+    unsigned long _lastReferenceTime;
+    int           _lastDifference;
+    double        _lastChangeInPercent;
+    int           _lastValue;
+    int           _referenceValue;
+    
+
+    boolean ChangeDetected();
+    boolean BackToReferenceValue();
+
+
+public:
+    byte UPDATE_REFERENCE_EVERY_X_SECONDS; // Update light reference every 15 seconds
+    byte MAX_REFERENCES;                   // Capture the average of 3 light value to compute the lght reference
+    byte REFERENCE_ACQUISITION_TIME;
+    byte DETECTION_PERCENT;                // If the light change more than +-24% we detected a possible change
+    byte DETECTION_PERCENT_BACK;           // if the light go back +-ReferenceValue, the button was activated by a human (Hopefully, not 100% guaranteed)
+    byte DETECTION_BACK_WAIT_TIME;         // Wait time before we check if the light value went back to the reference value
+
+    String Name;
+
+    // Set to true to notify we need to update the light reference
+    boolean NeedReference;
+
+    LightSensorButton(byte pin, char * name);
+    ~LightSensorButton();
+
+    // Compute and return the new reference light value
+    int UpdateReferences();
+
+    // Return true if it is time to update the reference light
+    boolean ReferenceTimeOut();
+
+    // Return true if the button was activated
+    boolean Activated();
+    
+    // Return internal information about the state of button
+    String ToString();
+    boolean FingerUp();
+    boolean FingerDown();
 };

@@ -3,6 +3,8 @@
     Using the light sensor CdS photoresistor with an Arduino, as
     a button to trigger command
 
+    https://learn.adafruit.com/photocells/using-a-photocell
+
     Torres Frederic 2014.12
 
 ***************************************************************************/
@@ -12,72 +14,50 @@
 boolean _ledState = false;
 
 // Pins Usage
-#define PHOTO_RESISTOR_ANALOG_PIN 0
-#define ONBOARD_LED_PIN 13
+#define LEFT_PHOTO_RESISTOR_ANALOG_PIN  0
+#define RIGHT_PHOTO_RESISTOR_ANALOG_PIN 1
+
+#define ONBOARD_LED_PIN                 13
+#define RED_LED_PIN                     11
+
+#define MAX_SENSOR                      2
+
+LightSensorButton  _rightLightSensorButton(RIGHT_PHOTO_RESISTOR_ANALOG_PIN, "LeftLightSensor");
+LightSensorButton  _leftLightSensorButton(LEFT_PHOTO_RESISTOR_ANALOG_PIN, "RightLightSensor");
+LightSensorButton* _lightSensorButtons[MAX_SENSOR];
 
 void setup() {
 
-    Board.InitializeComputerCommunication(9600, "Initializing...");
+    _lightSensorButtons[0] = &_rightLightSensorButton;
+    _lightSensorButtons[1] = &_leftLightSensorButton;
+
+    Board.InitializeComputerCommunication(9600, NULL);
     Board.TraceHeader("Photo Resistor as button");
     Board.SetPinMode(ONBOARD_LED_PIN, OUTPUT);
+    Board.SetPinMode(RED_LED_PIN, OUTPUT);
 }
-
-const byte UPDATE_REFERENCE_EVERY_X_SECONDS = 10;
-const byte MAX_REFERENCES                   = 3;
-const byte REFERENCE_ACQUISITION_TIME       = 250;
-const byte DETECTION_PERCENT                = 17;
-boolean _needReference                      = true;
-unsigned long _lastReferenceTime            = 0;
-int _referenceValue;
-
-
-int GetReferences() {
-
-    int ref = 0;
-
-    for (int i = 0; i < MAX_REFERENCES; i++) {
-
-        ref += analogRead(PHOTO_RESISTOR_ANALOG_PIN);
-        Board.Delay(REFERENCE_ACQUISITION_TIME);
-    }
-    _referenceValue = ref / MAX_REFERENCES;
-    _needReference  = false;
-    return _referenceValue;
-}
-
-boolean ChangeDetected(int newValue) {
-
-    int dif            = abs(_referenceValue - newValue);
-    int expectedChange = _referenceValue * DETECTION_PERCENT / 100;
-
-    if ((dif >= (expectedChange))) {
-        Serial.println(_referenceValue - newValue);
-    }
-
-    return (dif >= (expectedChange));
-}
-
 void loop() {
 
-    if ((_needReference) || (millis() - _lastReferenceTime > UPDATE_REFERENCE_EVERY_X_SECONDS * 1000)) {
+    for (int s = 0; s < MAX_SENSOR; s++) {
 
-        Board.TraceNoNewLine(Board.Format("[%s]Getting reference, ", Board.GetTime()));
-        Board.TraceNoNewLine(Board.Format("Ref value: %d, ", GetReferences()));
-        Board.Trace("Ready.");
-        _lastReferenceTime = millis();
+        // Recalibrate the light reference every 15 seconds or on demand
+        if (_lightSensorButtons[s]->NeedReference || _lightSensorButtons[s]->ReferenceTimeOut()) {
+
+            _lightSensorButtons[s]->UpdateReferences();
+            String info = _lightSensorButtons[s]->ToString();
+            Board.Trace(Board.Format("Getting reference - %s - Ready.", info.c_str()));
+        }
     }
 
-    int photoResistorValue = analogRead(PHOTO_RESISTOR_ANALOG_PIN);
+    for (int s = 0; s < MAX_SENSOR; s++) {
 
-    if (ChangeDetected(photoResistorValue)) {
+        if (_lightSensorButtons[s]->Activated()) {
 
-        _ledState = !_ledState;
-        Board.LedOn(ONBOARD_LED_PIN, _ledState);
-
-        double changeInPercent = (1.0 * photoResistorValue / _referenceValue) - 1;
-        Board.Trace(Board.Format("[%s]Change Detected %d, %f%%", Board.GetTime(), photoResistorValue, changeInPercent));
-        
-        Board.Delay(250);
-        _needReference = true;
+            _ledState = !_ledState;
+            Board.LedOn(ONBOARD_LED_PIN, _ledState);
+            Board.LedOn(RED_LED_PIN, _ledState);
+            Board.Trace(Board.Format("Changed detected - %s", _lightSensorButtons[s]->ToString().c_str()));
+            _lightSensorButtons[s]->NeedReference = true;
+        }
     }
 }

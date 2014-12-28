@@ -1,29 +1,26 @@
-#include <fArduino.h>
-
+﻿#include <fArduino.h>
 ///////////////////////////////////////////////////////////////////////////////
 //  
 // fArduino.cpp
-// Reusable code for Arduino and Trinket programming, mostly to write 
+// Reusable code for Arduino and Trinket programming, mostly to write clean and
+// maintainable class. The fArduino library is only one cpp file with multiples
+// classes, but remember that the linker will only use the methods and classes
+// used.
 //
 // Torres Frederic 2014
 //
 // MIT License
 //
-// Remarks the SpeakerManager class require to be compiled for Trinket 8Mhz
-//
+// Remarks 
+// - the SpeakerManager class whem compiled for a Trinket need to be compiled at 8Mhz
+// - 
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <stdarg.h>
 #include <stdio.h>
 #include "fArduino.h"
 
-//#define TRINKET 1 // On the trinket there is no Serial communication
 
-#if defined(TRINKET)
-// #define SERIAL_AVAILABLE 0
-#else
-#define SERIAL_AVAILABLE 1
-#endif 
 
 BoardClass::BoardClass() {
 
@@ -59,6 +56,19 @@ int freeListSize() {
     }
     return total;
 }
+
+bool BoardClass::InBetween(int newValue, int refValue, int plusOrMinuspercent)
+{
+    int p = refValue*plusOrMinuspercent / 100;
+    return (newValue >= refValue - p) && (newValue <= refValue + p);
+}
+
+bool BoardClass::InBetween(double newValue, double refValue, double plusOrMinuspercent)
+{
+    double p = refValue*plusOrMinuspercent / 100.0;
+    return (newValue >= refValue - p) && (newValue <= refValue + p);
+}
+
 int BoardClass::GetFreeMemory() {
 
     int free_memory;
@@ -169,6 +179,9 @@ void BoardClass::Trace(char * msg) {
     #if defined(SERIAL_AVAILABLE)
     if (this->_serialCommunicationInitialized) {
 
+        Serial.print("[");
+        Serial.print(this->GetTime());
+        Serial.print("]");
         Serial.println(msg);
         Serial.flush();
     }
@@ -542,11 +555,23 @@ void TemperatureManager::Add(float celsius) {
 
 }
 
+/**************************************************
+SpeakerManager
 
-//////////////////////////////////////////////////////
-///  SpeakerManager
-/// based on http://www.instructables.com/id/Arduino-Basics-Making-Sound/step2/Playing-A-Melody/
-///
+based on http://www.instructables.com/id/Arduino-Basics-Making-Sound/step2/Playing-A-Melody/
+http://makezine.com/projects/make-35/advanced-arduino-sound-synthesis/
+
+Remark from Jeremy Blum about using the default Arduino tone() method
+http://www.jeremyblum.com/2010/09/05/driving-5-speakers-simultaneously-with-an-arduino
+The built-in tone() function allows you to generate a squarewave with 50% duty cycle of your
+selected frequency on any pin on the arduino.
+It relies on one of the arduino�s 3 timers to work in the background.
+
+SPECIFICALLY, IT USES TIMER2, WHICH IS ALSO RESPONSIBLE FOR
+CONTROLLING PWM ON PINS 3 AND 11.
+SO YOU NATURALLY LOOSE THAT ABILITY WHEN USING THE TONE() FUNCTION.
+
+*/
 SpeakerManager::SpeakerManager(byte pin) {
 
     this->_pin = pin;
@@ -659,4 +684,123 @@ void SpeakerManager::Tone(int note, int duration) {
 #else
     tone(this->_pin, note, duration);
 #endif
+}
+
+/**************************************************
+LightSensorButton
+
+- When used with a 1k resistor, simply passing the hand over the button
+will trigger the event.
+- When used with a 10k resistor, the user will have to put the finger on
+the light sensor
+- Possiblity to implement : Put the finger on the button (FingerDown),
+wait 3 seconds, remove finger
+
+https://learn.adafruit.com/photocells/using-a-photocell
+*/
+boolean LightSensorButton::Activated() {
+
+    static byte changeDetectedCounter;
+
+    if (this->ChangeDetected()) {
+
+        #if defined(LIGHTSENSORBUTTON_DEBUG)
+        Board.Trace(Board.Format("LightSensorButton(%d) Change detected %d", _pin, changeDetectedCounter));
+        #endif
+
+        changeDetectedCounter++;
+        if (changeDetectedCounter > 2) {
+            Board.Delay(200);
+        }
+        if (changeDetectedCounter > 5) {
+            // Most likely the light has changed quickly in the room and it is not cause by a human
+            // passing the had in front of the light sensor.
+            // We better give up and request new light reference
+            Board.Trace(Board.Format("LightSensorButton(%d) Permanent light change detected", _pin));
+            changeDetectedCounter = 0;
+            this->NeedReference   = true;
+            return false;
+        }
+
+        Board.Delay(this->DETECTION_BACK_WAIT_TIME);
+
+        if (this->BackToReferenceValue()) {
+
+            #if defined(LIGHTSENSORBUTTON_DEBUG)
+            Board.Trace("Returned to ref value -- Activated");
+            #endif
+            changeDetectedCounter = 0;
+            return true;
+        }
+    }
+}
+boolean LightSensorButton::BackToReferenceValue() {
+    
+    return Board.InBetween(analogRead(this->_pin), this->_referenceValue, this->DETECTION_PERCENT_BACK);
+}
+boolean LightSensorButton::ChangeDetected() {
+
+    _lastValue           = analogRead(this->_pin);
+    _lastDifference      = _referenceValue - _lastValue;
+    int expectedChange   = _referenceValue * DETECTION_PERCENT / 100;
+    _lastChangeInPercent = ((1.0 * _lastValue / _referenceValue) - 1) * 100.0;
+    boolean r            = abs(_lastDifference) >= expectedChange;
+    return r;
+}
+int LightSensorButton::UpdateReferences() {
+
+    int ref = 0;
+
+    for (int i = 0; i < MAX_REFERENCES; i++) {
+
+        ref += analogRead(this->_pin);
+        delay(REFERENCE_ACQUISITION_TIME);
+    }
+    _referenceValue          = ref / MAX_REFERENCES;
+    this->NeedReference      = false;
+    this->_lastReferenceTime = millis();
+    this->ChangeDetected();
+    return _referenceValue;
+}
+boolean LightSensorButton::ReferenceTimeOut() {
+
+    return (millis() - this->_lastReferenceTime) > this->UPDATE_REFERENCE_EVERY_X_SECONDS * 1000;
+}
+LightSensorButton::LightSensorButton(byte pin, char * name) {
+
+    this->Name                             = name;
+    this->UPDATE_REFERENCE_EVERY_X_SECONDS = 15; // Update light reference every 15 seconds
+    this->MAX_REFERENCES                   = 3;  // Capture the average of 3 light value to compute the lght reference
+    this->REFERENCE_ACQUISITION_TIME       = 250; 
+    this->DETECTION_PERCENT                = 24; // If the light change more than +-24% we detected a possible change
+    this->DETECTION_PERCENT_BACK           = 8;  // if the light go back +-ReferenceValue, the button was activated by a human (Hopefully, not 100% guaranteed)
+    this->DETECTION_BACK_WAIT_TIME         = 250;// Wait time before we check if the light value went back to the reference value
+
+    this->_pin                             = pin;
+    this->NeedReference                    = true;
+    this->_lastReferenceTime               = 0;
+    this->_lastDifference                  = 0;
+    this->_lastChangeInPercent             = 0;
+    this->_referenceValue                  = 0;
+}
+LightSensorButton::~LightSensorButton() {
+
+}
+boolean LightSensorButton::FingerUp() {
+
+    return this->_lastDifference < 0;
+}
+boolean LightSensorButton::FingerDown() {
+
+    return this->_lastDifference > 0;
+}
+String LightSensorButton::ToString() {
+    
+    return Board.Format("LightSensorButton(%s:%d) { value:%d, diff:%d, diffPercent:%f%% }",
+        this->Name.c_str(),
+        this->_pin,
+        this->_lastValue,
+        this->_lastDifference,
+        this->_lastChangeInPercent
+        );
 }
