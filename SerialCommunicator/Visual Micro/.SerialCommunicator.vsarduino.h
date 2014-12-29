@@ -41,8 +41,4 @@ extern "C" void __cxa_pure_virtual() {;}
 #include "D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\cores\arduino\arduino.h"
 #include "D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\variants\standard\pins_arduino.h" 
 #include "D:\DVT\Arduino\fArduino\SerialCommunicator\SerialCommunicator.ino"
-#include "D:\DVT\Arduino\fArduino\SerialCommunicator\fArduino.cpp"
-#include "D:\DVT\Arduino\fArduino\SerialCommunicator\fArduino.h"
-#include "D:\DVT\Arduino\fArduino\SerialCommunicator\fArduinot.cpp"
-#include "D:\DVT\Arduino\fArduino\SerialCommunicator\fArduinot.h"
 #endif

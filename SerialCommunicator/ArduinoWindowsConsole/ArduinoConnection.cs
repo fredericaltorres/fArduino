@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO.Ports;
+using System.Threading;
 
 namespace ArduinoLibrary
 {
@@ -28,9 +29,34 @@ namespace ArduinoLibrary
             this.PortName       = portName;
             _serialPort.ErrorReceived += new SerialErrorReceivedEventHandler(port_ErrorReceived);
             _serialPort.DataReceived  += new SerialDataReceivedEventHandler(port_DataReceived);
-            this._serialPort.Open();
-            this._serialPort.DiscardInBuffer();
-            this._serialPort.DiscardOutBuffer();
+
+            if (this.Open())
+            {
+                this._serialPort.DiscardInBuffer();
+                this._serialPort.DiscardOutBuffer();
+            }
+            else
+            {
+                throw new ApplicationException(string.Format("Cannot open port:{0}", portName));
+            }
+        }
+
+        private bool Open(int retryCount = 5, int waitTime = 2000)
+        {
+            int count = 0;
+            while (count < retryCount)
+            {
+                try
+                {
+                    this._serialPort.Open();
+                    return true;
+                }
+                catch (System.Exception ex)
+                {
+                    Thread.Sleep(waitTime);
+                }
+            }
+            return false;
         }
 
         public void Send(string text)

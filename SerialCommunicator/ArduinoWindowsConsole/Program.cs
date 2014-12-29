@@ -25,7 +25,7 @@ namespace test
             var goOn        = true;
             string portName = "COM4";
             Console.WriteLine("Communication to Arduino, port:{0}", portName);
-            Console.WriteLine("Q)uit R)eset L)ed I)nvalid");
+            Console.WriteLine("Q)uit L)ed R)eset Counter I)nc Counter G)et Counter");
 
             using (var ac = new ArduinoConnection(portName))
             {
@@ -37,9 +37,13 @@ namespace test
                         switch (Console.ReadKey(true).Key)
                         {
                             case ConsoleKey.Q: goOn = false;               break;
-                            case ConsoleKey.R: SendCommand(ac, "reset");   break;
+
+                            case ConsoleKey.R: SendCommand(ac, "resetCounter");   break;
+                            case ConsoleKey.I: SendCommand(ac, "incCounter");       break;
+                            case ConsoleKey.G: SendCommand(ac, "getCounter");       break;
+
                             case ConsoleKey.L: SendCommand(ac, "led");     break;
-                            case ConsoleKey.I: SendCommand(ac, "invalid"); break;
+                            case ConsoleKey.S: SendCommand(ac, "invalid"); break;
                         }
                     }
                     if (ac.ReceivedMessages.Count > 0)
