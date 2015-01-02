@@ -19,22 +19,23 @@ boolean _ledState = false;
 //    - the moment we started the Arduino
 //    - One mesure every 6 minutes
 #define MAX_TEMPERATURE_SAMPLES 3 * 24 * 6 // 3d * 24h * 6m ==> 432
-TimeOut _timeOut(1000 * 60 * 6); 
+#define SAMPLING_TIME           1000UL * 60UL * 1UL // Must be unsigned long
+TimeOut _timeOut(SAMPLING_TIME);
 MemDB _temperatureDB; // Trinket has only 512 byte of EPROM
 
 void setup() {
 
-    Board.Delay(1000); // Wait one second so after plug in the USB port, I can start the ArduinoWindowsConsole
+    Board.Delay(1500); // Wait one second so after plug in the USB port, I can start the ArduinoWindowsConsole
+
     Board.InitializeComputerCommunication(9600, "Initializing...");
     Board.TraceHeader("Serial Communicator With EEPROM");
-    Board.SetPinMode(ON_BOARD_LED, OUTPUT);
     
+    Board.SetPinMode(ON_BOARD_LED, OUTPUT);
     MemDB::InitEEPROM(512, MAX_TEMPERATURE_SAMPLES * 3);
     int temperatureDBAddr = _temperatureDB.CreateByteArray(MAX_TEMPERATURE_SAMPLES, false);
     
     Board.TraceFormat("temperatureDBAddr:%d", temperatureDBAddr);
     Board.TraceFormat("temperature Length:%d", _temperatureDB.GetLength());
-
     Board.Trace(_timeOut.ToString());
 }
 
@@ -45,6 +46,9 @@ void PowerLed(boolean state) {
 
 void loop() {
 
+    //String ss("");
+        
+    
     if (_timeOut.IsTimeOut()) {
 
         int lastTemp = _temperatureDB.AddByteArray((byte)millis());
@@ -87,10 +91,10 @@ void loop() {
                 executed = true;
             }
             if (executed) {
-                Board.Trace(Board.Format("[%s executed]", s.c_str()));
+                Board.Trace(StringFormat.Format("[%s executed]", s.c_str()));
             }
             else {
-                Board.Trace(Board.Format("[Invalid command:%s]", s.c_str()));
+                Board.Trace(StringFormat.Format("[Invalid command:%s]", s.c_str()));
             }
         }
     }

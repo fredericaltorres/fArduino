@@ -5,232 +5,249 @@
     #define _FARDUINO_h
 
     #if defined(ARDUINO) && ARDUINO >= 100
-    #include "Arduino.h"
+        #include "Arduino.h"
     #else
-    #include "WProgram.h"
+        #include "WProgram.h"
     #endif
 
-
-
-
-
-#define ABOUT_TO_CALL_EEPROM_API while(!eeprom_is_ready());cli();
-#define DONE_CALLING_EEPROM_API sei();
-
-/*
-https://raw.githubusercontent.com/thijse/Arduino-Libraries/master/EEPROMEx/EEPROMex.h
-
-EEPROMEx.h - Extended EEPROM library
-Copyright (c) 2012 Thijs Elenbaas.  All right reserved.
-
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
-
-#ifndef EEPROMEX_h
-#define EEPROMEX_h
-
-#if ARDUINO >= 100
-#include <Arduino.h> 
-#else
-#include <WProgram.h> 
-#endif
-#include <inttypes.h>
-#include <avr/eeprom.h>
-
-// Boards with ATmega328, Duemilanove, Uno, UnoSMD, Lilypad - 1024 bytes (1 kilobyte)
-// Boards with ATmega1280 or 2560, Arduino Mega series ? 4096 bytes (4 kilobytes)
-// Boards with ATmega168, Lilypad, old Nano, Diecimila  ? 512 bytes (1/2 kilobyte)
-
-#define EEPROMSizeATmega168   512     
-#define EEPROMSizeATmega328   1024     
-#define EEPROMSizeATmega1280  4096     
-#define EEPROMSizeATmega32u4  1024
-#define EEPROMSizeAT90USB1286 4096
-#define EEPROMSizeMK20DX128   2048
-
-#define EEPROMSizeUno         EEPROMSizeATmega328     
-#define EEPROMSizeUnoSMD      EEPROMSizeATmega328
-#define EEPROMSizeLilypad     EEPROMSizeATmega328
-#define EEPROMSizeDuemilanove EEPROMSizeATmega328
-#define EEPROMSizeMega        EEPROMSizeATmega1280
-#define EEPROMSizeDiecimila   EEPROMSizeATmega168
-#define EEPROMSizeNano        EEPROMSizeATmega168
-#define EEPROMSizeTeensy2     EEPROMSizeATmega32u4
-#define EEPROMSizeLeonardo    EEPROMSizeATmega32u4
-#define EEPROMSizeMicro       EEPROMSizeATmega32u4
-#define EEPROMSizeYun         EEPROMSizeATmega32u4
-#define EEPROMSizeTeensy2pp   EEPROMSizeAT90USB1286
-#define EEPROMSizeTeensy3     EEPROMSizeMK20DX128
-
-class EEPROMClassEx
-{
-
-public:
-    EEPROMClassEx();
-    bool 	 isReady();
-    int 	 writtenBytes();
-    void 	 setMemPool(int base, int memSize);
-    void  	 setMaxAllowedWrites(int allowedWrites);
-    int 	 getAddress(int noOfBytes);
-
-    uint8_t  read(int);
-    bool 	 readBit(int, byte);
-    uint8_t  readByte(int);
-    uint16_t readInt(int);
-    uint32_t readLong(int);
-    float    readFloat(int);
-    double   readDouble(int);
-
-    bool     write(int, uint8_t);
-    bool 	 writeBit(int, uint8_t, bool);
-    bool     writeByte(int, uint8_t);
-    bool 	 writeInt(int, uint16_t);
-    bool 	 writeLong(int, uint32_t);
-    bool 	 writeFloat(int, float);
-    bool 	 writeDouble(int, double);
-
-    bool     update(int, uint8_t);
-    bool 	 updateBit(int, uint8_t, bool);
-    bool     updateByte(int, uint8_t);
-    bool 	 updateInt(int, uint16_t);
-    bool 	 updateLong(int, uint32_t);
-    bool 	 updateFloat(int, float);
-    bool 	 updateDouble(int, double);
-
-
-    // Use template for other data formats
-
-
-    template <class T> int readBlock(int address, const T value[], int items)
-    {
-        if (!isWriteOk(address + items*sizeof(T))) return 0;
-        unsigned int i;
-        for (i = 0; i < (unsigned int)items; i++)
-            readBlock<T>(address + (i*sizeof(T)), value[i]);
-        return i;
-    }
-
-    template <class T> int readBlock(int address, const T& value)
-    {
-        eeprom_read_block((void*)&value, (const void*)address, sizeof(value));
-        return sizeof(value);
-    }
-
-    template <class T> int writeBlock(int address, const T value[], int items)
-    {
-        if (!isWriteOk(address + items*sizeof(T))) return 0;
-        unsigned int i;
-        for (i = 0; i < (unsigned int)items; i++)
-            writeBlock<T>(address + (i*sizeof(T)), value[i]);
-        return i;
-    }
-
-    template <class T> int writeBlock(int address, const T& value)
-    {
-        if (!isWriteOk(address + sizeof(value))) return 0;
-        eeprom_write_block((void*)&value, (void*)address, sizeof(value));
-        return sizeof(value);
-    }
-
-    template <class T> int updateBlock(int address, const T value[], int items)
-    {
-        int writeCount = 0;
-        if (!isWriteOk(address + items*sizeof(T))) return 0;
-        unsigned int i;
-        for (i = 0; i < (unsigned int)items; i++)
-            writeCount += updateBlock<T>(address + (i*sizeof(T)), value[i]);
-        return writeCount;
-    }
-
-    template <class T> int updateBlock(int address, const T& value)
-    {
-        int writeCount = 0;
-        if (!isWriteOk(address + sizeof(value))) return 0;
-        const byte* bytePointer = (const byte*)(const void*)&value;
-        for (unsigned int i = 0; i < (unsigned int)sizeof(value); i++) {
-            if (read(address) != *bytePointer) {
-                write(address, *bytePointer);
-                writeCount++;
-            }
-            address++;
-            bytePointer++;
-        }
-        return writeCount;
-    }
-
-private:
-    //Private variables
-    static int _base;
-    
-    static int _nextAvailableaddress;
-    static int _writeCounts;
-    int _allowedWrites;
-    bool checkWrite(int base, int noOfBytes);
-    bool isWriteOk(int address);
-    bool isReadOk(int address);
-
-public:
-    static int _memSize;
-};
-
-extern EEPROMClassEx EEPROM;
-
-#endif
-
-//////////////////////////////////////////////////////
-/// 
-///
-class MemDB {
-private:
-    int _size;
-    int _index;
-    int _startAddress;
-    int _lengthAddress;    
-protected:
-public:
-    static void InitEEPROM(int maxEEPROMMemory, int maxAllowedWrites);
-    MemDB();
-    ~MemDB();
-    int CreateByteArray(int size, boolean init);
-    byte AddByteArray(byte b);
-    byte GetByteArray(int index);
-    int GetLength();
-    int SetLength();
-    int Clear();
-    String ToString();
-};
-
-    // --- fArduino LIBRARY COMPILATION MODE ----------------------------------------------------------------------------
+    // --- fArduino LIBRARY COMPILATION MODE ---
     // #define TRINKET 1 // On the trinket there is no Serial communication
-    //#define LIGHTSENSORBUTTON_DEBUG 1
-    // --- fArduino LIBRARY COMPILATION MODE ----------------------------------------------------------------------------
+    // #define LIGHTSENSORBUTTON_DEBUG 1
+    // --- fArduino LIBRARY COMPILATION MODE ---
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// EEPROMClassEx
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    #define ABOUT_TO_CALL_EEPROM_API while(!eeprom_is_ready());cli();
+    #define DONE_CALLING_EEPROM_API sei();
+
+    /*
+        https://raw.githubusercontent.com/thijse/Arduino-Libraries/master/EEPROMEx/EEPROMex.h
+
+        EEPROMEx.h - Extended EEPROM library
+        Copyright (c) 2012 Thijs Elenbaas.  All right reserved.
+
+        This library is free software; you can redistribute it and/or
+        modify it under the terms of the GNU Lesser General Public
+        License as published by the Free Software Foundation; either
+        version 2.1 of the License, or (at your option) any later version.
+
+        This library is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+        Lesser General Public License for more details.
+
+        You should have received a copy of the GNU Lesser General Public
+        License along with this library; if not, write to the Free Software
+        Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+    */
+    #ifndef EEPROMEX_h
+        #define EEPROMEX_h
+
+        #if ARDUINO >= 100
+            #include <Arduino.h> 
+        #else
+            #include <WProgram.h> 
+        #endif
+        #include <inttypes.h>
+        #include <avr/eeprom.h>
+
+        // Boards with ATmega328, Duemilanove, Uno, UnoSMD, Lilypad - 1024 bytes (1 kilobyte)
+        // Boards with ATmega1280 or 2560, Arduino Mega series ? 4096 bytes (4 kilobytes)
+        // Boards with ATmega168, Lilypad, old Nano, Diecimila  ? 512 bytes (1/2 kilobyte)
+
+        #define EEPROMSizeATmega168   512     
+        #define EEPROMSizeATmega328   1024     
+        #define EEPROMSizeATmega1280  4096     
+        #define EEPROMSizeATmega32u4  1024
+        #define EEPROMSizeAT90USB1286 4096
+        #define EEPROMSizeMK20DX128   2048
+
+        #define EEPROMSizeUno         EEPROMSizeATmega328     
+        #define EEPROMSizeUnoSMD      EEPROMSizeATmega328
+        #define EEPROMSizeLilypad     EEPROMSizeATmega328
+        #define EEPROMSizeDuemilanove EEPROMSizeATmega328
+        #define EEPROMSizeMega        EEPROMSizeATmega1280
+        #define EEPROMSizeDiecimila   EEPROMSizeATmega168
+        #define EEPROMSizeNano        EEPROMSizeATmega168
+        #define EEPROMSizeTeensy2     EEPROMSizeATmega32u4
+        #define EEPROMSizeLeonardo    EEPROMSizeATmega32u4
+        #define EEPROMSizeMicro       EEPROMSizeATmega32u4
+        #define EEPROMSizeYun         EEPROMSizeATmega32u4
+        #define EEPROMSizeTeensy2pp   EEPROMSizeAT90USB1286
+        #define EEPROMSizeTeensy3     EEPROMSizeMK20DX128
+
+        class EEPROMClassEx
+        {
+            public:
+                EEPROMClassEx               (                     );
+                bool 	 isReady            (                     );
+                int 	 writtenBytes       (                     );
+                void 	 setMemPool         (int base, int memSize);
+                void  	 setMaxAllowedWrites(int allowedWrites    );
+                int 	 getAddress         (int noOfBytes        );
+
+                uint8_t  read               (int                  );
+                bool 	 readBit            (int, byte            );
+                uint8_t  readByte           (int                  );
+                uint16_t readInt            (int                  );
+                uint32_t readLong           (int                  );
+                float    readFloat          (int                  );
+                double   readDouble         (int                  );
+
+                bool     write              (int, uint8_t         );
+                bool 	 writeBit           (int, uint8_t, bool   );
+                bool     writeByte          (int, uint8_t         );
+                bool 	 writeInt           (int, uint16_t        );
+                bool 	 writeLong          (int, uint32_t        );
+                bool 	 writeFloat         (int, float           );
+                bool 	 writeDouble        (int, double          );
+
+                bool     update             (int, uint8_t         );
+                bool 	 updateBit          (int, uint8_t, bool   );
+                bool     updateByte         (int, uint8_t         );
+                bool 	 updateInt          (int, uint16_t        );
+                bool 	 updateLong         (int, uint32_t        );
+                bool 	 updateFloat        (int, float           );
+                bool 	 updateDouble       (int, double          );
+
+                // Use template for other data formats
+
+                template <class T> int readBlock(int address, const T value[], int items)
+                {
+                    if (!isWriteOk(address + items*sizeof(T))) return 0;
+                    unsigned int i;
+                    for (i = 0; i < (unsigned int)items; i++)
+                        readBlock<T>(address + (i*sizeof(T)), value[i]);
+                    return i;
+                }
+
+                template <class T> int readBlock(int address, const T& value)
+                {
+                    eeprom_read_block((void*)&value, (const void*)address, sizeof(value));
+                    return sizeof(value);
+                }
+
+                template <class T> int writeBlock(int address, const T value[], int items)
+                {
+                    if (!isWriteOk(address + items*sizeof(T))) return 0;
+                    unsigned int i;
+                    for (i = 0; i < (unsigned int)items; i++)
+                        writeBlock<T>(address + (i*sizeof(T)), value[i]);
+                    return i;
+                }
+
+                template <class T> int writeBlock(int address, const T& value)
+                {
+                    if (!isWriteOk(address + sizeof(value))) return 0;
+                    eeprom_write_block((void*)&value, (void*)address, sizeof(value));
+                    return sizeof(value);
+                }
+
+                template <class T> int updateBlock(int address, const T value[], int items)
+                {
+                    int writeCount = 0;
+                    if (!isWriteOk(address + items*sizeof(T))) return 0;
+                    unsigned int i;
+                    for (i = 0; i < (unsigned int)items; i++)
+                        writeCount += updateBlock<T>(address + (i*sizeof(T)), value[i]);
+                    return writeCount;
+                }
+
+                template <class T> int updateBlock(int address, const T& value)
+                {
+                    int writeCount = 0;
+                    if (!isWriteOk(address + sizeof(value))) return 0;
+                    const byte* bytePointer = (const byte*)(const void*)&value;
+                    for (unsigned int i = 0; i < (unsigned int)sizeof(value); i++) {
+                        if (read(address) != *bytePointer) {
+                            write(address, *bytePointer);
+                            writeCount++;
+                        }
+                        address++;
+                        bytePointer++;
+                    }
+                    return writeCount;
+                }
+
+            private:
+                //Private variables
+                static int _base;
+    
+                static int _nextAvailableaddress;
+                static int _writeCounts;
+                int _allowedWrites;
+                bool checkWrite(int base, int noOfBytes);
+                bool isWriteOk(int address);
+                bool isReadOk(int address);
+
+            public:
+                static int _memSize;
+        };
+
+        extern EEPROMClassEx EEPROM;
+
+    #endif
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// MemDB
+    /// - Manage byte array saved in EEPROM
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    class MemDB {
+
+        private:
+            int _size;
+            int _index;
+            int _startAddress;
+            int _lengthAddress;    
+        protected:
+        public:
+            static void InitEEPROM(int maxEEPROMMemory, int maxAllowedWrites);
+            MemDB();
+            ~MemDB();
+            int  CreateByteArray(int size, boolean init);
+            byte AddByteArray(byte b);
+            byte GetByteArray(int index);
+            int  GetLength();
+            int  SetLength();
+            int  Clear();
+            String ToString();
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// StringFormatClass
+    /// Create a sigleton object named StringFormat exposing method to format string
+    /// The formating follow the sprinf syntax http://www.tutorialspoint.com/c_standard_library/c_function_sprintf.htm
+    /// with some extended syntax for unsigned int and long and boolean
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    class StringFormatClass {
+        public:
+            String Format(char *format, ...);
+            String GetTime();
+            String PadRight(String source, char * padding, int max);
+            String PadLeft(String source, char * padding, int max);
+            String MakeString(char * padding, int max);
+            boolean IsDigit(char *format);
+    };
+    extern StringFormatClass StringFormat;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Board
+    /// Represet the Trinket/Arduino board
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     #define ArraySize(x) sizeof(x) / sizeof(x[0])
     #define UNDEFINED_PIN -1
     #define MAX_FORMAT_SIZE 128
-    #define TRACE_HEADER_CHAR "-"
+    #define TRACE_HEADER_CHAR "~"
 
     #if defined(TRINKET)
         // #define SERIAL_AVAILABLE 0
     #else
         #define SERIAL_AVAILABLE 1
     #endif 
-
-    //////////////////////////////////////////////////////
-    /// Represet the Trinket/Arduino board
-    ///
+ 
     class BoardClass {
     private:
         boolean _serialCommunicationInitialized;
@@ -240,8 +257,8 @@ public:
         BoardClass();
         ~BoardClass();
 
-        char * GetTime();
-        String Format(char *format, ...);
+        //char * GetTime();
+        //String Format(char *format, ...);
         int GetFreeMemory();
 
         boolean GetButtonStateDebounced(int pin, boolean lastState);
@@ -283,93 +300,115 @@ public:
     // Global Signleton
     extern BoardClass Board;
 
-    //////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// Led
-    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     class Led {
-    private:
-        int _pin;
-        unsigned long _rate;
-        boolean _state;
-        int _level;
-        unsigned long _blinkStartTime;
-    protected:
-    public:
 
-        bool State;
-        Led(int pin);
-        void SetState(boolean on);
-        void SetLevel(int level);
-        ~Led();
-        void SetBlinkMode(unsigned long rate);
-        unsigned long GetBlinkDurationCycle();
-        void SetBlinkModeOff();
-        boolean IsBlinking();
-        void Blink();
+        private:
+            int _pin;
+            unsigned long _rate;
+            boolean _state;
+            int _level;
+            unsigned long _blinkStartTime;
+
+        public:
+            bool State;
+            Led(int pin);
+            void SetState(boolean on);
+            void SetLevel(int level);
+            ~Led();
+            void SetBlinkMode(unsigned long rate);
+            unsigned long GetBlinkDurationCycle();
+            void SetBlinkModeOff();
+            boolean IsBlinking();
+            void Blink();
     };
 
-    //////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// MultiState Button
-    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     class MultiStateButton {
 
-    private:
-        int         _pin;
-        int         _previousPin;
-        int         _maxState;
-        const int  *_ledIntensityArray;  // Point to an array of int mapping the intensity of the led with the StateIndex
-        bool        _statedChanged;
+        private:
+            int         _pin;
+            int         _previousPin;
+            int         _maxState;
+            const int  *_ledIntensityArray;  // Point to an array of int mapping the intensity of the led with the StateIndex
+            bool        _statedChanged;
 
-    public:
-        Led     *LedInstance;
-        int     StateIndex;
+        public:
+            Led     *LedInstance;
+            int     StateIndex;
 
-        boolean NextButtonLastStateInLoop;
-        boolean PreviousButtonLastStateInLoop;
+            boolean NextButtonLastStateInLoop;
+            boolean PreviousButtonLastStateInLoop;
 
-        MultiStateButton(int pin, Led * led, int maxState, const int * ledIntensityArray);
-        ~MultiStateButton();
+            MultiStateButton(int pin, Led * led, int maxState, const int * ledIntensityArray);
+            ~MultiStateButton();
 
-        boolean GetButtonStateDebounced();
-        boolean GetPreviousButtonStateDebounced();
-        void NextState();
-        void PreviousState();
-        void UpdateUI();
-        void SetPreviousButton(int pin);
+            boolean GetButtonStateDebounced();
+            boolean GetPreviousButtonStateDebounced();
+            void NextState();
+            void PreviousState();
+            void UpdateUI();
+            void SetPreviousButton(int pin);
 
-        boolean StateChangeFor(int state);
+            boolean StateChangeFor(int state);
     };
 
-    //////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// TimeOut
-    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     class TimeOut {
-    private:
-        unsigned long _time;
-        unsigned long _duration;
-    public:
-        unsigned long Counter;
 
-        TimeOut(unsigned long duration);
-        ~TimeOut();
-        void Reset();
-        boolean IsTimeOut();
-        boolean EveryCalls(unsigned long callCount);
-        String ToString();
+        private:
+            unsigned long _time;
+            unsigned long _duration;
+
+        public:
+            unsigned long Counter;
+
+            TimeOut(unsigned long duration);
+            ~TimeOut();
+            void Reset();
+            boolean IsTimeOut();
+            boolean EveryCalls(unsigned long callCount);
+            String ToString();
     };
     
-    //////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///  Temperature Manager
-    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     class TemperatureManager {
-    private:
-    public:
-        TemperatureManager();
-        ~TemperatureManager();
-        float CelsiusToFahrenheit(float celsius);
-        void Add(float celsius);
+
+        private:
+
+        public:
+            TemperatureManager();
+            ~TemperatureManager();
+            float CelsiusToFahrenheit(float celsius);
+            void Add(float celsius);
     };
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// SpeakerManager
+    ///
+    /// based on http://www.instructables.com/id/Arduino-Basics-Making-Sound/step2/Playing-A-Melody/
+    /// http://makezine.com/projects/make-35/advanced-arduino-sound-synthesis/
+    /// 
+    /// Remark from Jeremy Blum about using the default Arduino tone() method
+    /// http://www.jeremyblum.com/2010/09/05/driving-5-speakers-simultaneously-with-an-arduino
+    /// The built-in tone() function allows you to generate a squarewave with 50% duty cycle of your
+    /// selected frequency on any pin on the arduino.
+    /// It relies on one of the arduino?s 3 timers to work in the background.
+    /// 
+    /// SPECIFICALLY, IT USES TIMER2, WHICH IS ALSO RESPONSIBLE FOR
+    /// CONTROLLING PWM ON PINS 3 AND 11.
+    /// SO YOU NATURALLY LOOSE THAT ABILITY WHEN USING THE TONE() FUNCTION.
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Speaker Notes
     #define NOTE_B0  31
@@ -472,111 +511,87 @@ public:
     #define _4_NOTE 4
     #define _8_NOTE 8
 
-    /**************************************************
-    SpeakerManager
-
-    based on http://www.instructables.com/id/Arduino-Basics-Making-Sound/step2/Playing-A-Melody/
-    http://makezine.com/projects/make-35/advanced-arduino-sound-synthesis/
-
-    Remark from Jeremy Blum about using the default Arduino tone() method
-    http://www.jeremyblum.com/2010/09/05/driving-5-speakers-simultaneously-with-an-arduino
-    The built-in tone() function allows you to generate a squarewave with 50% duty cycle of your
-    selected frequency on any pin on the arduino.
-    It relies on one of the arduino?s 3 timers to work in the background.
-
-    SPECIFICALLY, IT USES TIMER2, WHICH IS ALSO RESPONSIBLE FOR
-    CONTROLLING PWM ON PINS 3 AND 11.
-    SO YOU NATURALLY LOOSE THAT ABILITY WHEN USING THE TONE() FUNCTION.
-
-    */
     class SpeakerManager {
-    private:
-        byte _pin;
 
-        int           _backGroundNoteDurationIndex;
-        int *         _backGroundNoteDurationSequence;
-        int           _backGroundNoteDurationSequenceSize;
+        private:
+            byte _pin;
 
-    public:
-        boolean       BackGroundOn;
+            int           _backGroundNoteDurationIndex;
+            int *         _backGroundNoteDurationSequence;
+            int           _backGroundNoteDurationSequenceSize;
 
-        SpeakerManager(byte pin);
-        ~SpeakerManager();
-        void Play(int note, int duration);
-        void Play(int note, int duration, int speed);
-        void Play(int note, int duration, int speed, boolean stop);
-        void Off();
-        void PlaySequence(int size, int * noteDurationSequence);
-        void PlaySequence(int size, int * noteDurationSequence, int speed);
-        void PlaySequence(int size, int * noteDurationSequence, int speed, boolean reverse);
-        void Tone(int note, int duration);
+        public:
+            boolean       BackGroundOn;
 
-        void StartSequenceBackGround(int size, int * noteDurationSequence);
-        boolean BackGroundUpdate();
-        void StartBackgroundNote();
+            SpeakerManager(byte pin);
+            ~SpeakerManager();
+            void Play(int note, int duration);
+            void Play(int note, int duration, int speed);
+            void Play(int note, int duration, int speed, boolean stop);
+            void Off();
+            void PlaySequence(int size, int * noteDurationSequence);
+            void PlaySequence(int size, int * noteDurationSequence, int speed);
+            void PlaySequence(int size, int * noteDurationSequence, int speed, boolean reverse);
+            void Tone(int note, int duration);
+
+            void StartSequenceBackGround(int size, int * noteDurationSequence);
+            boolean BackGroundUpdate();
+            void StartBackgroundNote();
     };
 
-
-    /**************************************************
-     LightSensorButton
-
-     - When used with a 1k resistor, simply passing the hand over the button 
-     will trigger the event.
-     - When used with a 10k resistor, the user will have to put the finger on
-     the light sensor
-     - Possiblity to implement : Put the finger on the button (FingerDown),
-     wait 3 seconds, remove finger
-
-        https://learn.adafruit.com/photocells/using-a-photocell
-    */
-
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// LightSensorButton
+    /// 
+    ///   - When used with a 1k resistor, simply passing the hand over the button 
+    ///   will trigger the event.
+    ///   - When used with a 10k resistor, the user will have to put the finger on
+    ///   the light sensor
+    ///   - Possiblity to implement : Put the finger on the button (FingerDown),
+    ///   wait 3 seconds, remove finger
+    /// 
+    ///   https://learn.adafruit.com/photocells/using-a-photocell
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     class LightSensorButton {
-    private:
-        byte          _pin;    
+
+        private:
+            byte          _pin;    
+            unsigned long _lastReferenceTime;
+            int           _lastDifference;
+            double        _lastChangeInPercent;
+            int           _lastValue;
+            int           _referenceValue;
+
+            boolean ChangeDetected();
+            boolean BackToReferenceValue();
+
+        public:
+            byte UPDATE_REFERENCE_EVERY_X_SECONDS; // Update light reference every 15 seconds
+            byte MAX_REFERENCES;                   // Capture the average of 3 light value to compute the lght reference
+            byte REFERENCE_ACQUISITION_TIME;
+            byte DETECTION_PERCENT;                // If the light change more than +-24% we detected a possible change
+            byte DETECTION_PERCENT_BACK;           // if the light go back +-ReferenceValue, the button was activated by a human (Hopefully, not 100% guaranteed)
+            byte DETECTION_BACK_WAIT_TIME;         // Wait time before we check if the light value went back to the reference value
+
+            String Name;
+
+            // Set to true to notify we need to update the light reference
+            boolean NeedReference;
+
+            LightSensorButton(byte pin, char * name);
+            ~LightSensorButton();
+
+            // Compute and return the new reference light value
+            int UpdateReferences();
+
+            // Return true if it is time to update the reference light
+            boolean ReferenceTimeOut();
+
+            // Return true if the button was activated
+            boolean Activated();
     
-        unsigned long _lastReferenceTime;
-        int           _lastDifference;
-        double        _lastChangeInPercent;
-        int           _lastValue;
-        int           _referenceValue;
-    
-
-        boolean ChangeDetected();
-        boolean BackToReferenceValue();
-
-
-    public:
-        byte UPDATE_REFERENCE_EVERY_X_SECONDS; // Update light reference every 15 seconds
-        byte MAX_REFERENCES;                   // Capture the average of 3 light value to compute the lght reference
-        byte REFERENCE_ACQUISITION_TIME;
-        byte DETECTION_PERCENT;                // If the light change more than +-24% we detected a possible change
-        byte DETECTION_PERCENT_BACK;           // if the light go back +-ReferenceValue, the button was activated by a human (Hopefully, not 100% guaranteed)
-        byte DETECTION_BACK_WAIT_TIME;         // Wait time before we check if the light value went back to the reference value
-
-        String Name;
-
-        // Set to true to notify we need to update the light reference
-        boolean NeedReference;
-
-        LightSensorButton(byte pin, char * name);
-        ~LightSensorButton();
-
-        // Compute and return the new reference light value
-        int UpdateReferences();
-
-        // Return true if it is time to update the reference light
-        boolean ReferenceTimeOut();
-
-        // Return true if the button was activated
-        boolean Activated();
-    
-        // Return internal information about the state of button
-        String ToString();
-        boolean FingerUp();
-        boolean FingerDown();
+            // Return internal information about the state of button
+            String ToString();
+            boolean FingerUp();
+            boolean FingerDown();
     };
-
-
-
-
 #endif

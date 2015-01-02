@@ -26,14 +26,146 @@
 #include <stdio.h>
 #include <fArduino.h>
 
-BoardClass::BoardClass() {
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    this->_startTime = millis();
-    this->_serialCommunicationInitialized = false;
-}
-BoardClass::~BoardClass() {
+String StringFormatClass::MakeString(char * padding, int max) {
 
+    String r("");
+    while (r.length() < max) {
+        r.concat(padding);
+    }
+    return r;
 }
+String StringFormatClass::PadRight(String source, char * padding, int max) {
+
+    String r(source);
+    while (r.length() < max) {
+        r.concat(padding);
+    }
+    return r;
+}
+String StringFormatClass::PadLeft(String source, char * padding, int max) {
+
+    int neededPadding = max - source.length();
+    if (neededPadding <= 0) {
+        return source;
+    }
+    else {
+        String r = this->MakeString(padding, neededPadding);
+        r.concat(source);
+        return r;
+    }
+}
+String StringFormatClass::GetTime() {
+
+    unsigned long secSinceStart = millis() / 1000;
+    int hours                   = secSinceStart / 3600;
+    secSinceStart              -= hours * 3600;
+    int minutes                 = secSinceStart / 60;
+    secSinceStart              -= minutes * 60;
+    int seconds                 = secSinceStart;
+    String formated             = this->Format("%02d:%02d:%2d", hours, minutes, seconds);
+
+    return formated;
+}
+boolean StringFormatClass::IsDigit(char *format) {
+
+    return (*format >= '0' && *format <= '9');
+}
+// http://www.tutorialspoint.com/c_standard_library/c_function_sprintf.htm
+String StringFormatClass::Format(char *format, ...) {
+
+    String formated = String("");
+    char tmpBuf[16]; // temp buffer to format number
+    va_list argptr;
+    va_start(argptr, format);
+
+    int formatSize = 0;
+
+    while (*format != '\0') {
+
+        if (*format == '%') {
+
+            format++;
+            while (StringFormat.IsDigit(format)) { // We have a formating size "value:%2d"
+                formatSize = *format - '0';
+                format++;
+            }
+            
+            if (*format == '%') { // string
+
+                formated.concat("%");
+            }
+            else if (*format == 's') { // string
+                char* s = va_arg(argptr, char *);
+                formated.concat(String(s));
+            }
+            else if (*format == 'c') { // character
+                char c = (char)va_arg(argptr, int);
+                formated.concat(String(c));
+            }
+            else if (*format == 'd') { // integer
+
+                int d = va_arg(argptr, int);
+                formated.concat(StringFormat.PadLeft(String(d), "0", formatSize));
+            }
+            else if (*format == 'l') { // long
+                long d = va_arg(argptr, long);
+                formated.concat(String(d));
+            }
+            else if (*format == 'u') { // un signed integer or long Not standard
+
+                format++;
+                if (*format == 'i') { // un signed integer
+                    unsigned int ui = va_arg(argptr, unsigned int);
+                    formated.concat(String(ui));
+                }
+                if (*format == 'l') { // un signed integer
+                    unsigned long ui = va_arg(argptr, unsigned long);
+                    formated.concat(String(ui));
+                }
+            }
+            else if (*format == 'x') { // un signed integer hexa
+
+                unsigned int ui = va_arg(argptr, unsigned int);
+                snprintf(tmpBuf, sizeof(tmpBuf), "%x", ui);
+                formated.concat(String(tmpBuf));
+            }
+            else if (*format == 'X') { // un signed integer hexa uppercase
+                unsigned int ui = va_arg(argptr, unsigned int);
+                snprintf(tmpBuf, sizeof(tmpBuf), "%X", ui);
+                formated.concat(String(tmpBuf));
+            }
+            else if (*format == 'f') { // float
+#if !defined(TRINKET)
+                // Cannot be compiled on the Trinket. Will fix it later
+                double d = va_arg(argptr, double);
+                formated.concat(String(d));
+#endif
+            }
+            else if (*format == 'b') { // boolean not standard
+
+                //bool d = va_arg(argptr, bool);
+                int d = va_arg(argptr, int);
+                if (d)
+                    strcpy(tmpBuf, "true");
+                else
+                    strcpy(tmpBuf, "false");
+                formated.concat(String(tmpBuf));
+            }
+        }
+        else {
+            char c = format[0];
+            formated.concat(String(c));
+        }
+        format++;
+    }
+    va_end(argptr);
+    return formated;
+}
+StringFormatClass StringFormat;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern unsigned int       __bss_end;
 extern unsigned int       __heap_start;
@@ -61,6 +193,16 @@ int freeListSize() {
     return total;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+BoardClass::BoardClass() {
+
+    this->_startTime = millis();
+    this->_serialCommunicationInitialized = false;
+}
+BoardClass::~BoardClass() {
+
+}
 bool BoardClass::InBetween(int newValue, int refValue, int plusOrMinuspercent) {
 
     int p = refValue*plusOrMinuspercent / 100;
@@ -83,99 +225,6 @@ int BoardClass::GetFreeMemory() {
     }
     return free_memory;
 }
-String BoardClass::Format(char *format, ...) {
-
-    String formated = String("");
-    char tmpBuf[16]; // temp buffer to format number
-    va_list argptr;
-    va_start(argptr, format);
-
-    while (*format != '\0') {
-
-        if (*format == '%') {
-
-            format++;
-            if (*format == '%') { // string
-
-                formated.concat("%");
-            }
-            else if (*format == 's') { // string
-                char* s = va_arg(argptr, char *);
-                formated.concat(String(s));
-            }
-            else if (*format == 'c') { // character
-                char c = (char)va_arg(argptr, int);
-                formated.concat(String(c));
-            }
-            else if (*format == 'd') { // integer
-                int d = va_arg(argptr, int);
-                formated.concat(String(d));
-            }
-            else if (*format == 'u') { // un signed integer or long
-
-                format++;
-                if (*format == 'i') { // un signed integer
-                    unsigned int ui = va_arg(argptr, unsigned int);
-                    formated.concat(String(ui));
-                }
-                if (*format == 'l') { // un signed integer
-                    unsigned long ui = va_arg(argptr, unsigned long);
-                    formated.concat(String(ui));
-                }
-            }
-            else if (*format == 'x') { // un signed integer hexa
-                unsigned int ui = va_arg(argptr, unsigned int);
-                snprintf(tmpBuf, sizeof(tmpBuf), "%x", ui);
-                formated.concat(String(tmpBuf));
-            }
-            else if (*format == 'X') { // un signed integer hexa uppercase
-                unsigned int ui = va_arg(argptr, unsigned int);
-                snprintf(tmpBuf, sizeof(tmpBuf), "%X", ui);
-                formated.concat(String(tmpBuf));
-            }
-            else if (*format == 'f') { // float
-
-#if !defined(TRINKET)
-                // Cannot be compiled on the Trinket. Will fix it later
-                double d = va_arg(argptr, double);
-                formated.concat(String(d));
-#endif
-            }
-            else if (*format == 'b') { // boolean not standard
-
-                //bool d = va_arg(argptr, bool);
-                int d = va_arg(argptr, int);
-                if (d)
-                    strcpy(tmpBuf, "true");
-                else
-                    strcpy(tmpBuf, "false");
-                formated.concat(String(tmpBuf));
-            }
-        }
-        else {
-            char c = format[0];
-            formated.concat(String(c));
-        }
-        format++;
-    }
-    va_end(argptr);
-    return formated;
-}
-char * BoardClass::GetTime() {
-
-    static char buffer[MAX_FORMAT_SIZE];
-
-    unsigned long secSinceStart = (millis() - this->_startTime) / 1000;
-
-    int hours = secSinceStart / 3600;
-    secSinceStart -= hours * 3600;
-    int minutes = secSinceStart / 60;
-    secSinceStart -= minutes * 60;
-    int seconds = secSinceStart;
-
-    snprintf(buffer, MAX_FORMAT_SIZE, "%02d:%02d:%02d", hours, minutes, seconds);
-    return buffer;
-}
 void BoardClass::ClearKeyboard() {
 
     #if defined(SERIAL_AVAILABLE)
@@ -193,7 +242,7 @@ void BoardClass::Trace(char * msg) {
 
         Serial.print("[");
             Serial.flush();
-        Serial.print(this->GetTime());
+        Serial.print(StringFormat.GetTime());
             Serial.flush();
         Serial.print("]");
             Serial.flush();
@@ -217,7 +266,6 @@ void BoardClass::TraceNoNewLine(const char * msg) {
 
     this->TraceNoNewLine((char *)msg);
 }
-
 void BoardClass::Trace(String msg) {
 
     this->Trace(msg.c_str());
@@ -241,17 +289,15 @@ void BoardClass::TraceHeader(char * msg) {
 
     int maxPad = 64;
 
-    char barString[MAX_FORMAT_SIZE];
-    memset(barString, 0, MAX_FORMAT_SIZE);
-    PadRight(barString, TRACE_HEADER_CHAR, maxPad);
+    String barString("");
+    barString = StringFormat.PadRight(barString, TRACE_HEADER_CHAR, maxPad);
 
-    char msg2[MAX_FORMAT_SIZE];
-    memset(msg2, 0, MAX_FORMAT_SIZE);
-    strcpy(msg2, TRACE_HEADER_CHAR);
-    strcat(msg2, " ");
-    strcat(msg2, msg);
-    PadRight(msg2, " ", maxPad - 1);
-    PadRight(msg2, TRACE_HEADER_CHAR, maxPad);
+    String msg2("");
+    msg2.concat(TRACE_HEADER_CHAR);
+    msg2.concat(" ");
+    msg2.concat(msg);
+    msg2 = StringFormat.PadRight(msg2, " ", maxPad - 1);
+    msg2.concat(TRACE_HEADER_CHAR);
 
     this->Trace(barString);
     this->Trace(msg2);
@@ -315,19 +361,6 @@ void BoardClass::TraceFormat(char * format, double f1, double f2) {
     snprintf(buffer, MAX_FORMAT_SIZE, format, f1s.c_str(), f2s.c_str());
     this->Trace(buffer);
 }
-
-/// snprintf fr float does not work for the Arduino
-//char * BoardClass::ToString(double d) {
-//
-//    char buffer[MAX_FORMAT_SIZE];
-//    String f1s = dtostrf(d, 2, 2, buffer);
-//    return (char*)f1s.c_str();
-//}
-//char * BoardClass::ToString(float f) {
-//
-//    return this->ToString((double)f);
-//}
-
 void BoardClass::InitializeComputerCommunication(unsigned long speed, char * message) {
 
 #if defined(SERIAL_AVAILABLE)
@@ -375,6 +408,8 @@ boolean BoardClass::GetButtonStateDebounced(int pin, boolean lastState) {
 
 // Global Signleton
 BoardClass Board;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////
 /// Led
@@ -434,7 +469,7 @@ void Led::Blink() {
     }
 }
 
-//////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// MultiState Button
 ///
 MultiStateButton::MultiStateButton(int pin, Led * led, int maxState, const int * ledIntensityArray) {
@@ -519,7 +554,7 @@ void MultiStateButton::UpdateUI() {
     }
 }
 
-//////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// TimeOut
 ///
 TimeOut::TimeOut(unsigned long duration) {
@@ -532,10 +567,9 @@ TimeOut::~TimeOut() {
 }
 boolean TimeOut::IsTimeOut() {
 
-    unsigned long m = millis();
-    boolean b = (m - this->_time) > this->_duration;
+    boolean b = (millis() - this->_time) > this->_duration;
     if (b) {
-        //Board.Trace(Board.Format("millis:%u, _time:%u, _duration:%u", m, this->_time, this->_duration));
+        Board.Trace(this->ToString());
         this->Reset();
     }
     return b;
@@ -551,23 +585,10 @@ void TimeOut::Reset() {
 }
 String TimeOut::ToString() {
 
-    String s("");
-    s = Board.Format("TimeOut counter:%ul, duration:%ul, time:%ul", this->Counter, this->_duration, this->_time);
-
-   /* Serial.println(this->Counter);
-    Serial.flush();
-    delay(100);
-    Serial.println(this->_duration);
-    Serial.flush();
-    delay(100);
-    Serial.println(this->_time);
-    Serial.flush();
-    delay(100);*/
-
-    return s;
+    return StringFormat.Format("TimeOut counter:%l, duration:%l, time:%l", this->Counter, this->_duration, this->_time);
 }
 
-//////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///  Temperature Manager
 ///
 TemperatureManager::TemperatureManager() {
@@ -583,24 +604,8 @@ float TemperatureManager::CelsiusToFahrenheit(float celsius) {
 void TemperatureManager::Add(float celsius) {
 
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/**************************************************
-SpeakerManager
-
-based on http://www.instructables.com/id/Arduino-Basics-Making-Sound/step2/Playing-A-Melody/
-http://makezine.com/projects/make-35/advanced-arduino-sound-synthesis/
-
-Remark from Jeremy Blum about using the default Arduino tone() method
-http://www.jeremyblum.com/2010/09/05/driving-5-speakers-simultaneously-with-an-arduino
-The built-in tone() function allows you to generate a squarewave with 50% duty cycle of your
-selected frequency on any pin on the arduino.
-It relies on one of the arduino?s 3 timers to work in the background.
-
-SPECIFICALLY, IT USES TIMER2, WHICH IS ALSO RESPONSIBLE FOR
-CONTROLLING PWM ON PINS 3 AND 11.
-SO YOU NATURALLY LOOSE THAT ABILITY WHEN USING THE TONE() FUNCTION.
-
-*/
 SpeakerManager::SpeakerManager(byte pin) {
 
     this->_pin = pin;
@@ -734,7 +739,7 @@ boolean LightSensorButton::Activated() {
     if (this->ChangeDetected()) {
 
         #if defined(LIGHTSENSORBUTTON_DEBUG)
-        Board.Trace(Board.Format("LightSensorButton(%d) Change detected %d", _pin, changeDetectedCounter));
+        Board.Trace(StringFormat.Format("LightSensorButton(%d) Change detected %d", _pin, changeDetectedCounter));
         #endif
 
         changeDetectedCounter++;
@@ -745,7 +750,7 @@ boolean LightSensorButton::Activated() {
             // Most likely the light has changed quickly in the room and it is not cause by a human
             // passing the had in front of the light sensor.
             // We better give up and request new light reference
-            Board.Trace(Board.Format("LightSensorButton(%d) Permanent light change detected", _pin));
+            Board.Trace(StringFormat.Format("LightSensorButton(%d) Permanent light change detected", _pin));
             changeDetectedCounter = 0;
             this->NeedReference   = true;
             return false;
@@ -825,7 +830,7 @@ boolean LightSensorButton::FingerDown() {
 }
 String LightSensorButton::ToString() {
     
-    return Board.Format("LightSensorButton(%s:%d) { value:%d, diff:%d, diffPercent:%f%% }",
+    return StringFormat.Format("LightSensorButton(%s:%d) { value:%d, diff:%d, diffPercent:%f%% }",
         this->Name.c_str(),
         this->_pin,
         this->_lastValue,
@@ -1191,7 +1196,7 @@ String MemDB::ToString() {
     String values("");
     for (int t = 0; t < this->GetLength(); t++) {
         byte b = this->GetByteArray(t);
-        values += Board.Format("%d:%d, ", t, b);
+        values += StringFormat.Format("%d:%d, ", t, b);
     }
     return values;
 }
