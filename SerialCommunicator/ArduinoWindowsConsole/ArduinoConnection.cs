@@ -15,11 +15,10 @@ namespace ArduinoLibrary
     public class ArduinoConnection : IDisposable 
     {
         SerialPort _serialPort;
-        public string PortName  { get; set; }
-        public int BaudRate     { get; set; }
-
         private StringBuilder _textReceived = new StringBuilder(1024);
 
+        public string PortName  { get; set; }
+        public int BaudRate     { get; set; }
         public Queue<String> ReceivedMessages = new Queue<string>();
 
         public ArduinoConnection(string portName)
@@ -57,7 +56,7 @@ namespace ArduinoLibrary
                 }
             }
             return false;
-        }
+        } 
 
         public void Send(string text)
         {
@@ -71,8 +70,19 @@ namespace ArduinoLibrary
 
         void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
+            //var t = this._serialPort.ReadExisting();
+            //while (t.Contains("\n"))
+            //{
+            //    var pos = t.IndexOf("\n");
+            //    var s1  = t.Substring(0, pos - 1);
+            //    ReceivedMessages.Enqueue(s1);
+            //    t = t.Substring(pos + 1);
+            //}
+
             var s = this._serialPort.ReadExisting();
+            //Console.WriteLine("ReadExisting:{0}", s);
             _textReceived.Append(s);
+
             if (_textReceived.ToString().EndsWith("\n"))
             {
                 var text = _textReceived.ToString().Replace("\n", "");

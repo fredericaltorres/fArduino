@@ -61,18 +61,16 @@ int freeListSize() {
     return total;
 }
 
-bool BoardClass::InBetween(int newValue, int refValue, int plusOrMinuspercent)
-{
+bool BoardClass::InBetween(int newValue, int refValue, int plusOrMinuspercent) {
+
     int p = refValue*plusOrMinuspercent / 100;
     return (newValue >= refValue - p) && (newValue <= refValue + p);
 }
+bool BoardClass::InBetween(double newValue, double refValue, double plusOrMinuspercent) {
 
-bool BoardClass::InBetween(double newValue, double refValue, double plusOrMinuspercent)
-{
     double p = refValue*plusOrMinuspercent / 100.0;
     return (newValue >= refValue - p) && (newValue <= refValue + p);
 }
-
 int BoardClass::GetFreeMemory() {
 
     int free_memory;
@@ -113,9 +111,17 @@ String BoardClass::Format(char *format, ...) {
                 int d = va_arg(argptr, int);
                 formated.concat(String(d));
             }
-            else if (*format == 'u') { // un signed integer
-                unsigned int ui = va_arg(argptr, unsigned int);
-                formated.concat(String(ui));
+            else if (*format == 'u') { // un signed integer or long
+
+                format++;
+                if (*format == 'i') { // un signed integer
+                    unsigned int ui = va_arg(argptr, unsigned int);
+                    formated.concat(String(ui));
+                }
+                if (*format == 'l') { // un signed integer
+                    unsigned long ui = va_arg(argptr, unsigned long);
+                    formated.concat(String(ui));
+                }
             }
             else if (*format == 'x') { // un signed integer hexa
                 unsigned int ui = va_arg(argptr, unsigned int);
@@ -186,10 +192,14 @@ void BoardClass::Trace(char * msg) {
     if (this->_serialCommunicationInitialized) {
 
         Serial.print("[");
+            Serial.flush();
         Serial.print(this->GetTime());
+            Serial.flush();
         Serial.print("]");
+            Serial.flush();
         Serial.println(msg);
-        Serial.flush();
+            Serial.flush();
+        Board.Delay(10);
     }
     #endif
 }
@@ -244,9 +254,7 @@ void BoardClass::TraceHeader(char * msg) {
     PadRight(msg2, TRACE_HEADER_CHAR, maxPad);
 
     this->Trace(barString);
-    this->Delay(10);
     this->Trace(msg2);
-    this->Delay(10);
     this->Trace(barString);
 }
 void BoardClass::TraceFormat(char * format, char *s) {
@@ -516,7 +524,7 @@ void MultiStateButton::UpdateUI() {
 ///
 TimeOut::TimeOut(unsigned long duration) {
 
-    this->Counter = -1;
+    this->Counter   = -1;
     this->_duration = duration;
     this->Reset();
 }
@@ -524,8 +532,10 @@ TimeOut::~TimeOut() {
 }
 boolean TimeOut::IsTimeOut() {
 
-    boolean b = (millis() - this->_time) > this->_duration;
+    unsigned long m = millis();
+    boolean b = (m - this->_time) > this->_duration;
     if (b) {
+        //Board.Trace(Board.Format("millis:%u, _time:%u, _duration:%u", m, this->_time, this->_duration));
         this->Reset();
     }
     return b;
@@ -538,6 +548,23 @@ void TimeOut::Reset() {
 
     this->_time = millis();
     this->Counter++;
+}
+String TimeOut::ToString() {
+
+    String s("");
+    s = Board.Format("TimeOut counter:%ul, duration:%ul, time:%ul", this->Counter, this->_duration, this->_time);
+
+   /* Serial.println(this->Counter);
+    Serial.flush();
+    delay(100);
+    Serial.println(this->_duration);
+    Serial.flush();
+    delay(100);
+    Serial.println(this->_time);
+    Serial.flush();
+    delay(100);*/
+
+    return s;
 }
 
 //////////////////////////////////////////////////////
@@ -881,7 +908,8 @@ void EEPROMClassEx::setMaxAllowedWrites(int allowedWrites) {
 #endif			
 }
 
-int EEPROMClassEx::getAddress(int noOfBytes){
+int EEPROMClassEx::getAddress(int noOfBytes) {
+
     int availableaddress = _nextAvailableaddress;
     _nextAvailableaddress += noOfBytes;
 
@@ -918,17 +946,20 @@ bool EEPROMClassEx::readBit(int address, byte bit) {
 uint8_t EEPROMClassEx::readByte(int address)
 {
     if (!isReadOk(address + sizeof(uint8_t))) return 0;
-    return eeprom_read_byte((unsigned char *)address);
+
+    ABOUT_TO_CALL_EEPROM_API;
+    uint8_t v = eeprom_read_byte((unsigned char *)address);
+    DONE_CALLING_EEPROM_API;
+
+    return v;
 }
 
 uint16_t EEPROMClassEx::readInt(int address)
 {
-    ABOUT_TO_CALL_EEPROM_API;
-
     if (!isReadOk(address + sizeof(uint16_t))) return 0;
 
+    ABOUT_TO_CALL_EEPROM_API;
     uint16_t v = eeprom_read_word((uint16_t *)address);
-
     DONE_CALLING_EEPROM_API;
 
     return v;
@@ -970,18 +1001,22 @@ bool EEPROMClassEx::writeBit(int address, uint8_t bit, bool value) {
 bool EEPROMClassEx::writeByte(int address, uint8_t value)
 {
     if (!isWriteOk(address + sizeof(uint8_t))) return false;
+
+    ABOUT_TO_CALL_EEPROM_API;
     eeprom_write_byte((unsigned char *)address, value);
+    DONE_CALLING_EEPROM_API;
+
     return true;
 }
 
 bool EEPROMClassEx::writeInt(int address, uint16_t value)
 {
-    ABOUT_TO_CALL_EEPROM_API;
-
     if (!isWriteOk(address + sizeof(uint16_t))) return false;
-    eeprom_write_word((uint16_t *)address, value);
 
+    ABOUT_TO_CALL_EEPROM_API;
+    eeprom_write_word((uint16_t *)address, value);
     DONE_CALLING_EEPROM_API;
+
     return true;
 }
 
@@ -1086,10 +1121,77 @@ bool EEPROMClassEx::isReadOk(int address)
     return true;
 }
 
-int EEPROMClassEx::_base = 0;
-int EEPROMClassEx::_memSize = 512;
+int EEPROMClassEx::_base                 = 0;
+int EEPROMClassEx::_memSize              = 512;
 int EEPROMClassEx::_nextAvailableaddress = 0;
-int EEPROMClassEx::_writeCounts = 0;
+int EEPROMClassEx::_writeCounts          = 0;
 
 EEPROMClassEx EEPROM;
 
+//////////////////////////////////////////////////////
+/// MemDB 
+/// Object to store byte array in the EEPROM memory
+///
+void MemDB::InitEEPROM(int maxEEPROMMemory, int maxAllowedWrites) {
+
+    EEPROM.setMaxAllowedWrites(maxEEPROMMemory);
+    EEPROM.setMemPool(0, maxAllowedWrites);
+}
+MemDB::MemDB() {
+}
+MemDB::~MemDB() {
+}
+int MemDB::CreateByteArray(int size, boolean init) {
+    
+    this->_size          = size;
+    this->_lengthAddress = EEPROM.getAddress(sizeof(int)); // Location of the array len is first
+    this->_startAddress  = EEPROM.getAddress(size);        // Location of the data
+
+    if (init) {
+        this->Clear();
+    }
+    else {
+        this->_index = this->GetLength(); // Load length from EEPROM
+    }
+    return this->_startAddress;
+}
+int MemDB::Clear() {
+
+    this->_index = 0;
+    this->SetLength();
+}
+byte MemDB::AddByteArray(byte b) {
+
+    if (this->_index >= 0 && this->_index < this->_size) {
+
+        EEPROM.writeByte(this->_startAddress + this->_index, b);
+        this->_index += 1;
+        this->SetLength();
+        return b;
+    }    
+    return 0;
+}
+byte MemDB::GetByteArray(int index) {
+
+    if (index >= 0 && index < this->_size) {
+        return EEPROM.readByte(this->_startAddress + index);
+    }
+    else return 0; // Which we could throw
+}
+int MemDB::GetLength() {
+
+    return EEPROM.readInt(this->_lengthAddress);
+}
+int MemDB::SetLength() {
+
+    return EEPROM.writeInt(this->_lengthAddress, this->_index);
+}
+String MemDB::ToString() {
+
+    String values("");
+    for (int t = 0; t < this->GetLength(); t++) {
+        byte b = this->GetByteArray(t);
+        values += Board.Format("%d:%d, ", t, b);
+    }
+    return values;
+}

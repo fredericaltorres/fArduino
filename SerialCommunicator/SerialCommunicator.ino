@@ -1,31 +1,41 @@
 /************************************
 
-http://arduino.cc/en/Reference/HomePage
+    http://arduino.cc/en/Reference/HomePage
 
-http://playground.arduino.cc/Interfacing/Csharp
-http://thijs.elenbaas.net/2013/09/arduino-to-pc-messaging
+    http://playground.arduino.cc/Interfacing/Csharp
+    http://thijs.elenbaas.net/2013/09/arduino-to-pc-messaging
 
-TV for $1 - https://www.youtube.com/watch?v=WlBXiZpuncg
+    TV for $1 - https://www.youtube.com/watch?v=WlBXiZpuncg
 
 */
-
 
 #include "fArduino.h"
 
 #define ON_BOARD_LED 13
 boolean _ledState = false;
-int _counter      = 0;
-int eeprom_counter_addr;
+
+// Trigger every 6 minutes - 6 time per hour => 144 value per day 
+// 432 bytes represent 3 days of data, starting from 
+//    - the moment we started the Arduino
+//    - One mesure every 6 minutes
+#define MAX_TEMPERATURE_SAMPLES 3 * 24 * 6 // 3d * 24h * 6m ==> 432
+TimeOut _timeOut(1000 * 60 * 6); 
+MemDB _temperatureDB; // Trinket has only 512 byte of EPROM
 
 void setup() {
 
-    // Wait one second so after plug in the USB port, I can start the ArduinoWindowsConsole
-    Board.Delay(1000);
+    Board.Delay(1000); // Wait one second so after plug in the USB port, I can start the ArduinoWindowsConsole
     Board.InitializeComputerCommunication(9600, "Initializing...");
     Board.TraceHeader("Serial Communicator With EEPROM");
     Board.SetPinMode(ON_BOARD_LED, OUTPUT);
+    
+    MemDB::InitEEPROM(512, MAX_TEMPERATURE_SAMPLES * 3);
+    int temperatureDBAddr = _temperatureDB.CreateByteArray(MAX_TEMPERATURE_SAMPLES, false);
+    
+    Board.TraceFormat("temperatureDBAddr:%d", temperatureDBAddr);
+    Board.TraceFormat("temperature Length:%d", _temperatureDB.GetLength());
 
-    eeprom_counter_addr = EEPROM.getAddress(sizeof(int));
+    Board.Trace(_timeOut.ToString());
 }
 
 void PowerLed(boolean state) {
@@ -34,14 +44,11 @@ void PowerLed(boolean state) {
 }
 
 void loop() {
-    
-    Board.LedOn(ON_BOARD_LED, _ledState);
-    Board.Delay(100);
-    _counter++;
 
-    if (_counter % 50 == 0) {
+    if (_timeOut.IsTimeOut()) {
 
-        Board.Trace(Board.Format("counter:%d, EEPROM.isReady:%b", _counter, EEPROM.isReady()));
+        int lastTemp = _temperatureDB.AddByteArray((byte)millis());
+        Board.TraceFormat("LastTemperature:%d", lastTemp);
     }
 
     if (Serial.available()) {
@@ -53,25 +60,30 @@ void loop() {
 
             if (s == "resetCounter") {
 
-                EEPROM.writeInt(eeprom_counter_addr, 0);
-                _counter = 0;
+                _temperatureDB.Clear();
+                Board.Trace("No temperatures stored");
                 executed = true;
             }
             else if (s == "incCounter") {
 
-                EEPROM.writeInt(eeprom_counter_addr, EEPROM.readInt(eeprom_counter_addr)+1);
+                _temperatureDB.AddByteArray((byte)millis());
                 executed = true;
             }
             else if (s == "getCounter") {
                 
-                int v = EEPROM.readInt(eeprom_counter_addr);
-                Board.Trace(Board.Format("[eeprom_counter:%d]", v));
-                delay(10);
+                if (_temperatureDB.GetLength() == 0) {
+                    Board.Trace("No temperatures stored");
+                }
+                else {
+                    Board.Trace(_temperatureDB.ToString());
+                }
+                Board.Trace(_timeOut.ToString());
                 executed = true;
             }
             else if (s == "led") {
 
                 _ledState = !_ledState;
+                Board.LedOn(ON_BOARD_LED, _ledState);
                 executed = true;
             }
             if (executed) {

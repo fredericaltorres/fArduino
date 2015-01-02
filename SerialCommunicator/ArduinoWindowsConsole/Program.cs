@@ -36,14 +36,14 @@ namespace test
                     {
                         switch (Console.ReadKey(true).Key)
                         {
-                            case ConsoleKey.Q: goOn = false;               break;
+                            case ConsoleKey.Q: goOn = false;                        break;
 
-                            case ConsoleKey.R: SendCommand(ac, "resetCounter");   break;
+                            case ConsoleKey.R: SendCommand(ac, "resetCounter");     break;
                             case ConsoleKey.I: SendCommand(ac, "incCounter");       break;
                             case ConsoleKey.G: SendCommand(ac, "getCounter");       break;
 
-                            case ConsoleKey.L: SendCommand(ac, "led");     break;
-                            case ConsoleKey.S: SendCommand(ac, "invalid"); break;
+                            case ConsoleKey.L: SendCommand(ac, "led");              break;
+                            case ConsoleKey.S: SendCommand(ac, "invalid");          break;
                         }
                     }
                     if (ac.ReceivedMessages.Count > 0)
