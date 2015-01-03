@@ -21,5 +21,16 @@
     <ClInclude Include="Visual Micro\.MCP9808_TempSensor.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Adafruit_MCP9808.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fArduino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Adafruit_MCP9808.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

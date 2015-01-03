@@ -213,6 +213,9 @@ bool BoardClass::InBetween(double newValue, double refValue, double plusOrMinusp
     double p = refValue*plusOrMinuspercent / 100.0;
     return (newValue >= refValue - p) && (newValue <= refValue + p);
 }
+int BoardClass::GetEEPROMSize() {
+    return EEPROM_SIZE;
+}
 int BoardClass::GetFreeMemory() {
 
     int free_memory;

@@ -12,6 +12,18 @@
 
     // --- fArduino LIBRARY COMPILATION MODE ---
     // #define TRINKET 1 // On the trinket there is no Serial communication
+
+    #if defined(TRINKET)
+        #define EEPROM_SIZE 512
+    #else
+        #define ARDUINO_UNO 1 // On the trinket there is no Serial communication
+        #define EEPROM_SIZE 1024
+
+    #endif
+//1024 bytes on the ATmega328
+//512 bytes on the ATmega168 and ATmega8 
+//4 KB(4096 bytes) on the ATmega1280 and ATmega2560.
+
     // #define LIGHTSENSORBUTTON_DEBUG 1
     // --- fArduino LIBRARY COMPILATION MODE ---
 
@@ -261,6 +273,8 @@
         //char * GetTime();
         //String Format(char *format, ...);
         int GetFreeMemory();
+
+        int GetEEPROMSize();
 
         boolean GetButtonStateDebounced(int pin, boolean lastState);
         void LedOn(int pin, boolean state);

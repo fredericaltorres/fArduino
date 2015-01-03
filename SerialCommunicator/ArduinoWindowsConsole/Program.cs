@@ -23,13 +23,14 @@ namespace test
         static void PrintHelp(string portName)
         {
             Console.WriteLine("Communication to Arduino, port:{0}", portName);
-            Console.WriteLine("Q)uit L)ed R)eset Counter I)nc Counter G)et Counter H)elp");
+            Console.WriteLine("Q)uit R)eset Counter A)cquire D)isplay Data P)ause H)elp");
         }
 
         static void Main(string[] args)
         {
-            var goOn        = true;
-            string portName = "COM4";
+            var goOn         = true;
+            var processQueue = true;
+            string portName  = "COM4";
 
             PrintHelp(portName);
 
@@ -46,20 +47,21 @@ namespace test
                                 Console.Clear();
                                 PrintHelp(portName);                 
                                 break;
-                            case ConsoleKey.Q: goOn = false;                        break;
-
-                            case ConsoleKey.R: SendCommand(ac, "resetCounter");     break;
-                            case ConsoleKey.I: SendCommand(ac, "incCounter");       break;
-                            case ConsoleKey.G: SendCommand(ac, "getCounter");       break;
-
-                            case ConsoleKey.L: SendCommand(ac, "led");              break;
-                            case ConsoleKey.S: SendCommand(ac, "invalid");          break;
+                            case ConsoleKey.Q: goOn = false;                     break;
+                            case ConsoleKey.A: SendCommand(ac, "acquireData");   break;
+                            case ConsoleKey.R: SendCommand(ac, "resetData");     break;
+                            case ConsoleKey.G: SendCommand(ac, "getData");       break;
+                            case ConsoleKey.P:
+                                processQueue = !processQueue;
+                                Console.WriteLine("ProcessQueue:{0}", processQueue);
+                                break;
+                            case ConsoleKey.L: SendCommand(ac, "led");           break;
                         }
                     }
-                    if (ac.ReceivedMessages.Count > 0)
+                    if (processQueue && ac.ReceivedMessages.Count > 0)
                     {
                         var message = ac.ReceivedMessages.Dequeue();
-                        if (message.StartsWith("["))
+                        if (message.StartsWith("<"))
                             WriteLine(message, ConsoleColor.Green);
                         else 
                             WriteLine(message, ConsoleColor.DarkGreen);

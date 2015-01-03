@@ -44,7 +44,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\cores\arduino;D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\variants\standard;D:\DVT\Arduino\arduino-1.0.6\libraries\Wire;D:\DVT\Arduino\arduino-1.0.6\libraries\Wire\utility;D:\DVT\Arduino\arduino-1.0.6\libraries;D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\libraries;C:\Program Files (x86)\Visual Micro\Visual Micro for Arduino\Micro Platforms\default\debuggers;D:\DVT\Arduino\arduino-1.0.6\libraries\libraries;d:\dvt\arduino\arduino-1.0.6\hardware\tools\avr\avr\include\;d:\dvt\arduino\arduino-1.0.6\hardware\tools\avr\avr\include\avr\;d:\dvt\arduino\arduino-1.0.6\hardware\tools\avr\avr\;d:\dvt\arduino\arduino-1.0.6\hardware\tools\avr\lib\gcc\avr\4.3.2\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\cores\arduino;D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\variants\standard;D:\DVT\Arduino\arduino-1.0.6\libraries\Wire;D:\DVT\Arduino\arduino-1.0.6\libraries\Wire\utility;D:\DVT\Arduino\arduino-1.0.6\libraries\fArduino;D:\DVT\Arduino\arduino-1.0.6\libraries\fArduino\utility;D:\DVT\Arduino\arduino-1.0.6\libraries;D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\libraries;C:\Program Files (x86)\Visual Micro\Visual Micro for Arduino\Micro Platforms\default\debuggers;D:\DVT\Arduino\arduino-1.0.6\libraries\libraries;d:\dvt\arduino\arduino-1.0.6\hardware\tools\avr\avr\include\;d:\dvt\arduino\arduino-1.0.6\hardware\tools\avr\avr\include\avr\;d:\dvt\arduino\arduino-1.0.6\hardware\tools\avr\avr\;d:\dvt\arduino\arduino-1.0.6\hardware\tools\avr\lib\gcc\avr\4.3.2\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>D:\DVT\Arduino\fArduino\MCP9808_TempSensor\Visual Micro\.MCP9808_TempSensor.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <IgnoreStandardIncludePath>true</IgnoreStandardIncludePath>
       <PreprocessorDefinitions>__AVR_ATmega328p__;__AVR_ATmega328P__;ARDUINO=106;ARDUINO_MAIN;__AVR__;__avr__;F_CPU=16000000L;__cplusplus;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -79,7 +79,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Adafruit_MCP9808.cpp" />
-    <ClCompile Include="fArduino.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

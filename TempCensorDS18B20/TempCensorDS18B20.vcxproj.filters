@@ -18,18 +18,13 @@
     <None Include="TempCensorDS18B20.ino" />
     <None Include="main.ino" />
     <None Include="main.FirstWiringSolution.ino" />
+    <None Include="main.Second.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Visual Micro\.TempCensorDS18B20.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="fArduino.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DallasTemperature.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OneWire.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DS18B20TemperatureSensor.h">
@@ -37,13 +32,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="fArduino.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DallasTemperature.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OneWire.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DS18B20TemperatureSensor.cpp">
