@@ -213,6 +213,7 @@
             int  SetLength();
             int  Clear();
             String ToString();
+            void ToSerial();
     };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -274,9 +275,9 @@
         void TraceNoNewLine(const char * msg);
         void TraceNoNewLine(const String &);
 
-        void Trace(char * msg);
-        void Trace(const char * msg);
-        void Trace(String msg);
+        void Trace(char * msg, boolean printTime = true);
+        void Trace(const char * msg, boolean printTime = true);
+        void Trace(String msg, boolean printTime = true);
 
         void TraceHeader(char * msg);
         void TraceFormat(char * format, int d1);
@@ -323,6 +324,7 @@
             void SetBlinkModeOff();
             boolean IsBlinking();
             void Blink();
+            void Blink(int blinkCount, int waitTime);
     };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////

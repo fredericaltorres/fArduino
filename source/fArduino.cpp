@@ -86,14 +86,16 @@ String StringFormatClass::Format(char *format, ...) {
 
         if (*format == '%') {
 
+            formatSize = 0;
             format++;
-            while (StringFormat.IsDigit(format)) { // We have a formating size "value:%2d"
+
+            // Check and reading format size if defined
+            while (StringFormat.IsDigit(format)) {
                 formatSize = *format - '0';
                 format++;
             }
             
             if (*format == '%') { // string
-
                 formated.concat("%");
             }
             else if (*format == 's') { // string
@@ -104,8 +106,7 @@ String StringFormatClass::Format(char *format, ...) {
                 char c = (char)va_arg(argptr, int);
                 formated.concat(String(c));
             }
-            else if (*format == 'd') { // integer
-
+            else if (*format == 'd') { // decimal/integer
                 int d = va_arg(argptr, int);
                 formated.concat(StringFormat.PadLeft(String(d), "0", formatSize));
             }
@@ -113,8 +114,7 @@ String StringFormatClass::Format(char *format, ...) {
                 long d = va_arg(argptr, long);
                 formated.concat(String(d));
             }
-            else if (*format == 'u') { // un signed integer or long Not standard
-
+            else if (*format == 'u') { // un signed integer or long - Not standard, format is %ui or %ul
                 format++;
                 if (*format == 'i') { // un signed integer
                     unsigned int ui = va_arg(argptr, unsigned int);
@@ -137,15 +137,15 @@ String StringFormatClass::Format(char *format, ...) {
                 formated.concat(String(tmpBuf));
             }
             else if (*format == 'f') { // float
-#if !defined(TRINKET)
+                #if !defined(TRINKET)
                 // Cannot be compiled on the Trinket. Will fix it later
                 double d = va_arg(argptr, double);
                 formated.concat(String(d));
-#endif
+                #endif
             }
             else if (*format == 'b') { // boolean not standard
 
-                //bool d = va_arg(argptr, bool);
+                // bool d = va_arg(argptr, bool);
                 int d = va_arg(argptr, int);
                 if (d)
                     strcpy(tmpBuf, "true");
@@ -156,7 +156,7 @@ String StringFormatClass::Format(char *format, ...) {
         }
         else {
             char c = format[0];
-            formated.concat(String(c));
+            formated.concat(String(format[0]));
         }
         format++;
     }
@@ -235,19 +235,22 @@ void BoardClass::ClearKeyboard() {
 //
 // http://www.baldengineer.com/when-do-you-use-the-arduinos-to-use-serial-flush.html
 //
-void BoardClass::Trace(char * msg) {
+void BoardClass::Trace(char * msg, boolean printTime /*= true*/) {
 
     #if defined(SERIAL_AVAILABLE)
     if (this->_serialCommunicationInitialized) {
 
-        Serial.print("[");
+        if (printTime) {
+
+            Serial.print("[");
             Serial.flush();
-        Serial.print(StringFormat.GetTime());
+            Serial.print(StringFormat.GetTime());
             Serial.flush();
-        Serial.print("]");
+            Serial.print("]");
             Serial.flush();
+        }
         Serial.println(msg);
-            Serial.flush();
+        Serial.flush();
         Board.Delay(10);
     }
     #endif
@@ -266,13 +269,13 @@ void BoardClass::TraceNoNewLine(const char * msg) {
 
     this->TraceNoNewLine((char *)msg);
 }
-void BoardClass::Trace(String msg) {
+void BoardClass::Trace(String msg, boolean printTime/* = true*/) {
 
-    this->Trace(msg.c_str());
+    this->Trace(msg.c_str(), printTime);
 }
-void BoardClass::Trace(const char * msg) {
+void BoardClass::Trace(const char * msg, boolean printTime/* = true*/) {
 
-    Trace((char*)msg);
+    Trace((char*)msg, printTime);
 }
 void BoardClass::TraceNoNewLine(const String & msg) {
 
@@ -440,9 +443,9 @@ void Led::SetLevel(int level) {
 }
 void Led::SetBlinkMode(unsigned long rate) {
 
-    this->_rate = rate;
+    this->_rate           = rate;
     this->_blinkStartTime = millis();
-    this->_state = true;
+    this->_state          = true;
     this->SetState(this->_state);
 }
 unsigned long Led::GetBlinkDurationCycle() {
@@ -451,7 +454,7 @@ unsigned long Led::GetBlinkDurationCycle() {
 }
 void Led::SetBlinkModeOff() {
 
-    this->_rate = 0;
+    this->_rate  = 0;
     this->_state = false;
     this->SetLevel(0);
 }
@@ -468,19 +471,29 @@ void Led::Blink() {
         this->_blinkStartTime = millis();
     }
 }
+void Led::Blink(int blinkCount, int waitTime) {
+    
+    for (int z = 0; z < blinkCount; z++) {
+        this->SetState(true);
+        Board.Delay(waitTime);
+        this->SetState(false);
+        Board.Delay(waitTime);
+    }
+    this->SetState(false);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// MultiState Button
 ///
 MultiStateButton::MultiStateButton(int pin, Led * led, int maxState, const int * ledIntensityArray) {
 
-    this->_pin = pin;
-    this->_previousPin = UNDEFINED_PIN;
-    this->_maxState = maxState;
-    this->_ledIntensityArray = ledIntensityArray;
-    this->LedInstance = led;
-    this->StateIndex = 0;
-    this->NextButtonLastStateInLoop = false;
+    this->_pin                          = pin;
+    this->_previousPin                  = UNDEFINED_PIN;
+    this->_maxState                     = maxState;
+    this->_ledIntensityArray            = ledIntensityArray;
+    this->LedInstance                   = led;
+    this->StateIndex                    = 0;
+    this->NextButtonLastStateInLoop     = false;
     this->PreviousButtonLastStateInLoop = false;
 }
 MultiStateButton::~MultiStateButton() {
@@ -569,7 +582,6 @@ boolean TimeOut::IsTimeOut() {
 
     boolean b = (millis() - this->_time) > this->_duration;
     if (b) {
-        Board.Trace(this->ToString());
         this->Reset();
     }
     return b;
@@ -1196,7 +1208,18 @@ String MemDB::ToString() {
     String values("");
     for (int t = 0; t < this->GetLength(); t++) {
         byte b = this->GetByteArray(t);
-        values += StringFormat.Format("%d:%d, ", t, b);
+        //values += StringFormat.Format("%d:%d, ", t, b);
+        values += StringFormat.Format("%d ", t, b);
     }
     return values;
+}
+// Send the data as csv to the serial port
+void MemDB::ToSerial() {
+
+    for (int t = 0; t < this->GetLength(); t++) {
+        
+        Serial.println(StringFormat.Format("%3d, %d", t, this->GetByteArray(t)));
+        Serial.flush();
+        Board.Delay(5);
+    }
 }
