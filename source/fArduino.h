@@ -218,12 +218,18 @@
             static void InitEEPROM(int maxEEPROMMemory, int maxAllowedWrites);
             MemDB();
             ~MemDB();
+
+            int  CreateString(int size);
+            void SetString(String s);
+            String GetString();
+
             int  CreateByteArray(int size, boolean init);
             byte AddByteArray(byte b);
             byte GetByteArray(int index);
+            int  ClearByteArray();
             int  GetLength();
             int  SetLength();
-            int  Clear();
+
             String ToString();
             void ToSerial();
     };
@@ -275,6 +281,8 @@
         int GetFreeMemory();
 
         int GetEEPROMSize();
+
+        int RoundDouble(double d);
 
         boolean GetButtonStateDebounced(int pin, boolean lastState);
         void LedOn(int pin, boolean state);

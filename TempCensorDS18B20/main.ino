@@ -23,6 +23,7 @@ TV for $1 - https://www.youtube.com/watch?v=WlBXiZpuncg
 
 Led _onBoardLed(ON_BOARD_LED); // Use on board led, to express the application is or waiting or just acquire a temperature
 boolean _ledState = false;
+#define ON_BOARD_LED_NORMAL_BLINKING_RATE 500 // 500 milli-seconds
 
 // Data Management
 // Trigger every 6 minutes => 3days * 24hours * 6minutes ==> 432 byte
@@ -50,9 +51,10 @@ void AcquireData() {
 
     double celsius    = _DS18B20.GetTemperature();
     double fahrenheit = CelsiusToFahrenheit(celsius);
-    int lastTemp      = _temperatureDB.AddByteArray((byte)(int)celsius);
+    int lastTemp      = _temperatureDB.AddByteArray((byte)Board.RoundDouble(celsius));
     Board.Trace(StringFormat.Format("celsius:%f, fahrenheit:%f, celsius(byte):%d", celsius, fahrenheit, lastTemp));
     _onBoardLed.Blink(10, 40); // Blink led 10 time quickly to signal we just acquire a new value    
+    _acquisitionTimeOut.Reset(); // Reset time out in case the acquisition was manually requested
 }
 
 void CheckForIssueWithSensor() {
@@ -83,10 +85,9 @@ void setup() {
     Board.Trace(_acquisitionTimeOut.ToString());
 
     Board.Trace(StringFormat.Format("Sensor ID:%d, Name:%s",_DS18B20.GetSensorId(), _DS18B20.GetSensorName()));
-    //Board.Trace(StringFormat.Format("Sensor Unique ID:%s", _DS18B20.GetSensorUniqueIdsOn1Wire()));
-    
+
     // The onboard led will blink on/off every 1/2 seconds to signal app is running
-    _onBoardLed.SetBlinkMode(500);
+    _onBoardLed.SetBlinkMode(ON_BOARD_LED_NORMAL_BLINKING_RATE);
 
     AcquireData();
 }
@@ -114,7 +115,7 @@ void loop() {
 
             if (s == "resetData") {
 
-                _temperatureDB.Clear();
+                _temperatureDB.ClearByteArray();
                 Board.Trace("No temperatures stored");
                 executed = true;
             }

@@ -64,7 +64,7 @@ void loop() {
 
             if (s == "resetCounter") {
 
-                _temperatureDB.Clear();
+                _temperatureDB.ClearByteArray();
                 Board.Trace("No temperatures stored");
                 executed = true;
             }

@@ -203,6 +203,11 @@ BoardClass::BoardClass() {
 BoardClass::~BoardClass() {
 
 }
+int BoardClass::RoundDouble(double d) {
+    d += 0.5;
+    int i = (int)d;
+    return i;
+}
 bool BoardClass::InBetween(int newValue, int refValue, int plusOrMinuspercent) {
 
     int p = refValue*plusOrMinuspercent / 100;
@@ -1161,6 +1166,16 @@ MemDB::MemDB() {
 }
 MemDB::~MemDB() {
 }
+int MemDB::CreateString(int size) {
+
+    return EEPROM.getAddress(size);
+}
+void MemDB::SetString(String s) {
+
+}
+String MemDB::GetString() {
+
+}
 int MemDB::CreateByteArray(int size, boolean init) {
     
     this->_size          = size;
@@ -1175,7 +1190,7 @@ int MemDB::CreateByteArray(int size, boolean init) {
     }
     return this->_startAddress;
 }
-int MemDB::Clear() {
+int MemDB::ClearByteArray() {
 
     this->_index = 0;
     this->SetLength();
