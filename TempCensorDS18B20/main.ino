@@ -28,16 +28,18 @@ boolean _ledState = false;
 // Trigger every 6 minutes => 3days * 24hours * 6minutes ==> 432 byte
 // From the moment we started the app
 #define MAX_TEMPERATURE_SAMPLES 3 * 24 * 6          // 3days * 24hours * 6minutes ==> 432 byte
-
 #define SAMPLING_TIME           1000UL * 60UL * 6UL // Every 6 minutes -- Must be unsigned long
-//#define SAMPLING_TIME           1000UL * 4 // Every 6 minutes -- Must be unsigned long
 
-TimeOut _timeOut(SAMPLING_TIME);
-MemDB _temperatureDB;                               // Reminder:Trinket has only 512 byte of EPROM
+TimeOut _acquisitionTimeOut(SAMPLING_TIME);
+MemDB _temperatureDB;                               // Reminder:Trinket has only 512 bytes of EPROM
 
 // Data Acquisition
 OneWire                  _oneWire(ONE_WIRE_BUS);
 DS18B20TemperatureSensor _DS18B20(&_oneWire);
+
+// Timeout to make sure the sensor is working
+TimeOut _monitorTimeOut(1000);
+#define ABNORMAL_TEMPERATURE 100 // Celcius
 
 double CelsiusToFahrenheit(double celsius) {
 
@@ -50,7 +52,18 @@ void AcquireData() {
     double fahrenheit = CelsiusToFahrenheit(celsius);
     int lastTemp      = _temperatureDB.AddByteArray((byte)(int)celsius);
     Board.Trace(StringFormat.Format("celsius:%f, fahrenheit:%f, celsius(byte):%d", celsius, fahrenheit, lastTemp));
-    _onBoardLed.Blink(10, 40); // Blink led 10 time quickly to signal we just acquire a new value
+    _onBoardLed.Blink(10, 40); // Blink led 10 time quickly to signal we just acquire a new value    
+}
+
+void CheckForIssueWithSensor() {
+
+    double celsius = _DS18B20.GetTemperature();
+    if (abs(celsius) > ABNORMAL_TEMPERATURE) {
+
+        Board.Trace(StringFormat.Format("Temperature sensor issue celsius:%f", celsius));
+        _onBoardLed.Blink(20, 75); // Blink led for 2 seconds
+        _monitorTimeOut.Reset();    // Restart countring from now, after we blinked the led
+    }
 }
 
 void setup() {
@@ -67,10 +80,11 @@ void setup() {
     Board.Trace(StringFormat.Format("Temperature Count:%d", _temperatureDB.GetLength()));
     Board.Trace(StringFormat.Format("Acquire data every %ul second(s)", SAMPLING_TIME));
 
-    Board.Trace(_timeOut.ToString());
+    Board.Trace(_acquisitionTimeOut.ToString());
 
     Board.Trace(StringFormat.Format("Sensor ID:%d, Name:%s",_DS18B20.GetSensorId(), _DS18B20.GetSensorName()));
-
+    //Board.Trace(StringFormat.Format("Sensor Unique ID:%s", _DS18B20.GetSensorUniqueIdsOn1Wire()));
+    
     // The onboard led will blink on/off every 1/2 seconds to signal app is running
     _onBoardLed.SetBlinkMode(500);
 
@@ -81,7 +95,12 @@ void loop() {
 
     _onBoardLed.Blink(); // Blink led every second
 
-    if (_timeOut.IsTimeOut()) {
+    if (_monitorTimeOut.IsTimeOut()) {
+
+        CheckForIssueWithSensor();
+    }
+
+    if (_acquisitionTimeOut.IsTimeOut()) {
 
         AcquireData();
     }

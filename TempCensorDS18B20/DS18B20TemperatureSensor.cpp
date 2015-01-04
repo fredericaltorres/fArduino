@@ -55,6 +55,7 @@ int DS18B20TemperatureSensor::GetSensorId(){
 
     return this->_sensorId;
 }
+// http://forum.arduino.cc/index.php?topic=40211.0
 double DS18B20TemperatureSensor::GetTemperature() {
     byte i;
     byte data[12];
@@ -72,7 +73,6 @@ double DS18B20TemperatureSensor::GetTemperature() {
     }
     this->_oneWire->reset();
     this->_oneWire->select(addr);
-    
     this->_oneWire->write(0x44, 1);
 
     delay(DS18X20_WAIT_TIME_FOR_GET_TEMPERATURE);

@@ -74,7 +74,9 @@
     <None Include="main.ino">
       <FileType>CppCode</FileType>
     </None>
-    <None Include="main.Second.ino" />
+    <None Include="main.Second.ino">
+      <FileType>CppCode</FileType>
+    </None>
     <None Include="TempCensorDS18B20.ino">
       <FileType>CppCode</FileType>
     </None>
