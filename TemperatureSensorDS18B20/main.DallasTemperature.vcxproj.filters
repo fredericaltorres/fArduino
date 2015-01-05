@@ -15,19 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="TempCensorDS18B20.ino" />
     <None Include="main.ino" />
     <None Include="main.FirstWiringSolution.ino" />
-    <None Include="main.Second.ino" />
+    <None Include="main.DallasTemperature.ino" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Visual Micro\.TempCensorDS18B20.vsarduino.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DallasTemperature.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DS18B20TemperatureSensor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Visual Micro\.main.DallasTemperature.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

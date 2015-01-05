@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SerialCommunicator", "Seria
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArduinoWindowsConsole", "ArduinoWindowsConsole\ArduinoWindowsConsole.csproj", "{51DF39A6-C253-4542-82ED-193DDE0AA90D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TempCensorDS18B20", "..\TempCensorDS18B20\TempCensorDS18B20.vcxproj", "{70BDE9F1-99F1-4C5A-95CA-7E247B3D9C4A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "main.DallasTemperature", "..\main.DallasTemperature\main.DallasTemperature.vcxproj", "{70BDE9F1-99F1-4C5A-95CA-7E247B3D9C4A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -13,6 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{70BDE9F1-99F1-4C5A-95CA-7E247B3D9C4A}</ProjectGuid>
     <RootNamespace>TempCensorDS18B20</RootNamespace>
+    <ProjectName>DS18B20TemperatureSensor</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -45,7 +46,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\cores\arduino;D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\variants\standard;D:\DVT\Arduino\arduino-1.0.6\libraries\OneWire;D:\DVT\Arduino\arduino-1.0.6\libraries\OneWire\utility;D:\DVT\Arduino\arduino-1.0.6\libraries\fArduino;D:\DVT\Arduino\arduino-1.0.6\libraries\fArduino\utility;D:\DVT\Arduino\arduino-1.0.6\libraries;D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\libraries;C:\Program Files (x86)\Visual Micro\Visual Micro for Arduino\Micro Platforms\default\debuggers;D:\DVT\Arduino\arduino-1.0.6\libraries\libraries;d:\dvt\arduino\arduino-1.0.6\hardware\tools\avr\avr\include\;d:\dvt\arduino\arduino-1.0.6\hardware\tools\avr\avr\include\avr\;d:\dvt\arduino\arduino-1.0.6\hardware\tools\avr\avr\;d:\dvt\arduino\arduino-1.0.6\hardware\tools\avr\lib\gcc\avr\4.3.2\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>D:\DVT\Arduino\fArduino\TempCensorDS18B20\Visual Micro\.TempCensorDS18B20.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles>D:\DVT\Arduino\fArduino\main.DallasTemperature\Visual Micro\.main.DallasTemperature.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <IgnoreStandardIncludePath>true</IgnoreStandardIncludePath>
       <PreprocessorDefinitions>__AVR_ATmega328p__;__AVR_ATmega328P__;ARDUINO=106;ARDUINO_MAIN;__AVR__;__avr__;F_CPU=16000000L;__cplusplus;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -74,17 +75,14 @@
     <None Include="main.ino">
       <FileType>CppCode</FileType>
     </None>
-    <None Include="main.Second.ino">
-      <FileType>CppCode</FileType>
-    </None>
-    <None Include="TempCensorDS18B20.ino">
+    <None Include="main.DallasTemperature.ino">
       <FileType>CppCode</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DallasTemperature.h" />
     <ClInclude Include="DS18B20TemperatureSensor.h" />
-    <ClInclude Include="Visual Micro\.TempCensorDS18B20.vsarduino.h" />
+    <ClInclude Include="Visual Micro\.main.DallasTemperature.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DallasTemperature.cpp" />

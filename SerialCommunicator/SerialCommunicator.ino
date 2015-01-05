@@ -45,9 +45,6 @@ void PowerLed(boolean state) {
 }
 
 void loop() {
-
-    //String ss("");
-        
     
     if (_timeOut.IsTimeOut()) {
 
@@ -55,47 +52,41 @@ void loop() {
         Board.TraceFormat("LastTemperature:%d", lastTemp);
     }
 
-    if (Serial.available()) {
+    boolean executed          = false;
+    WindowsCommand winCommand = Board.GetWindowsConsoleCommand();
+    
+    if (winCommand.Command == "resetCounter") {
 
-        while (Serial.available()) {
+        _temperatureDB.ClearByteArray();
+        Board.Trace("No temperatures stored");
+        executed = true;
+    }
+    else if (winCommand.Command == "incCounter") {
 
-            boolean executed = false;
-            String s         = Serial.readStringUntil('\n');
-
-            if (s == "resetCounter") {
-
-                _temperatureDB.ClearByteArray();
-                Board.Trace("No temperatures stored");
-                executed = true;
-            }
-            else if (s == "incCounter") {
-
-                _temperatureDB.AddByteArray((byte)millis());
-                executed = true;
-            }
-            else if (s == "getCounter") {
+        _temperatureDB.AddByteArray((byte)millis());
+        executed = true;
+    }
+    else if (winCommand.Command == "getCounter") {
                 
-                if (_temperatureDB.GetLength() == 0) {
-                    Board.Trace("No temperatures stored");
-                }
-                else {
-                    Board.Trace(_temperatureDB.ToString());
-                }
-                Board.Trace(_timeOut.ToString());
-                executed = true;
-            }
-            else if (s == "led") {
-
-                _ledState = !_ledState;
-                Board.LedOn(ON_BOARD_LED, _ledState);
-                executed = true;
-            }
-            if (executed) {
-                Board.Trace(StringFormat.Format("[%s executed]", s.c_str()));
-            }
-            else {
-                Board.Trace(StringFormat.Format("[Invalid command:%s]", s.c_str()));
-            }
+        if (_temperatureDB.GetLength() == 0) {
+            Board.Trace("No temperatures stored");
         }
+        else {
+            Board.Trace(_temperatureDB.ToString());
+        }
+        Board.Trace(_timeOut.ToString());
+        executed = true;
+    }
+    else if (winCommand.Command == "led") {
+
+        _ledState = !_ledState;
+        Board.LedOn(ON_BOARD_LED, _ledState);
+        executed = true;
+    }
+    if (executed) {
+        Board.Trace(StringFormat.Format("[%s executed]", winCommand.Command.c_str()));
+    }
+    else {
+        Board.Trace(StringFormat.Format("[Invalid command:%s]", winCommand.Command.c_str()));
     }
 }
