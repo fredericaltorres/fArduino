@@ -1,4 +1,4 @@
-# Acquiring and storing temperature with Arduino and a DS18B20 sensor
+# Acquiring and storing temperatures with Arduino and a DS18B20 sensor
 
 - Acquiring temperature data every 6 minutes. 
 - Store the data into an EPROM Array. Sore 3 days of data on 512 bytes of EPROM.
