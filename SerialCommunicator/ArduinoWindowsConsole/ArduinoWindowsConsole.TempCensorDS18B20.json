@@ -1,5 +1,7 @@
 {
-  "PortName": "COM4",
+    "PortName": "COM4",
+    "DeviceName": "Arduino Uno",
+    
   "ComCommands": [
     {
       "Caption": "H)elp",
@@ -32,10 +34,16 @@
       "ConsoleKey": 82
     },
     {
-      "Caption": "G)et Data",
-      "Command": "getData",
+        "Caption": "G)et Data",
+        "Command": "getData",
+        "CommandType": 2,
+        "ConsoleKey": 71
+    },
+    {
+      "Caption": "B)ad Command",
+      "Command": "bad-command",
       "CommandType": 2,
-      "ConsoleKey": 71
+      "ConsoleKey": 66
     }
   ]
 }

@@ -1,7 +1,7 @@
 # Acquiring and storing temperatures with Arduino and a DS18B20 sensor
 
 - Acquiring temperature data every 6 minutes. 
-- Store the data into an EPROM Array. Sore 3 days of data on 512 bytes of EPROM.
+- Store the data into an EPROM Array. Store 3 days of data on 512 bytes of EPROM.
 - Api to communicate with a Windows Console to
     - resetData
     - getData: Send acquired data as CSV to the WindowsConsole (Serial port)
