@@ -22,7 +22,6 @@ Keyboard YPT-210: http://www2.yamaha.co.jp/manual/pdf/emi/english/port/psre213_e
 
 Led _onBoardLed(ON_BOARD_LED);
 boolean _ledState = false;
-#define ON_BOARD_LED_NORMAL_BLINKING_RATE 500 // 500 milli-seconds
 
 SoftwareSerial _softwareSerial(MIDI_IN_PIN, MIDI_OUT_PIN);
 MIDI_CREATE_INSTANCE(HardwareSerial, _softwareSerial, MIDI);
@@ -66,7 +65,7 @@ int trackInstrument[MAX_INSTRUMENTS] = { CYMBAL_CRASH_1, BD, SD, HH_CLOSED };
 byte measure[MAX_MEASURES][MAX_INSTRUMENTS][16] = {
         {
             //                    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
-            /*CYMBAL_CRASH_1 */{  75, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000  },
+            /*CYMBAL_CRASH_1 */{  75, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000 },
             /*BD             */{ 100, 000, 000, 000, 000, 000, 000, 000, 100, 000, 000, 000, 000, 000, 000, 000 },
             /*SD             */{ 000, 000, 000, 000, 125, 000, 000, 000, 000, 000, 000, 000, 125, 000, 000, 000 },
             /*HH_CLOSED      */{ 100, 000, 100, 000, 100, 000, 100, 000, 100, 000, 100, 000, 100, 000, 100, 000 },
@@ -99,8 +98,6 @@ int ComputeVelocity(int v) {
     return vv;
 }
 
-
-
 void setup() {
 
     Board.Delay(1500); // Wait 1.5 second before initializing the serial com, so  I can start the ArduinoWindowsConsole on the Windows machine
@@ -112,6 +109,12 @@ void setup() {
     Board.Trace(StringFormat.Format("Playing _channel:%d", _channel));
 }
 
+void ShowUserInfo() {
+
+    Board.SendWindowsConsoleCommand(StringFormat.Format("defaultVelocity:%d", _defaultVelocity), false, true);
+    Board.SendWindowsConsoleCommand(StringFormat.Format("_tempo:%d, m/16:%d", _tempo, GetTempo16OfMeasure(_tempo)), false, true);
+    Board.SendWindowsConsoleCommand(StringFormat.Format("_playing:%b", _playing), false, true);
+}
 void ProcessWindowsConsoleCommand() {
 
     if (Serial.available()) {
@@ -121,30 +124,30 @@ void ProcessWindowsConsoleCommand() {
 
             if (_defaultVelocity < 127)
                 _defaultVelocity += 10;
-            Board.SendWindowsConsoleCommand(StringFormat.Format("defaultVelocity:%d", _defaultVelocity), false, true);
+            ShowUserInfo();
         }
         else if (winCommand.Command == "-sound") {
 
             if (_defaultVelocity > 0)
                 _defaultVelocity -= 10;
-            Board.SendWindowsConsoleCommand(StringFormat.Format("defaultVelocity:%d", _defaultVelocity), false, true);
+            ShowUserInfo();
         }
         else if (winCommand.Command == "+tempo") {
 
             if (_tempo < 200)
                 _tempo += 10;
-            Board.SendWindowsConsoleCommand(StringFormat.Format("_tempo:%d, m/16:%d", _tempo, GetTempo16OfMeasure(_tempo)), false, true);
+            ShowUserInfo();
         }
         else if (winCommand.Command == "-tempo") {
 
             if (_tempo > 40)
                 _tempo -= 10;
-            Board.SendWindowsConsoleCommand(StringFormat.Format("_tempo:%d, m/16:%d", _tempo, GetTempo16OfMeasure(_tempo)), false, true);
+            ShowUserInfo();
         }
         else if (winCommand.Command == "play") {
 
             _playing = !_playing;
-            Board.SendWindowsConsoleCommand(StringFormat.Format("_playing:%b", _playing), false, true);
+            ShowUserInfo();            
         }
         else {
             if (winCommand.Command != "") {
