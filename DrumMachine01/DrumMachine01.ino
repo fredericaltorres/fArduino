@@ -111,9 +111,7 @@ void setup() {
 
 void ShowUserInfo() {
 
-    Board.SendWindowsConsoleCommand(StringFormat.Format("defaultVelocity:%d", _defaultVelocity), false, true);
-    Board.SendWindowsConsoleCommand(StringFormat.Format("_tempo:%d, m/16:%d", _tempo, GetTempo16OfMeasure(_tempo)), false, true);
-    Board.SendWindowsConsoleCommand(StringFormat.Format("_playing:%b", _playing), false, true);
+    Board.SendWindowsConsoleCommand(StringFormat.Format("defaultVelocity:%d, _tempo:%d, m/16:%d, playing:%b", _defaultVelocity, _tempo, GetTempo16OfMeasure(_tempo), _playing), false, true);
 }
 void ProcessWindowsConsoleCommand() {
 
@@ -182,6 +180,8 @@ void loop() {
                         MIDI.sendNoteOff(trackInstrument[it], 0, _channel);
                     }
                 }
+                if (!_playing)
+                    break;
             }
         }
     }
