@@ -12,11 +12,7 @@ Keyboard YPT-210: http://www2.yamaha.co.jp/manual/pdf/emi/english/port/psre213_e
 #include <fArduino.h>
 
 // Pins usage
-#if TRINKET
-#define ON_BOARD_LED 1
-#else
 #define ON_BOARD_LED 13
-#endif
 #define MIDI_IN_PIN  2
 #define MIDI_OUT_PIN 3
 
