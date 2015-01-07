@@ -54,11 +54,12 @@ int     _defaultVelocity = 50;
 int     _channel         = YPT210_DRUM_CHANNEL;
 
 #define MAX_MEASURES    2
+#define MAX_BAR_PER_MEASURE 16
 #define MAX_INSTRUMENTS 4
 
 int trackInstrument[MAX_INSTRUMENTS] = { CYMBAL_CRASH_1, BD, SD, HH_CLOSED };
 
-byte measure[MAX_MEASURES][MAX_INSTRUMENTS][16] = {
+byte measure[MAX_MEASURES][MAX_INSTRUMENTS][MAX_BAR_PER_MEASURE] = {
         {
             //                    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
             /*CYMBAL_CRASH_1 */{  75, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000 },
@@ -153,13 +154,11 @@ void ProcessWindowsConsoleCommand() {
 
 void loop() {
 
-    //_onBoardLed.Blink(); // Blink led every 1/2 second
-
     if (_playing) {
 
         for (int m = 0; m < MAX_MEASURES; m++) {
 
-            for (int m16 = 0; m16 < 16; m16++) {
+            for (int m16 = 0; m16 < MAX_BAR_PER_MEASURE; m16++) {
 
                 _ledState = !_ledState;
                 _onBoardLed.SetState(_ledState);
