@@ -1,13 +1,12 @@
 /***********************************************************************
 
 Midi Library: https://github.com/FortySevenEffects/arduino_midi_library
-    Use SoftwareSerial
+Use SoftwareSerial
 
 Keyboard YPT-210: http://www2.yamaha.co.jp/manual/pdf/emi/english/port/psre213_en_om.pdf
 
 ***********************************************************************/
 
-#include "fMidi.h"
 #include "MIDI.h"
 #include <SoftwareSerial.h>
 #include <fArduino.h>
@@ -50,37 +49,46 @@ boolean _playing = false;
 #define TOM_HIGH 50
 #define TAMBOURINE 54
 
-int _measureCount   = 0;
-int tempo           = 120;
-int tempo16ms       = 125;
-int defaultVelocity = 64;
-int _channel        = YPT210_DRUM_CHANNEL;
+int _measureCount    = 0;
+int _tempo           = 120;
+int _defaultVelocity = 50;
+int _channel         = YPT210_DRUM_CHANNEL;
 
 #define MAX_MEASURES 2
 #define MAX_INSTRUMENTS 4
 
 int trackInstrument[MAX_INSTRUMENTS] = { CYMBAL_CRASH_1, BD, SD, HH_CLOSED };
+
 byte measure[MAX_MEASURES][MAX_INSTRUMENTS][16] = {
         {
-                                //  1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
-            /*CYMBAL_CRASH_1 */ {  75, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000 },
-            /*BD             */ { 100, 000, 000, 000, 000, 000, 000, 000, 100, 000, 000, 000, 000, 000, 000, 000 },
-            /*SD             */ { 000, 000, 000, 000, 125, 000, 000, 000, 000, 000, 000, 000, 125, 000, 000, 000 },
-            /*HH_CLOSED      */ { 100, 000, 100, 000, 100, 000, 100, 000, 100, 000, 100, 000, 100, 000, 100, 000 },
+            //  1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
+            /*CYMBAL_CRASH_1 */{ 75, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000 },
+            /*BD             */{ 100, 000, 000, 000, 000, 000, 000, 000, 100, 000, 000, 000, 000, 000, 000, 000 },
+            /*SD             */{ 000, 000, 000, 000, 125, 000, 000, 000, 000, 000, 000, 000, 125, 000, 000, 000 },
+            /*HH_CLOSED      */{ 100, 000, 100, 000, 100, 000, 100, 000, 100, 000, 100, 000, 100, 000, 100, 000 },
         },
         {
-                               //  1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
+            //  1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
             /*CYMBAL_CRASH_1 */{ 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000 },
             /*BD             */{ 100, 000, 000, 000, 000, 000, 000, 000, 100, 000, 000, 000, 000, 000, 000, 000 },
-            /*SD             */{ 000, 000, 000, 000, 125, 000, 000, 000, 000, 000, 000, 000, 125, 000,  90, 000 },
+            /*SD             */{ 000, 000, 000, 000, 125, 000, 000, 000, 000, 000, 000, 000, 125, 000, 90, 000 },
             /*HH_CLOSED      */{ 100, 000, 100, 000, 100, 000, 100, 000, 100, 000, 100, 000, 100, 000, 100, 000 },
         },
 };
 
+int GetTempo16OfMeasure(int tempo) {
+
+    double t                             = tempo;
+    double measureDurationInMilliSeconds = 60.0 / tempo * 4.0 * 1000;
+    double _16OfMeasure                  = measureDurationInMilliSeconds / 16;
+    _16OfMeasure                        += 0.5; // to round up hight
+    return (int)_16OfMeasure;
+}
+
 int ComputeVelocity(int v) {
 
-    int vv = (defaultVelocity * v) / 100;
-    if (vv >= 128)
+    int vv = (_defaultVelocity * v) / 100;
+    if (vv > 127)
         vv = 127;
     if (vv < 0)
         vv = 0;
@@ -88,36 +96,81 @@ int ComputeVelocity(int v) {
 }
 
 SoftwareSerial _softwareSerial(2, 3);
-MIDI_CREATE_INSTANCE(HardwareSerial, _softwareSerial, MIDI); 
+MIDI_CREATE_INSTANCE(HardwareSerial, _softwareSerial, MIDI);
 
 void setup() {
-    
+
     Board.Delay(1500); // Wait 1.5 second before initializing the serial com, so  I can start the ArduinoWindowsConsole on the Windows machine
     Board.InitializeComputerCommunication(9600, "Initializing...");
     Board.TraceHeader("Drum Machine 01");
     Board.SetPinMode(ON_BOARD_LED, OUTPUT);
-    _onBoardLed.SetBlinkMode(ON_BOARD_LED_NORMAL_BLINKING_RATE);
     _softwareSerial.begin(31250);
     MIDI.begin();
     Board.Trace(StringFormat.Format("Playing _channel:%d", _channel));
 }
 
+void ProcessWindowsConsoleCommand() {
+
+    if (Serial.available()) {
+
+        WindowsCommand winCommand = Board.GetWindowsConsoleCommand(); // The WindowsConsole method use the Serial port communication
+        if (winCommand.Command == "+sound") {
+
+            if (_defaultVelocity < 127)
+                _defaultVelocity += 10;
+            Board.SendWindowsConsoleCommand(StringFormat.Format("defaultVelocity:%d", _defaultVelocity), false, true);
+        }
+        else if (winCommand.Command == "-sound") {
+
+            if (_defaultVelocity > 0)
+                _defaultVelocity -= 10;
+            Board.SendWindowsConsoleCommand(StringFormat.Format("defaultVelocity:%d", _defaultVelocity), false, true);
+        }
+        else if (winCommand.Command == "+tempo") {
+
+            if (_tempo < 200)
+                _tempo += 10;
+            Board.SendWindowsConsoleCommand(StringFormat.Format("_tempo:%d, m/16:%d", _tempo, GetTempo16OfMeasure(_tempo)), false, true);
+        }
+        else if (winCommand.Command == "-tempo") {
+
+            if (_tempo > 40)
+                _tempo -= 10;
+            Board.SendWindowsConsoleCommand(StringFormat.Format("_tempo:%d, m/16:%d", _tempo, GetTempo16OfMeasure(_tempo)), false, true);
+        }
+        else if (winCommand.Command == "play") {
+
+            _playing = !_playing;
+            Board.SendWindowsConsoleCommand(StringFormat.Format("_playing:%b", _playing), false, true);
+        }
+        else {
+            if (winCommand.Command != "") {
+                Board.SendWindowsConsoleCommand(StringFormat.Format("[Invalid command:%s]", winCommand.Command.c_str()), false, true);
+            }
+        }
+    }
+}
+
 void loop() {
 
-    _onBoardLed.Blink(); // Blink led every 1/2 second
+    //_onBoardLed.Blink(); // Blink led every 1/2 second
 
     if (_playing) {
-        
+
         for (int m = 0; m < MAX_MEASURES; m++) {
 
             for (int m16 = 0; m16 < 16; m16++) {
+
+                _ledState = !_ledState;
+                _onBoardLed.SetState(_ledState);
 
                 for (int it = 0; it < MAX_INSTRUMENTS; it++) {
                     if (measure[it][m16] > 0) {
                         MIDI.sendNoteOn(trackInstrument[it], ComputeVelocity(measure[m][it][m16]), _channel);
                     }
                 }
-                Board.Delay(tempo16ms);
+                ProcessWindowsConsoleCommand();
+                Board.Delay(GetTempo16OfMeasure(_tempo));
                 for (int it = 0; it < MAX_INSTRUMENTS; it++) {
                     if (measure[m][it][m16] == 1) {
                         MIDI.sendNoteOff(trackInstrument[it], 0, _channel);
@@ -126,18 +179,8 @@ void loop() {
             }
         }
     }
-
-    WindowsCommand winCommand = Board.GetWindowsConsoleCommand(); // The WindowsConsole method use the Serial port communication
-
-    if (winCommand.Command == "play") {
-
-        _playing = !_playing;
-        Board.SendWindowsConsoleCommand(StringFormat.Format("_playing:%b", _playing));
-    }   
     else {
-        if (winCommand.Command != "") {
-            Board.SendWindowsConsoleCommand(StringFormat.Format("[Invalid command:%s]", winCommand.Command.c_str()));
-        }
+        ProcessWindowsConsoleCommand();
     }
 }
 

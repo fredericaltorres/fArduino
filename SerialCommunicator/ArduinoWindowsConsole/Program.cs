@@ -50,7 +50,13 @@ namespace test
             //_comConfig.ComCommands.Add(new ComCommand() { ConsoleKey = System.ConsoleKey.A, Caption = "A)cquire",  Command = "acquireData", CommandType = ComCommandType.Send });
             //_comConfig.ComCommands.Add(new ComCommand() { ConsoleKey = System.ConsoleKey.R, Caption = "R)eset",    Command = "resetData",   CommandType = ComCommandType.Send });
             //_comConfig.ComCommands.Add(new ComCommand() { ConsoleKey = System.ConsoleKey.G, Caption = "G)et Data", Command = "getData",     CommandType = ComCommandType.Send });
-            //_comConfig.Save(@"D:\DVT\Arduino\fArduino\SerialCommunicator\ArduinoWindowsConsole\TempCensorDS18B20.json");
+            //_comConfig.ComCommands.Add(new ComCommand() { ConsoleKey = System.ConsoleKey.Add, Caption = "+", Command = "getData",     CommandType = ComCommandType.Send });
+            //_comConfig.ComCommands.Add(new ComCommand() { ConsoleKey = System.ConsoleKey.Subtract, Caption = "-", Command = "getData",     CommandType = ComCommandType.Send });
+
+            //_comConfig.ComCommands.Add(new ComCommand() { ConsoleKey = System.ConsoleKey.RightArrow, Caption = "-", Command = "right",     CommandType = ComCommandType.Send });
+            //_comConfig.ComCommands.Add(new ComCommand() { ConsoleKey = System.ConsoleKey.LeftArrow, Caption = "-", Command = "left",     CommandType = ComCommandType.Send });
+
+            //_comConfig.Save(@"D:\DVT\Arduino\fArduino\SerialCommunicator\ArduinoWindowsConsole\c.json");
         }
 
         static void Main(string[] args)
@@ -69,7 +75,8 @@ namespace test
                 {
                     if (Console.KeyAvailable)
                     {
-                        var comCommand = _comConfig.GetCommand(Console.ReadKey(true).Key);
+                        var k = Console.ReadKey(true).Key;
+                        var comCommand = _comConfig.GetCommand(k);
                         switch (comCommand.CommandType)
                         {
                             case ComCommandType.Send                     : SendCommand(ac, comCommand.Command);                                               break;

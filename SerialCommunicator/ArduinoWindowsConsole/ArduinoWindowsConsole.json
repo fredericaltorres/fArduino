@@ -22,10 +22,34 @@
       "ConsoleKey": 82
     },
     {
-      "Caption": "P)lay",
-      "Command": "play",
+        "Caption": "P)lay",
+        "Command": "play",
+        "CommandType": 2,
+        "ConsoleKey": 80
+    },
+    {
+        "Caption": "+)Sound",
+        "Command": "+sound",
+        "CommandType": 2,
+        "ConsoleKey": 107
+    },
+    {
+        "Caption": "-)Sound",
+        "Command": "-sound",
+        "CommandType": 2,
+        "ConsoleKey": 109
+    },
+    {
+        "Caption": "Right Tempo+",
+        "Command": "+tempo",
+        "CommandType": 2,
+        "ConsoleKey": 39
+    },
+    {
+      "Caption": "Left Tempo-",
+      "Command": "-tempo",
       "CommandType": 2,
-      "ConsoleKey": 80
+      "ConsoleKey": 37
     }
   ]
 }

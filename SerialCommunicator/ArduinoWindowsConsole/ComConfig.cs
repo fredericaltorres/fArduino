@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 
 namespace ArduinoWindowsConsole
 {
-    public enum ComCommandType
+    public enum ComCommandType // Do not change the order of the enum type for compatibilty reason
     {
         Help,
         Quit,
         Send,
-        PauseProcessingFromDevice
+        PauseProcessingFromDevice,
+        Unknown,
     }
     public class ComCommand
     {
@@ -51,7 +52,7 @@ namespace ArduinoWindowsConsole
             foreach (var m in this.ComCommands)
                 if(m.ConsoleKey == consoleKey)
                     return m;
-            return null;
+            return new ComCommand() { CommandType = ComCommandType.Unknown };
         }
     }
 }

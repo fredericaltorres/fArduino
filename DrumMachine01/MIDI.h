@@ -1810,4 +1810,3 @@ void MidiInterface<SerialPort, Settings>::thruFilter(Channel inChannel)
 }
 
 END_MIDI_NAMESPACE
-

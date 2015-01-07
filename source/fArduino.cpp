@@ -203,6 +203,32 @@ BoardClass::BoardClass() {
 BoardClass::~BoardClass() {
 
 }
+void BoardClass::SendWindowsConsoleCommand(String command, boolean newLine/*=true*/, boolean asynchronous /*=false*/) {
+
+    if (asynchronous) {
+        #if defined(SERIAL_AVAILABLE)
+            Serial.println(command);
+        #endif
+    }
+    else {
+        if (newLine)
+            this->Trace(command, false);
+        else
+            this->TraceNoNewLine(command);
+    }
+}
+WindowsCommand BoardClass::GetWindowsConsoleCommand() {
+
+    WindowsCommand windowsCommand;
+    windowsCommand.Command = String("");
+
+    #if defined(SERIAL_AVAILABLE)
+    if (Serial.available())
+        windowsCommand.Command = Serial.readStringUntil('\n');
+    #endif
+
+    return windowsCommand;
+}
 int BoardClass::RoundDouble(double d) {
     d += 0.5;
     int i = (int)d;
@@ -482,6 +508,7 @@ void Led::Blink() {
 void Led::Blink(int blinkCount, int waitTime) {
     
     for (int z = 0; z < blinkCount; z++) {
+
         this->SetState(true);
         Board.Delay(waitTime);
         this->SetState(false);
@@ -1183,7 +1210,7 @@ int MemDB::CreateByteArray(int size, boolean init) {
     this->_startAddress  = EEPROM.getAddress(size);        // Location of the data
 
     if (init) {
-        this->Clear();
+        this->ClearByteArray();
     }
     else {
         this->_index = this->GetLength(); // Load length from EEPROM
@@ -1241,3 +1268,4 @@ void MemDB::ToSerial() {
         Board.Delay(5);
     }
 }
+

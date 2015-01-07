@@ -43,10 +43,4 @@ extern "C" void __cxa_pure_virtual() {;}
 #include "D:\DVT\Arduino\fArduino\DrumMachine01\DrumMachine01.ino"
 #include "D:\DVT\Arduino\fArduino\DrumMachine01\MIDI.cpp"
 #include "D:\DVT\Arduino\fArduino\DrumMachine01\MIDI.h"
-#include "D:\DVT\Arduino\fArduino\DrumMachine01\fMidi.cpp"
-#include "D:\DVT\Arduino\fArduino\DrumMachine01\fMidi.h"
-#include "D:\DVT\Arduino\fArduino\DrumMachine01\midi_Defs.h"
-#include "D:\DVT\Arduino\fArduino\DrumMachine01\midi_Message.h"
-#include "D:\DVT\Arduino\fArduino\DrumMachine01\midi_Namespace.h"
-#include "D:\DVT\Arduino\fArduino\DrumMachine01\midi_Settings.h"
 #endif

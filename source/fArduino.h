@@ -252,6 +252,14 @@
     extern StringFormatClass StringFormat;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// WindowsCommand
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    struct WindowsCommand {
+
+        String Command;
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// Board
     /// Represet the Trinket/Arduino board
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -283,6 +291,9 @@
         int GetEEPROMSize();
 
         int RoundDouble(double d);
+
+        WindowsCommand GetWindowsConsoleCommand();
+        void SendWindowsConsoleCommand(String command, boolean newLine = true, boolean asynchronous = false);
 
         boolean GetButtonStateDebounced(int pin, boolean lastState);
         void LedOn(int pin, boolean state);
@@ -618,4 +629,6 @@
             boolean FingerUp();
             boolean FingerDown();
     };
+
+
 #endif
