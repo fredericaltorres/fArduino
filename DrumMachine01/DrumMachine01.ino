@@ -17,61 +17,65 @@ Keyboard YPT-210: http://www2.yamaha.co.jp/manual/pdf/emi/english/port/psre213_e
 #else
 #define ON_BOARD_LED 13
 #endif
+#define MIDI_IN_PIN  2
+#define MIDI_OUT_PIN 3
 
 Led _onBoardLed(ON_BOARD_LED);
 boolean _ledState = false;
 #define ON_BOARD_LED_NORMAL_BLINKING_RATE 500 // 500 milli-seconds
 
-boolean _playing = false;
+SoftwareSerial _softwareSerial(MIDI_IN_PIN, MIDI_OUT_PIN);
+MIDI_CREATE_INSTANCE(HardwareSerial, _softwareSerial, MIDI);
 
 #define YPT210_DRUM_CHANNEL 10
 
-// YPT-210 Standard Kit 1
-#define BD_SOFT 33
-#define BD      36
-#define BD_HARD 35
-#define SD      38
-#define SD_HARD 40
-#define HAND_CLAP 39
-#define HH_CLOSED 42
-#define HH_PEDAL 44
-#define HH_OPEN  46
-#define CYMBAL_CRASH_1 49
-#define CYMBAL_CRASH_2 57
-#define CYMBAL_SPLASH 55
-#define CYMBAL_CHINESE 52
-#define CYMBAL_RIDE_1 51
-#define CYMBAL_RIDE_2 59
-#define TOM_FLOOR_L 41
-#define TOM_FLOOR_H 43
-#define TOM_MID_L 47
-#define TOM_MID_H 48
-#define TOM_HIGH 50
-#define TAMBOURINE 54
+// YPT-210 Standard Kit 1, Midi note
+#define BD_SOFT             33
+#define BD                  36
+#define BD_HARD             35
+#define SD                  38
+#define SD_HARD             40
+#define HAND_CLAP           39
+#define HH_CLOSED           42
+#define HH_PEDAL            44
+#define HH_OPEN             46
+#define CYMBAL_CRASH_1      49
+#define CYMBAL_CRASH_2      57
+#define CYMBAL_SPLASH       55
+#define CYMBAL_CHINESE      52
+#define CYMBAL_RIDE_1       51
+#define CYMBAL_RIDE_2       59
+#define TOM_FLOOR_L         41
+#define TOM_FLOOR_H         43
+#define TOM_MID_L           47
+#define TOM_MID_H           48
+#define TOM_HIGH            50
+#define TAMBOURINE          54
+    
+boolean _playing         = false;
+int     _measureCount    = 0;
+int     _tempo           = 120;
+int     _defaultVelocity = 50;
+int     _channel         = YPT210_DRUM_CHANNEL;
 
-int _measureCount    = 0;
-int _tempo           = 120;
-int _defaultVelocity = 50;
-int _channel         = YPT210_DRUM_CHANNEL;
-
-#define MAX_MEASURES 2
+#define MAX_MEASURES    2
 #define MAX_INSTRUMENTS 4
 
 int trackInstrument[MAX_INSTRUMENTS] = { CYMBAL_CRASH_1, BD, SD, HH_CLOSED };
 
 byte measure[MAX_MEASURES][MAX_INSTRUMENTS][16] = {
         {
-            //  1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
-            /*CYMBAL_CRASH_1 */{ 75, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000 },
+            //                    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
+            /*CYMBAL_CRASH_1 */{  75, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000  },
             /*BD             */{ 100, 000, 000, 000, 000, 000, 000, 000, 100, 000, 000, 000, 000, 000, 000, 000 },
             /*SD             */{ 000, 000, 000, 000, 125, 000, 000, 000, 000, 000, 000, 000, 125, 000, 000, 000 },
             /*HH_CLOSED      */{ 100, 000, 100, 000, 100, 000, 100, 000, 100, 000, 100, 000, 100, 000, 100, 000 },
         },
         {
-            //  1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
+            //                    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
             /*CYMBAL_CRASH_1 */{ 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000 },
             /*BD             */{ 100, 000, 000, 000, 000, 000, 000, 000, 100, 000, 000, 000, 000, 000, 000, 000 },
-            /*SD             */{ 000, 000, 000, 000, 125, 000, 000, 000, 000, 000, 000, 000, 125, 000, 90, 000 },
+            /*SD             */{ 000, 000, 000, 000, 125, 000, 000, 000, 000, 000, 000, 000, 125, 000,  90, 000 },
             /*HH_CLOSED      */{ 100, 000, 100, 000, 100, 000, 100, 000, 100, 000, 100, 000, 100, 000, 100, 000 },
         },
 };
@@ -95,8 +99,7 @@ int ComputeVelocity(int v) {
     return vv;
 }
 
-SoftwareSerial _softwareSerial(2, 3);
-MIDI_CREATE_INSTANCE(HardwareSerial, _softwareSerial, MIDI);
+
 
 void setup() {
 
