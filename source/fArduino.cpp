@@ -1269,3 +1269,68 @@ void MemDB::ToSerial() {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Piezo
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Piezo::Piezo(int pin, int threshHold, int maxCalibratedValue) {
+
+    this->_pin                = pin;
+    this->_threshHold         = threshHold;
+    this->_debug              = !false;
+    this->_maxCalibratedValue = maxCalibratedValue;
+}
+void Piezo::WaitForRebound() {
+
+    while (true) {
+        int val = analogRead(this->_pin);
+        if (val == 0)
+            break;
+        delay(1);
+    }
+}
+int Piezo::GetValue() {
+    
+    int val  = analogRead(this->_pin);
+
+    if (val > this->_threshHold) {
+
+        int val2 = -1;
+        String buf("");
+        int maxVal = val;
+        buf.concat(val); buf.concat(" ");
+
+        while (true) {
+
+            int v = analogRead(this->_pin);
+
+            if (v != val2) { // Eliminate multiple similar values
+
+                val2 = v;
+                if (val2 > maxVal)
+                    maxVal = val2;
+
+                if (this->_debug) {
+                    buf.concat(val2); buf.concat(" ");
+                }
+                if (val2 <= this->_threshHold)
+                    break;
+            }
+        }
+
+        //this->WaitForRebound();
+
+        if (maxVal > this->_maxCalibratedValue)
+            maxVal = this->_maxCalibratedValue;
+
+        int _8bitVal = map(maxVal, 0, this->_maxCalibratedValue, 0, 127);
+        if (this->_debug) {
+
+            Serial.println(StringFormat.Format("_8bitVal:%d, val:%d, maxVal:%d, buf:%s", _8bitVal, val, maxVal, buf.c_str()));
+            //Serial.flush();
+        }
+
+        return _8bitVal;
+    }
+    else return -1;
+}

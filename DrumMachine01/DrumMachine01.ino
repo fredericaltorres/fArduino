@@ -5,6 +5,8 @@ Use SoftwareSerial
 
 Keyboard YPT-210: http://www2.yamaha.co.jp/manual/pdf/emi/english/port/psre213_en_om.pdf
 
+    http://arduino.cc/en/Reference/HomePage
+
 ***********************************************************************/
 
 #include "MIDI.h"

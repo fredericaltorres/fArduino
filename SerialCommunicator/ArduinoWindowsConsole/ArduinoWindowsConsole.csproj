@@ -58,6 +58,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="DrumMachine01.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="ArduinoWindowsConsole.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -631,4 +631,20 @@
     };
 
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Piezo
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    class Piezo {
+
+        private:
+            byte    _pin;
+            int     _threshHold;
+            int     _maxCalibratedValue;
+            boolean _debug;
+        public:
+            Piezo(int pin, int threshHold, int maxCalibratedValue);
+            int GetValue();
+            void WaitForRebound();
+    };
+
 #endif
