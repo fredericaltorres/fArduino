@@ -103,10 +103,11 @@ void ProcessWindowsConsoleCommand() {
 }
 
 
-#define PIEZOTHRESHOLD 40
-#define FINGER1_MAX_VALUE 500 
-Piezo finger1(0, PIEZOTHRESHOLD, FINGER1_MAX_VALUE);
-Piezo finger2(1, PIEZOTHRESHOLD, FINGER1_MAX_VALUE);
+#define PIEZOTHRESHOLD 10
+#define HITHAT_MAX_VALUE 250
+#define SNARE_MAX_VALUE 200 
+Piezo finger1(0, PIEZOTHRESHOLD, HITHAT_MAX_VALUE);
+Piezo finger2(1, PIEZOTHRESHOLD, SNARE_MAX_VALUE);
 
 void loop() {
 
@@ -117,17 +118,12 @@ void loop() {
 
     int v1 = finger1.GetValue();
     if (v1 != -1) {
-        MIDI.sendNoteOn(BD,  v1, _channel);
-        delay(1);
-        //Serial.print("v1:"); Serial.println(v1);
-        //MIDI.sendNoteOff(BD, 0 , _channel);
+        MIDI.sendNoteOn(HH_CLOSED, v1, _channel);
     }
+
     int v2 = finger2.GetValue();
     if (v2 != -1) {
         MIDI.sendNoteOn (SD, v2, _channel);
-        delay(1);
-        //Serial.print("v2:"); Serial.println(v2);
-        //MIDI.sendNoteOff(SD, 0, _channel);
     }
     ProcessWindowsConsoleCommand();
     /*
