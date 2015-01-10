@@ -11,15 +11,25 @@
     #endif
 
     // --- fArduino LIBRARY COMPILATION MODE ---
-    // #define TRINKET 1 // On the trinket there is no Serial communication
+
+    // #define TRINKET 1
+    #define TRINKET_PRO 1
+    // #define ARDUINO_UNO 1
 
     #if defined(TRINKET)
         #define EEPROM_SIZE 512
-    #else
-        #define ARDUINO_UNO 1 // On the trinket there is no Serial communication
-        #define EEPROM_SIZE 1024
-
     #endif
+    #if defined(TRINKET_PRO)
+        #define EEPROM_SIZE 1024
+        #define SERIAL_AVAILABLE 1
+        #define TRACE_DELAY 20
+    #endif
+    #if defined(ARDUINO_UNO)
+        #define EEPROM_SIZE 1024
+        #define SERIAL_AVAILABLE 1
+        #define TRACE_DELAY 10
+    #endif
+
 //1024 bytes on the ATmega328
 //512 bytes on the ATmega168 and ATmega8 
 //4 KB(4096 bytes) on the ATmega1280 and ATmega2560.
@@ -269,11 +279,6 @@
     #define MAX_FORMAT_SIZE 128
     #define TRACE_HEADER_CHAR "~"
 
-    #if defined(TRINKET)
-        // #define SERIAL_AVAILABLE 0
-    #else
-        #define SERIAL_AVAILABLE 1
-    #endif 
  
     class BoardClass {
     private:
@@ -641,9 +646,12 @@
             int     _threshHold;
             int     _maxCalibratedValue;
             boolean _debug;
+            boolean _ready;
         public:
-            Piezo(int pin, int threshHold, int maxCalibratedValue);
+            byte MaxMidiVelocity;
+            Piezo(int pin, int threshHold, int maxCalibratedValue, int maxMidiVelocity);
             int GetValue();
+            int GetTimeValue();
             void WaitForRebound();
     };
 

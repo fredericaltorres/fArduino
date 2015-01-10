@@ -137,10 +137,15 @@ String StringFormatClass::Format(char *format, ...) {
                 formated.concat(String(tmpBuf));
             }
             else if (*format == 'f') { // float
-                #if !defined(TRINKET)
-                // Cannot be compiled on the Trinket. Will fix it later
+                
                 double d = va_arg(argptr, double);
-                formated.concat(String(d));
+                #if defined(ARDUINO_UNO)
+                    formated.concat(String(d));
+                #endif
+                #if defined(TRINKET) || defined(TRINKET_PRO)
+                    //dtostrf(d, 10, 2)
+                    sprintf(tmpBuf, "%f", d);
+                    formated.concat(tmpBuf);
                 #endif
             }
             else if (*format == 'b') { // boolean not standard
@@ -285,7 +290,7 @@ void BoardClass::Trace(char * msg, boolean printTime /*= true*/) {
         }
         Serial.println(msg);
         Serial.flush();
-        Board.Delay(10);
+        Board.Delay(TRACE_DELAY);
     }
     #endif
 }
@@ -1273,12 +1278,14 @@ void MemDB::ToSerial() {
 /// Piezo
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Piezo::Piezo(int pin, int threshHold, int maxCalibratedValue) {
+Piezo::Piezo(int pin, int threshHold, int maxCalibratedValue, int maxMidiVelocity) {
 
     this->_pin                = pin;
     this->_threshHold         = threshHold;
     this->_debug              = !false;
     this->_maxCalibratedValue = maxCalibratedValue;
+    this->_ready              = true;
+    this->MaxMidiVelocity     = maxMidiVelocity;
 }
 void Piezo::WaitForRebound() {
 
@@ -1290,6 +1297,101 @@ void Piezo::WaitForRebound() {
     }
 }
 int Piezo::GetValue() {
+    
+    if (this->_ready) {
+
+        int val = analogRead(this->_pin);
+
+        if (val > this->_threshHold) {
+
+
+            int threshHold2 = this->_threshHold * 2;
+            this->_ready = false;
+            int maxVal   = val;
+            String buf("");
+            buf.concat(val); buf.concat(" ");
+
+            while (true) {
+
+                int val2 = analogRead(this->_pin);
+                if (val2 > maxVal) {
+                    maxVal = val2;
+                    if (this->_debug) {
+                        buf.concat(val2); buf.concat(" ");
+                    }
+                    if (maxVal > threshHold2)
+                        break;
+                }
+                else {
+                    break;
+                }
+            }
+
+            if (maxVal > this->_maxCalibratedValue)
+                maxVal = this->_maxCalibratedValue;
+
+            int _8bitVal = map(maxVal, 0, this->_maxCalibratedValue, 0, this->MaxMidiVelocity);
+            if (this->_debug) {
+                
+                Serial.println(StringFormat.Format("[%d] HeightByte:%d val:%d maxVal:%d buf:%s", this->_pin, _8bitVal, val, maxVal, buf.c_str()));
+                Serial.flush();
+            }
+            else {
+                delay(6);
+            }
+            return _8bitVal;
+        }
+        else return -1;
+    }
+    else {
+        // Let's wait until descending value of the shock reach 0 
+        int val = analogRead(this->_pin);
+        if (val == 0) {
+            this->_ready = true;
+        }
+        return -1;
+    }
+}
+
+
+int Piezo::GetTimeValue() {
+
+    int _8bitVal;
+    int val = analogRead(this->_pin);
+
+    if (val > this->_threshHold) {
+
+        String buf("");
+        buf.concat(val); buf.concat(" ");
+
+        int t = 0;
+        while (true)  {
+            int val2 = analogRead(this->_pin);
+            if (val2 > this->_threshHold) {
+                t++;
+            }
+            else {
+                break;
+            }
+        }
+        if (t < 100) {
+            _8bitVal = -1;
+        }
+        else {
+            _8bitVal = map(t, 0, this->_maxCalibratedValue, 0, 127);
+        }
+        if (this->_debug) {
+
+            Serial.println(StringFormat.Format("_8bitVal:%d, val:%d, t:%d", _8bitVal, val, t));
+            //Serial.flush();
+        }
+
+        return _8bitVal;
+    }
+    else return -1;
+}
+
+/*int Piezo::GetValue() {
     
     int val  = analogRead(this->_pin);
 
@@ -1313,12 +1415,11 @@ int Piezo::GetValue() {
                 if (this->_debug) {
                     buf.concat(val2); buf.concat(" ");
                 }
-                if (val2 <= this->_threshHold)
+                if (val2 <= this->_threshHold) {
                     break;
+                }
             }
         }
-
-        //this->WaitForRebound();
 
         if (maxVal > this->_maxCalibratedValue)
             maxVal = this->_maxCalibratedValue;
@@ -1327,10 +1428,12 @@ int Piezo::GetValue() {
         if (this->_debug) {
 
             Serial.println(StringFormat.Format("_8bitVal:%d, val:%d, maxVal:%d, buf:%s", _8bitVal, val, maxVal, buf.c_str()));
-            //Serial.flush();
+            Serial.flush();
         }
 
         return _8bitVal;
     }
     else return -1;
 }
+
+*/

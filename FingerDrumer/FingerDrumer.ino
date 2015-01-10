@@ -105,9 +105,14 @@ void ProcessWindowsConsoleCommand() {
 
 #define PIEZOTHRESHOLD 10
 #define HITHAT_MAX_VALUE 250
-#define SNARE_MAX_VALUE 200 
-Piezo finger1(0, PIEZOTHRESHOLD, HITHAT_MAX_VALUE);
-Piezo finger2(1, PIEZOTHRESHOLD, SNARE_MAX_VALUE);
+#define SD_MAX_VALUE 1000
+#define BD_MAX_VALUE 1000
+
+Piezo fingerHitHat  (1, PIEZOTHRESHOLD, HITHAT_MAX_VALUE, 127);
+Piezo fingerHitHat2 (2, PIEZOTHRESHOLD, HITHAT_MAX_VALUE, 127);
+Piezo fingerSD      (3, PIEZOTHRESHOLD, SD_MAX_VALUE, 90);
+Piezo fingerBD      (0, PIEZOTHRESHOLD, BD_MAX_VALUE, 100);
+
 
 void loop() {
 
@@ -116,15 +121,27 @@ void loop() {
 
     /// http://todbot.com/arduino/sketches/midi_drum_kit/midi_drum_kit.pde
 
-    int v1 = finger1.GetValue();
+    int v1 = fingerHitHat.GetValue();
     if (v1 != -1) {
         MIDI.sendNoteOn(HH_CLOSED, v1, _channel);
     }
 
-    int v2 = finger2.GetValue();
-    if (v2 != -1) {
-        MIDI.sendNoteOn (SD, v2, _channel);
+    v1 = fingerHitHat2.GetValue();
+    if (v1 != -1) {
+        MIDI.sendNoteOn(HH_CLOSED, v1, _channel);
     }
+
+    v1 = fingerSD.GetValue();
+    if (v1 != -1) {
+        MIDI.sendNoteOn(SD_HARD, v1, _channel);
+    }
+
+    v1 = fingerBD.GetValue();
+    if (v1 != -1) {
+        MIDI.sendNoteOn(BD, v1, _channel);
+        MIDI.sendNoteOn(HH_CLOSED, v1 - (v1*20/100), _channel);
+    }
+
     ProcessWindowsConsoleCommand();
     /*
 

@@ -13,30 +13,17 @@
 
 #define ON_BOARD_LED 13
 boolean _ledState = false;
-
-// Trigger every 6 minutes - 6 time per hour => 144 value per day 
-// 432 bytes represent 3 days of data, starting from 
-//    - the moment we started the Arduino
-//    - One mesure every 6 minutes
-#define MAX_TEMPERATURE_SAMPLES 3 * 24 * 6 // 3d * 24h * 6m ==> 432
-#define SAMPLING_TIME           1000UL * 60UL * 1UL // Must be unsigned long
-TimeOut _timeOut(SAMPLING_TIME);
-MemDB _temperatureDB; // Trinket has only 512 byte of EPROM
+unsigned long _counter = 0;
+Led _onBoardLed(ON_BOARD_LED);
 
 void setup() {
 
     Board.Delay(1500); // Wait one second so after plug in the USB port, I can start the ArduinoWindowsConsole
 
     Board.InitializeComputerCommunication(9600, "Initializing...");
-    Board.TraceHeader("Serial Communicator With EEPROM");
-    
+    Board.TraceHeader("Serial Communicator With EEPROM");   
     Board.SetPinMode(ON_BOARD_LED, OUTPUT);
-    MemDB::InitEEPROM(512, MAX_TEMPERATURE_SAMPLES * 3);
-    int temperatureDBAddr = _temperatureDB.CreateByteArray(MAX_TEMPERATURE_SAMPLES, false);
-    
-    Board.TraceFormat("temperatureDBAddr:%d", temperatureDBAddr);
-    Board.TraceFormat("temperature Length:%d", _temperatureDB.GetLength());
-    Board.Trace(_timeOut.ToString());
+    _onBoardLed.SetBlinkMode(1000);
 }
 
 void PowerLed(boolean state) {
@@ -44,49 +31,53 @@ void PowerLed(boolean state) {
     Board.LedOn(ON_BOARD_LED, state);
 }
 
+void ShowUserData() {
+    Board.SendWindowsConsoleCommand(StringFormat.Format("counter:%ul", _counter));
+}
+
 void loop() {
     
-    if (_timeOut.IsTimeOut()) {
-
-        int lastTemp = _temperatureDB.AddByteArray((byte)millis());
-        Board.TraceFormat("LastTemperature:%d", lastTemp);
-    }
+    _onBoardLed.Blink();
+    _counter++;
 
     boolean executed          = false;
     WindowsCommand winCommand = Board.GetWindowsConsoleCommand();
     
-    if (winCommand.Command == "resetCounter") {
+    if (winCommand.Command != "") {
 
-        _temperatureDB.ClearByteArray();
-        Board.Trace("No temperatures stored");
-        executed = true;
-    }
-    else if (winCommand.Command == "incCounter") {
+        if (winCommand.Command == "test") {
 
-        _temperatureDB.AddByteArray((byte)millis());
-        executed = true;
-    }
-    else if (winCommand.Command == "getCounter") {
-                
-        if (_temperatureDB.GetLength() == 0) {
-            Board.Trace("No temperatures stored");
+            executed = true;
+        }
+        else if (winCommand.Command == "getData") {
+
+            ShowUserData();
+            executed = true;
+        }
+        else if (winCommand.Command == "resetData") {
+
+            _counter = 0;
+            ShowUserData();
+            executed = true;
+        }
+        else if (winCommand.Command == "inc") {
+
+            _counter++;
+            ShowUserData();
+            executed = true;
+        }
+        else if (winCommand.Command == "dec") {
+
+            _counter--;
+            ShowUserData();
+            executed = true;
+        }
+
+        if (executed) {
+            Board.Trace(StringFormat.Format("[%s executed]", winCommand.Command.c_str()));
         }
         else {
-            Board.Trace(_temperatureDB.ToString());
+            Board.Trace(StringFormat.Format("[Invalid command:%s]", winCommand.Command.c_str()));
         }
-        Board.Trace(_timeOut.ToString());
-        executed = true;
-    }
-    else if (winCommand.Command == "led") {
-
-        _ledState = !_ledState;
-        Board.LedOn(ON_BOARD_LED, _ledState);
-        executed = true;
-    }
-    if (executed) {
-        Board.Trace(StringFormat.Format("[%s executed]", winCommand.Command.c_str()));
-    }
-    else {
-        Board.Trace(StringFormat.Format("[Invalid command:%s]", winCommand.Command.c_str()));
     }
 }

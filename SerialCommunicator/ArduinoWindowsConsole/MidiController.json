@@ -1,6 +1,6 @@
 {
-    "PortName": "COM5",
-    "DeviceName": "Trinket Pro",
+    "PortName": "COM4",
+    "DeviceName": "Arduino Uno",
     
   "ComCommands": [
     {
@@ -16,16 +16,10 @@
       "ConsoleKey": 81
     },
     {
-      "Caption": "R)eset",
-      "Command": "resetData",
+      "Caption": "T)est Midi",
+      "Command": "testMidi", 
       "CommandType": 2,
-      "ConsoleKey": 82
-    },
-    {
-        "Caption": "G)et data",
-        "Command": "getData",
-        "CommandType": 2,
-        "ConsoleKey": 71
-    }     
+      "ConsoleKey": 84
+    }   
   ]
 }
