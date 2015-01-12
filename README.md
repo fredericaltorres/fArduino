@@ -16,6 +16,12 @@ And
 - Midi communication 
 	- project DrumMachine01 and FingerDrumer
 
+- PC communication 
+	- project SerialCommunicator
+
+- EEPROM Usage
+	- project TemperatureSensorDS18B20
+
 - LED and Music animation
 	- project TrinketChristmasTree
 
