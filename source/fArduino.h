@@ -655,4 +655,27 @@
             void WaitForRebound();
     };
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Register74HC595
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    class Register74HC595 {
+
+    private:
+        int _latchPin;   // Pin connected to ST_CP of 74HC595
+        int _clockPin;  // Pin connected to SH_CP of 74HC595
+        int _dataPin;  // Pin connected to DS of 74HC595
+    public:
+        Register74HC595(int latchPin, int clockPin, int dataPin);
+        void SendValue(int v);
+        void DisplayNumberFrom0To8(int v);
+        void DisplayNumberFrom0To8Reverse(int v);
+        void FlashNumberFrom0To8(int v, int flashCount = 3, int waitTime = 400);
+        void FlashValue(int v, int flashCount = 4, int waitTime = 250);
+        void AnimateAllLeftToRight(int waitTime);
+        void AnimateAllRightToLeft(int waitTime);
+        //void AnimateAllLeftToRightAndRightToLeft(int waitTime);
+        void AnimateOneLeftToRightAndRightToLeft(int waitTime);
+        void AnimateEveryOther(int flashCount, int waitTime);
+    };
+   
 #endif

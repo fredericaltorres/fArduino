@@ -1390,50 +1390,157 @@ int Piezo::GetTimeValue() {
     }
     else return -1;
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Register74HC595
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*int Piezo::GetValue() {
-    
-    int val  = analogRead(this->_pin);
+Register74HC595::Register74HC595(int latchPin, int clockPin, int dataPin) {
 
-    if (val > this->_threshHold) {
+    this->_latchPin = latchPin;
+    this->_clockPin = clockPin;
+    this->_dataPin = dataPin;
 
-        int val2 = -1;
-        String buf("");
-        int maxVal = val;
-        buf.concat(val); buf.concat(" ");
-
-        while (true) {
-
-            int v = analogRead(this->_pin);
-
-            if (v != val2) { // Eliminate multiple similar values
-
-                val2 = v;
-                if (val2 > maxVal)
-                    maxVal = val2;
-
-                if (this->_debug) {
-                    buf.concat(val2); buf.concat(" ");
-                }
-                if (val2 <= this->_threshHold) {
-                    break;
-                }
-            }
-        }
-
-        if (maxVal > this->_maxCalibratedValue)
-            maxVal = this->_maxCalibratedValue;
-
-        int _8bitVal = map(maxVal, 0, this->_maxCalibratedValue, 0, 127);
-        if (this->_debug) {
-
-            Serial.println(StringFormat.Format("_8bitVal:%d, val:%d, maxVal:%d, buf:%s", _8bitVal, val, maxVal, buf.c_str()));
-            Serial.flush();
-        }
-
-        return _8bitVal;
-    }
-    else return -1;
+    //set pins to output so you can control the shift register
+    Board.SetPinMode(latchPin, OUTPUT);
+    Board.SetPinMode(clockPin, OUTPUT);
+    Board.SetPinMode(dataPin, OUTPUT);
 }
 
-*/
+void Register74HC595::SendValue(int v) {
+
+    // take the latchPin low so  the LEDs don't change while you're sending in bits:
+    digitalWrite(this->_latchPin, LOW);
+    shiftOut(this->_dataPin, this->_clockPin, MSBFIRST, v); // shift out the bits:
+    digitalWrite(this->_latchPin, HIGH); //take the latch pin high so the LEDs will light up:
+}
+
+void Register74HC595::FlashValue(int v, int flashCount /* = 4 */, int waitTime /* = 125 */) {
+
+    for (int i = 0; i < flashCount; i++) {
+
+        this->SendValue(v);
+        Board.Delay(waitTime);
+        this->SendValue(0);
+        Board.Delay(waitTime);
+    }
+}
+
+void Register74HC595::AnimateOneLeftToRightAndRightToLeft(int waitTime){
+
+    this->SendValue(0);
+
+    int p2[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
+
+    for (int i = 0; i < 8; i++) {
+
+        this->SendValue(p2[i]);
+        Board.Delay(waitTime);
+    }
+    for (int i = 8 - 1; i >= 0; i--) {
+
+        this->SendValue(p2[i]);
+        Board.Delay(waitTime);
+    }
+}
+
+void Register74HC595::FlashNumberFrom0To8(int v, int flashCount /* = 4 */, int waitTime /* = 125 */) {
+
+    for (int i = 0; i < flashCount; i++) {
+
+        this->DisplayNumberFrom0To8(v);
+        Board.Delay(waitTime);
+        this->DisplayNumberFrom0To8(0);
+        Board.Delay(waitTime);
+    }
+}
+
+void Register74HC595::AnimateEveryOther(int flashCount, int waitTime) {
+
+    this->SendValue(0);
+
+    for (int i = 0; i < flashCount; i++) {
+
+        this->FlashValue(1 + 4 + 16 + 64, 1, waitTime);
+        this->FlashValue(2 + 8 + 32 + 128, 1, waitTime);
+    }
+}
+
+void Register74HC595::AnimateAllLeftToRight(int waitTime) {
+
+    this->SendValue(0);
+
+    for (int v = 0; v <= 8; v++) {
+
+        this->DisplayNumberFrom0To8(v);
+        Board.Delay(waitTime);
+    }
+    for (int v = 8; v > 0; v--) {
+
+        this->DisplayNumberFrom0To8(v);
+        Board.Delay(waitTime);
+    }
+    this->SendValue(0);
+}
+void Register74HC595::AnimateAllRightToLeft(int waitTime) {
+
+    this->SendValue(0);
+    for (int v = 0; v <= 8; v++) {
+
+        this->DisplayNumberFrom0To8Reverse(v);
+        Board.Delay(waitTime);
+    }
+    for (int v = 8; v > 0; v--) {
+
+        this->DisplayNumberFrom0To8Reverse(v);
+        Board.Delay(waitTime);
+    }
+    this->SendValue(0);
+}
+
+//void Register74HC595::AnimateAllLeftToRightAndRightToLeft(int waitTime) {
+//
+//    this->AnimateAllLeftToRight(waitTime);
+//    Board.Delay(waitTime * 5);
+//    this->AnimateAllRightToLeft(waitTime);
+//}
+
+//  0   1   2   3   4   5   6   7
+//  1   2   4   8   16  32  64  128
+void Register74HC595::DisplayNumberFrom0To8(int v) {
+
+    int v2 = 0;
+
+    switch (v) {
+
+        case 0: v2 = 0;                                  break;
+        case 1: v2 = 1;                                  break;
+        case 2: v2 = 1 + 2;                              break;
+        case 3: v2 = 1 + 2 + 4;                          break;
+        case 4: v2 = 1 + 2 + 4 + 8;                      break;
+        case 5: v2 = 1 + 2 + 4 + 8 + 16;                 break;
+        case 6: v2 = 1 + 2 + 4 + 8 + 16 + 32;            break;
+        case 7: v2 = 1 + 2 + 4 + 8 + 16 + 32 + 64;       break;
+        case 8: v2 = 1 + 2 + 4 + 8 + 16 + 32 + 64 + 128; break;
+    }
+    this->SendValue(v2);
+}
+
+void Register74HC595::DisplayNumberFrom0To8Reverse(int v) {
+
+    int v2 = 0;
+
+    switch (v) {
+
+        case 0: v2 = 0;                                 break;
+        case 1: v2 = 128;                               break;
+        case 2: v2 = 128 + 64;                          break;
+        case 3: v2 = 128 + 64 + 32;                     break;
+        case 4: v2 = 128 + 64 + 32 + 16;                break;
+        case 5: v2 = 128 + 64 + 32 + 16 + 8;            break;
+        case 6: v2 = 128 + 64 + 32 + 16 + 8 + 4;        break;
+        case 7: v2 = 128 + 64 + 32 + 16 + 8 + 4 + 2;    break;
+        case 8: v2 = 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1;break;
+    }
+    this->SendValue(v2);
+}
+

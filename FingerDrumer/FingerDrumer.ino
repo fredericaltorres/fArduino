@@ -143,51 +143,6 @@ void loop() {
     }
 
     ProcessWindowsConsoleCommand();
-    /*
-
-    // deal with second piezos, this is kind of a hack
-    int val     = analogRead(PIEZO_1_PIN);
-    int maxVal  = -1;
-    int val2    = -1;
-    if (val > PIEZOTHRESHOLD) {
-        buf.concat(val); buf.concat(" ");
-        while(true) {
-            int v = analogRead(PIEZO_1_PIN);
-            //if (v != val2) { // Eliminate multiple similar values
-                val2 = v;
-                if (val2 > maxVal)
-                    maxVal = val2;
-                buf.concat(val2); buf.concat(" ");
-                if (val2 <= PIEZOTHRESHOLD)
-                    break;
-            //}
-        }
-        Serial.println(StringFormat.Format("val:%d, maxVal:%d, buf:%s", val, maxVal, buf.c_str()));
-        //Serial.flush();
-    }
-
-    */
-    //Serial.flush();
-    //Serial.flush();
-    //delay(1000);
-    /*if (val >= PIEZOTHRESHOLD) {
-        int t = 0;
-        while (analogRead(PIEZO_1_PIN) >= PIEZOTHRESHOLD / 2) {
-            t++;
-        }
-        Serial.println(val);
-        Serial.println(t * 2);
-    }*/
-    //Serial.flush();
-
-    //int piezo1Velocity   = analogRead(PIEZO_1_PIN);
-    //int piezo1Velocity8b = piezo1Velocity / 8;
-    //if (piezo1Velocity != 0) {
-
-    //    Board.SendWindowsConsoleCommand(StringFormat.Format("%d %d", piezo1Velocity, piezo1Velocity8b), false, true);
-    //    Serial.println(piezo1Velocity);
-    //    Serial.flush();
-    //}    
 }
 
 

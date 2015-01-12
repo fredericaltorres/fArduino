@@ -58,6 +58,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Register74HC595.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="MidiController.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
