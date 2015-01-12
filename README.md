@@ -8,16 +8,16 @@ My experiments with micro controllers Arduino, Trinket and Trinket Pro
 And
 
 - [DS18B20 Digital temperature sensor](https://www.adafruit.com/products/374)
-project TemperatureSensorDS18B20
+* project TemperatureSensorDS18B20
 
 - [Photo cell (CdS photoresistor)](https://www.adafruit.com/products/161)
-project:ArduinoLightSensor
+* project:ArduinoLightSensor
 
 - Midi communication 
-project DrumMachine01 and FingerDrumer
+* project DrumMachine01 and FingerDrumer
 
 - LED and Music animation
-project TrinketChristmasTree
+* project TrinketChristmasTree
 
 # Library
 
