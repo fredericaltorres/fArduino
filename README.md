@@ -14,10 +14,10 @@ And
 	- project:ArduinoLightSensor
 
 - Midi communication 
-* project DrumMachine01 and FingerDrumer
+	- project DrumMachine01 and FingerDrumer
 
 - LED and Music animation
-* project TrinketChristmasTree
+	- project TrinketChristmasTree
 
 # Library
 
