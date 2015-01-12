@@ -54,9 +54,7 @@ void DisplayValueFrom1To64() {
 }
 
 
-int p2[] = { 1 , 2, 4 , 8, 16, 32, 64, 128 };
-
-void DisplayValueFrom0To8() {
+void DisplayAnimations() {
 
     int waitTime = 250;
     Board.Trace("FlashValue");
@@ -93,9 +91,9 @@ void loop() {
             DisplayValueFrom1To64();
             executed = true;
         }
-        else if (winCommand.Command == "loop8") {
+        else if (winCommand.Command == "animations") {
 
-            DisplayValueFrom0To8();
+            DisplayAnimations();
             executed = true;
         }
         else if (winCommand.Command == "reset") {

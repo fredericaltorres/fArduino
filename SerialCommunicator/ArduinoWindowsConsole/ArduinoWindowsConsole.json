@@ -28,10 +28,10 @@
       "ConsoleKey": 82
     },
     {
-        "Caption": "G) loop to 0..8",
-        "Command": "loop8",
+        "Caption": "A)nimations",
+        "Command": "animations",
         "CommandType": 2,
-        "ConsoleKey": 71
+        "ConsoleKey": 65
     }    
   ]
 }
