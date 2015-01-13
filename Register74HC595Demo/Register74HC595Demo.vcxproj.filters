@@ -18,6 +18,7 @@
     <None Include="Register74HC595Demo.ino" />
     <None Include="bu.ino" />
     <None Include="Another.ino" />
+    <None Include="Register74HC595Demo_8Bits.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Visual Micro\.Register74HC595Demo.vsarduino.h">

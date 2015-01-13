@@ -42,5 +42,6 @@ extern "C" void __cxa_pure_virtual() {;}
 #include "D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\variants\standard\pins_arduino.h" 
 #include "D:\DVT\Arduino\fArduino\Register74HC595Demo\Register74HC595Demo.ino"
 #include "D:\DVT\Arduino\fArduino\Register74HC595Demo\Another.ino"
+#include "D:\DVT\Arduino\fArduino\Register74HC595Demo\Register74HC595Demo_8Bits.ino"
 #include "D:\DVT\Arduino\fArduino\Register74HC595Demo\bu.ino"
 #endif

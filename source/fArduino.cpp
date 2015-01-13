@@ -1352,8 +1352,6 @@ int Piezo::GetValue() {
         return -1;
     }
 }
-
-
 int Piezo::GetTimeValue() {
 
     int _8bitVal;
@@ -1391,59 +1389,56 @@ int Piezo::GetTimeValue() {
     else return -1;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// Register74HC595
+/// Register74HC595_8Bit
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Register74HC595::Register74HC595(int latchPin, int clockPin, int dataPin) {
+Register74HC595_8Bit::Register74HC595_8Bit(int latchPin, int clockPin, int dataPin) {
 
     this->_latchPin = latchPin;
     this->_clockPin = clockPin;
-    this->_dataPin = dataPin;
+    this->_dataPin  = dataPin;
 
     //set pins to output so you can control the shift register
     Board.SetPinMode(latchPin, OUTPUT);
     Board.SetPinMode(clockPin, OUTPUT);
-    Board.SetPinMode(dataPin, OUTPUT);
+    Board.SetPinMode(dataPin,  OUTPUT);
 }
-
-void Register74HC595::SendValue(int v) {
+void Register74HC595_8Bit::Send8BitValue(int v) {
 
     // take the latchPin low so  the LEDs don't change while you're sending in bits:
     digitalWrite(this->_latchPin, LOW);
     shiftOut(this->_dataPin, this->_clockPin, MSBFIRST, v); // shift out the bits:
     digitalWrite(this->_latchPin, HIGH); //take the latch pin high so the LEDs will light up:
 }
-
-void Register74HC595::FlashValue(int v, int flashCount /* = 4 */, int waitTime /* = 125 */) {
+void Register74HC595_8Bit::FlashValue(int v, int flashCount /* = 4 */, int waitTime /* = 125 */) {
 
     for (int i = 0; i < flashCount; i++) {
 
-        this->SendValue(v);
+        this->Send8BitValue(v);
         Board.Delay(waitTime);
-        this->SendValue(0);
+        this->Send8BitValue(0);
         Board.Delay(waitTime);
     }
 }
+void Register74HC595_8Bit::AnimateOneLeftToRightAndRightToLeft(int waitTime){
 
-void Register74HC595::AnimateOneLeftToRightAndRightToLeft(int waitTime){
-
-    this->SendValue(0);
+    this->Send8BitValue(0);
 
     int p2[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
 
     for (int i = 0; i < 8; i++) {
 
-        this->SendValue(p2[i]);
+        this->Send8BitValue(p2[i]);
         Board.Delay(waitTime);
     }
     for (int i = 8 - 1; i >= 0; i--) {
 
-        this->SendValue(p2[i]);
+        this->Send8BitValue(p2[i]);
         Board.Delay(waitTime);
     }
+    this->Send8BitValue(0);
 }
-
-void Register74HC595::FlashNumberFrom0To8(int v, int flashCount /* = 4 */, int waitTime /* = 125 */) {
+void Register74HC595_8Bit::FlashNumberFrom0To8(int v, int flashCount /* = 4 */, int waitTime /* = 125 */) {
 
     for (int i = 0; i < flashCount; i++) {
 
@@ -1453,10 +1448,9 @@ void Register74HC595::FlashNumberFrom0To8(int v, int flashCount /* = 4 */, int w
         Board.Delay(waitTime);
     }
 }
+void Register74HC595_8Bit::AnimateEveryOther(int flashCount, int waitTime) {
 
-void Register74HC595::AnimateEveryOther(int flashCount, int waitTime) {
-
-    this->SendValue(0);
+    this->Send8BitValue(0);
 
     for (int i = 0; i < flashCount; i++) {
 
@@ -1464,10 +1458,9 @@ void Register74HC595::AnimateEveryOther(int flashCount, int waitTime) {
         this->FlashValue(2 + 8 + 32 + 128, 1, waitTime);
     }
 }
+void Register74HC595_8Bit::AnimateAllLeftToRight(int waitTime) {
 
-void Register74HC595::AnimateAllLeftToRight(int waitTime) {
-
-    this->SendValue(0);
+    this->Send8BitValue(0);
 
     for (int v = 0; v <= 8; v++) {
 
@@ -1479,11 +1472,11 @@ void Register74HC595::AnimateAllLeftToRight(int waitTime) {
         this->DisplayNumberFrom0To8(v);
         Board.Delay(waitTime);
     }
-    this->SendValue(0);
+    this->Send8BitValue(0);
 }
-void Register74HC595::AnimateAllRightToLeft(int waitTime) {
+void Register74HC595_8Bit::AnimateAllRightToLeft(int waitTime) {
 
-    this->SendValue(0);
+    this->Send8BitValue(0);
     for (int v = 0; v <= 8; v++) {
 
         this->DisplayNumberFrom0To8Reverse(v);
@@ -1494,19 +1487,11 @@ void Register74HC595::AnimateAllRightToLeft(int waitTime) {
         this->DisplayNumberFrom0To8Reverse(v);
         Board.Delay(waitTime);
     }
-    this->SendValue(0);
+    this->Send8BitValue(0);
 }
-
-//void Register74HC595::AnimateAllLeftToRightAndRightToLeft(int waitTime) {
-//
-//    this->AnimateAllLeftToRight(waitTime);
-//    Board.Delay(waitTime * 5);
-//    this->AnimateAllRightToLeft(waitTime);
-//}
-
 //  0   1   2   3   4   5   6   7
 //  1   2   4   8   16  32  64  128
-void Register74HC595::DisplayNumberFrom0To8(int v) {
+void Register74HC595_8Bit::DisplayNumberFrom0To8(int v) {
 
     int v2 = 0;
 
@@ -1522,10 +1507,9 @@ void Register74HC595::DisplayNumberFrom0To8(int v) {
         case 7: v2 = 1 + 2 + 4 + 8 + 16 + 32 + 64;       break;
         case 8: v2 = 1 + 2 + 4 + 8 + 16 + 32 + 64 + 128; break;
     }
-    this->SendValue(v2);
+    this->Send8BitValue(v2);
 }
-
-void Register74HC595::DisplayNumberFrom0To8Reverse(int v) {
+void Register74HC595_8Bit::DisplayNumberFrom0To8Reverse(int v) {
 
     int v2 = 0;
 
@@ -1541,6 +1525,102 @@ void Register74HC595::DisplayNumberFrom0To8Reverse(int v) {
         case 7: v2 = 128 + 64 + 32 + 16 + 8 + 4 + 2;    break;
         case 8: v2 = 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1;break;
     }
-    this->SendValue(v2);
+    this->Send8BitValue(v2);
 }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Register74HC595_16Bit
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Register74HC595_16Bit::Register74HC595_16Bit(int latchPin, int clockPin, int dataPin) {
+
+    this->_latchPin = latchPin;
+    this->_clockPin = clockPin;
+    this->_dataPin = dataPin;
+
+    //set pins to output so you can control the shift register
+    Board.SetPinMode(latchPin, OUTPUT);
+    Board.SetPinMode(clockPin, OUTPUT);
+    Board.SetPinMode(dataPin, OUTPUT);
+}
+
+void Register74HC595_16Bit::Send16BitValue(unsigned int v) {
+
+    byte low  = (byte)(v & 0xff);
+    byte high = (byte)((v >> 8) & 0xff);
+    
+    // take the latchPin low so  the LEDs don't change while you're sending in bits:
+    digitalWrite(this->_latchPin, LOW);
+    shiftOut(this->_dataPin, this->_clockPin, MSBFIRST, high); // shift out the bits:
+    shiftOut(this->_dataPin, this->_clockPin, MSBFIRST, low); // shift out the bits:
+    digitalWrite(this->_latchPin, HIGH); //take the latch pin high so the LEDs will light up:
+}
+
+void Register74HC595_16Bit::AnimateOneLeftToRightAndRightToLeft2Leds(int waitTime, int count) {
+
+    for (int counter = 0; counter < count; counter++) {
+
+        unsigned int v = 256 + 1;
+
+        for (int i = 0; i <= 7; i++) {
+
+            //Board.Trace(StringFormat.Format("[%d]v:%ui", i, v));
+            this->Send16BitValue(v);
+            Board.Delay(i == 0 ? waitTime * 2 : waitTime); // Wait more for the first step
+            v = v << 1;
+        }
+
+        v = 32768 + 128;
+
+        for (int i = 0; i <= 7; i++) {
+
+            //Board.Trace(StringFormat.Format("[%d]v:%ui", i, v));
+            this->Send16BitValue(v);
+            Board.Delay(i == 7 ? waitTime * 2 : waitTime); // Wait more for the first step
+            v = v >> 1;
+        }
+        this->Send16BitValue(0);
+    }
+}
+
+void Register74HC595_16Bit::AnimateOneLeftToRightAndRightToLeft1Leds(int waitTime, int count) {
+
+    unsigned int _16Bits[] = {
+    1,     // 1
+    2,     // 2
+    4,     // 3
+    8,     // 4
+    16,    // 5
+    32,    // 6
+    64,    // 7
+    128,   // 8
+    256,   // 9
+    512,   // 10
+    1024,  // 11
+    2048,  // 12
+    4096,  // 13
+    8192,  // 14
+    16384, // 15
+    32768  // 16
+    };
+
+    for (int counter = 0; counter < count; counter++) {
+
+        unsigned int v = 256 + 1;
+
+        for (int i = 0; i < 16; i++) {
+
+            //Board.Trace(StringFormat.Format("[%d]v:%ui", i, _16Bits[i]));
+            this->Send16BitValue(_16Bits[i]);
+            Board.Delay(waitTime);
+        }
+        for (int i = 15; i >=0; i--) {
+
+            //Board.Trace(StringFormat.Format("[%d]v:%ui", i, _16Bits[i]));
+            this->Send16BitValue(_16Bits[i]);
+            Board.Delay(waitTime);
+        }
+        this->Send16BitValue(0);
+    }
+}

@@ -22,19 +22,20 @@ int latchPin = 8;   // Pin connected to ST_CP of 74HC595
 int clockPin = 12;  // Pin connected to SH_CP of 74HC595
 int dataPin = 11;  // Pin connected to DS of 74HC595
 
-Register74HC595 _register74HC595(latchPin, clockPin, dataPin);
+Register74HC595_16Bit _register74HC595_16Bit(latchPin, clockPin, dataPin);
 
 #define ON_BOARD_LED 13
 Led _onBoardLed(ON_BOARD_LED);
 
 void setup() {
 
-    Board.Delay(1500); // Wait one second so after plug in the USB port, I can start the ArduinoWindowsConsole
+    Board.Delay(1000); // Wait one second so after plug in the USB port, I can start the ArduinoWindowsConsole
 
     Board.InitializeComputerCommunication(9600, "Initializing...");
     Board.TraceHeader("Register74HC595 Demo");
     Board.SetPinMode(ON_BOARD_LED, OUTPUT);
     _onBoardLed.SetBlinkMode(500);
+    _register74HC595_16Bit.Send16BitValue(0);
 }
 
 void ShowUserData(int value) {
@@ -42,36 +43,16 @@ void ShowUserData(int value) {
     Board.SendWindowsConsoleCommand(StringFormat.Format("value:%d", value), true, true);
 }
 
-void DisplayValueFrom1To64() {
 
-    for (int v = 0; v < 64; v++) {
-
-        _register74HC595.SendValue(v);
-        ShowUserData(v);
-        delay(500);
-    }
-    _register74HC595.SendValue(0);
+void Animations() {
+    
+    int waitTime = 125;
+    _register74HC595_16Bit.AnimateOneLeftToRightAndRightToLeft2Leds(waitTime, 3);
+    
+    waitTime = 100;
+    _register74HC595_16Bit.AnimateOneLeftToRightAndRightToLeft1Leds(waitTime, 2);    
 }
 
-
-void DisplayAnimations() {
-
-    int waitTime = 250;
-    Board.Trace("FlashValue");
-    _register74HC595.FlashValue(255, 4, waitTime);
-
-    waitTime = 65;
-    Board.Trace("AnimateOneLeftToRightAndRightToLeft");
-    _register74HC595.AnimateOneLeftToRightAndRightToLeft(waitTime);
-
-    Board.Trace("AnimateAllLeftToRight");
-    _register74HC595.AnimateAllLeftToRight(waitTime);
-
-    Board.Trace("AnimateAllLeftToRight");
-    _register74HC595.AnimateAllRightToLeft(waitTime);
-
-    _register74HC595.SendValue(0);
-}
 
 void loop() {
 
@@ -88,17 +69,16 @@ void loop() {
         }
         else if (winCommand.Command == "loop64") {
 
-            DisplayValueFrom1To64();
             executed = true;
         }
         else if (winCommand.Command == "animations") {
 
-            DisplayAnimations();
+            Animations();
             executed = true;
         }
         else if (winCommand.Command == "reset") {
 
-            _register74HC595.SendValue(0);
+            _register74HC595_16Bit.Send16BitValue(0);
             executed = true;
         }
         if (executed) {

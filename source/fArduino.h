@@ -656,17 +656,18 @@
     };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// Register74HC595
+    /// Register74HC595_8Bit
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    class Register74HC595 {
+    class Register74HC595_8Bit {
 
     private:
         int _latchPin;   // Pin connected to ST_CP of 74HC595
         int _clockPin;  // Pin connected to SH_CP of 74HC595
         int _dataPin;  // Pin connected to DS of 74HC595
     public:
-        Register74HC595(int latchPin, int clockPin, int dataPin);
-        void SendValue(int v);
+
+        Register74HC595_8Bit(int latchPin, int clockPin, int dataPin);
+        void Send8BitValue(int v);
         void DisplayNumberFrom0To8(int v);
         void DisplayNumberFrom0To8Reverse(int v);
         void FlashNumberFrom0To8(int v, int flashCount = 3, int waitTime = 400);
@@ -678,4 +679,21 @@
         void AnimateEveryOther(int flashCount, int waitTime);
     };
    
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Register74HC595_16Bit
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    class Register74HC595_16Bit {
+
+    private:
+        int _latchPin;   // Pin connected to ST_CP of 74HC595
+        int _clockPin;  // Pin connected to SH_CP of 74HC595
+        int _dataPin;  // Pin connected to DS of 74HC595
+    public:
+
+        Register74HC595_16Bit(int latchPin, int clockPin, int dataPin);
+        void Send16BitValue(unsigned int v);
+        void AnimateOneLeftToRightAndRightToLeft2Leds(int waitTime, int count);
+        void AnimateOneLeftToRightAndRightToLeft1Leds(int waitTime, int count);
+    };
 #endif
