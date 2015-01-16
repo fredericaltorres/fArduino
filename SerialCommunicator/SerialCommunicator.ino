@@ -32,6 +32,7 @@ void PowerLed(boolean state) {
 }
 
 void ShowUserData() {
+
     Board.SendWindowsConsoleCommand(StringFormat.Format("counter:%ul", _counter));
 }
 
@@ -57,18 +58,6 @@ void loop() {
         else if (winCommand.Command == "resetData") {
 
             _counter = 0;
-            ShowUserData();
-            executed = true;
-        }
-        else if (winCommand.Command == "inc") {
-
-            _counter++;
-            ShowUserData();
-            executed = true;
-        }
-        else if (winCommand.Command == "dec") {
-
-            _counter--;
             ShowUserData();
             executed = true;
         }

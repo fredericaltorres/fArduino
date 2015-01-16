@@ -1,4 +1,5 @@
-﻿/************************************
+﻿
+/************************************
 
 Serial to Parallel Shifting-Out with a 74HC595
 How to handle 8 leads with only 3 pins
@@ -18,9 +19,14 @@ TV for $1 - https://www.youtube.com/watch?v=WlBXiZpuncg
 
 #include "fArduino.h"
 
-int latchPin = 8;   // Pin connected to ST_CP of 74HC595
-int clockPin = 12;  // Pin connected to SH_CP of 74HC595
-int dataPin = 11;  // Pin connected to DS of 74HC595
+// Pin connected to latch pin (ST_CP, Storage Register Clock Pin) of 74HC595 - Register pin 12
+const int latchPin = 8; // Green Wire
+
+// Pin connected to clock pin (SH_CP, Shift Register Clock Pin) of 74HC595 - Register pin 11
+const int clockPin = 12;  // Yellow wire
+
+// Pin connected to Data in (DS) of 74HC595  - Register pin 14
+const int dataPin = 11; // Blue wire
 
 Register74HC595_16Bit _register74HC595_16Bit(latchPin, clockPin, dataPin);
 
@@ -45,12 +51,12 @@ void ShowUserData(int value) {
 
 
 void Animations() {
-    
+
     int waitTime = 125;
     _register74HC595_16Bit.AnimateOneLeftToRightAndRightToLeft2Leds(waitTime, 3);
-    
+
     waitTime = 100;
-    _register74HC595_16Bit.AnimateOneLeftToRightAndRightToLeft1Leds(waitTime, 2);    
+    _register74HC595_16Bit.AnimateOneLeftToRightAndRightToLeft1Leds(waitTime, 2);
 }
 
 
@@ -65,6 +71,11 @@ void loop() {
 
         if (winCommand.Command == "test") {
 
+            Board.Trace("Tested");
+            executed = true;
+        }
+        else if (winCommand.Command == "test") {
+
             executed = true;
         }
         else if (winCommand.Command == "loop64") {
@@ -73,7 +84,9 @@ void loop() {
         }
         else if (winCommand.Command == "animations") {
 
+            Board.Trace("Start Animations");
             Animations();
+            Board.Trace("End Animations");
             executed = true;
         }
         else if (winCommand.Command == "reset") {

@@ -13,14 +13,14 @@ And
 - [Photo cell (CdS photoresistor)](https://www.adafruit.com/products/161)
 	- project:ArduinoLightSensor
 
-- Midi communication 
+- Midi communication
 	- project DrumMachine01 and FingerDrumer
 
-- PC communication 
+- PC communication
 	- project SerialCommunicator
 
 - EEPROM Usage
-	- project TemperatureSensorDS18B20
+	- project TemperatureSensorDS18B20 b
 
 - LED and Music animation
 	- project TrinketChristmasTree

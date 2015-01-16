@@ -1,5 +1,5 @@
 {
-    "PortName": "COM4",
+    "PortName": "COM5",
     "DeviceName": "Arduino Uno - Register74HC595",
     
   "ComCommands": [
@@ -22,6 +22,18 @@
         "ConsoleKey": 76
     },
     {
+        "Caption": "+)Inc Pin",
+        "Command": "incPin",
+        "CommandType": 2,
+        "ConsoleKey": 107
+    },
+    {
+        "Caption": "-)Dec Pin",
+        "Command": "decPin",
+        "CommandType": 2,
+        "ConsoleKey": 109
+    },
+    {
       "Caption": "R)eset",
       "Command": "reset",
       "CommandType": 2,
@@ -32,6 +44,7 @@
         "Command": "animations",
         "CommandType": 2,
         "ConsoleKey": 65
-    }    
+    }
+       
   ]
 }
