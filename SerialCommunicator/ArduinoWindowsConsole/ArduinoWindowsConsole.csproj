@@ -58,6 +58,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="PinTester.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="basicCommunication.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

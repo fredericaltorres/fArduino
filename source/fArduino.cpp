@@ -329,6 +329,8 @@ char * PadRight(char * s, char * padding, int max) {
 }
 void BoardClass::TraceHeader(char * msg) {
 
+    #if defined(SERIAL_AVAILABLE)
+
     int maxPad = 64;
 
     String barString("");
@@ -344,6 +346,7 @@ void BoardClass::TraceHeader(char * msg) {
     this->Trace(barString);
     this->Trace(msg2);
     this->Trace(barString);
+    #endif
 }
 void BoardClass::TraceFormat(char * format, char *s) {
 
@@ -772,124 +775,6 @@ void SpeakerManager::Tone(int note, int duration) {
 #endif
 }
 
-/**************************************************
-LightSensorButton
-
-- When used with a 1k resistor, simply passing the hand over the button
-will trigger the event.
-- When used with a 10k resistor, the user will have to put the finger on
-the light sensor
-- Possiblity to implement : Put the finger on the button (FingerDown),
-wait 3 seconds, remove finger
-
-https://learn.adafruit.com/photocells/using-a-photocell
-*/
-boolean LightSensorButton::Activated() {
-
-    static byte changeDetectedCounter;
-
-    if (this->ChangeDetected()) {
-
-        #if defined(LIGHTSENSORBUTTON_DEBUG)
-        Board.Trace(StringFormat.Format("LightSensorButton(%d) Change detected %d", _pin, changeDetectedCounter));
-        #endif
-
-        changeDetectedCounter++;
-        if (changeDetectedCounter > 2) {
-            Board.Delay(200);
-        }
-        if (changeDetectedCounter > 5) {
-            // Most likely the light has changed quickly in the room and it is not cause by a human
-            // passing the had in front of the light sensor.
-            // We better give up and request new light reference
-            Board.Trace(StringFormat.Format("LightSensorButton(%d) Permanent light change detected", _pin));
-            changeDetectedCounter = 0;
-            this->NeedReference   = true;
-            return false;
-        }
-
-        Board.Delay(this->DETECTION_BACK_WAIT_TIME);
-
-        if (this->BackToReferenceValue()) {
-
-            #if defined(LIGHTSENSORBUTTON_DEBUG)
-            Board.Trace("Returned to ref value -- Activated");
-            #endif
-            changeDetectedCounter = 0;
-            return true;
-        }
-    }
-}
-boolean LightSensorButton::BackToReferenceValue() {
-    
-    return Board.InBetween(analogRead(this->_pin), this->_referenceValue, this->DETECTION_PERCENT_BACK);
-}
-boolean LightSensorButton::ChangeDetected() {
-
-    _lastValue           = analogRead(this->_pin);
-    _lastDifference      = _referenceValue - _lastValue;
-    int expectedChange   = _referenceValue * DETECTION_PERCENT / 100;
-    _lastChangeInPercent = ((1.0 * _lastValue / _referenceValue) - 1) * 100.0;
-    boolean r            = abs(_lastDifference) >= expectedChange;
-    return r;
-}
-int LightSensorButton::UpdateReferences() {
-
-    int ref = 0;
-
-    for (int i = 0; i < MAX_REFERENCES; i++) {
-
-        ref += analogRead(this->_pin);
-        delay(REFERENCE_ACQUISITION_TIME);
-    }
-    _referenceValue          = ref / MAX_REFERENCES;
-    this->NeedReference      = false;
-    this->_lastReferenceTime = millis();
-    this->ChangeDetected();
-    return _referenceValue;
-}
-boolean LightSensorButton::ReferenceTimeOut() {
-
-    return (millis() - this->_lastReferenceTime) > this->UPDATE_REFERENCE_EVERY_X_SECONDS * 1000;
-}
-LightSensorButton::LightSensorButton(byte pin, char * name) {
-
-    this->Name                             = name;
-    this->UPDATE_REFERENCE_EVERY_X_SECONDS = 15; // Update light reference every 15 seconds
-    this->MAX_REFERENCES                   = 3;  // Capture the average of 3 light value to compute the lght reference
-    this->REFERENCE_ACQUISITION_TIME       = 250; 
-    this->DETECTION_PERCENT                = 24; // If the light change more than +-24% we detected a possible change
-    this->DETECTION_PERCENT_BACK           = 8;  // if the light go back +-ReferenceValue, the button was activated by a human (Hopefully, not 100% guaranteed)
-    this->DETECTION_BACK_WAIT_TIME         = 250;// Wait time before we check if the light value went back to the reference value
-
-    this->_pin                             = pin;
-    this->NeedReference                    = true;
-    this->_lastReferenceTime               = 0;
-    this->_lastDifference                  = 0;
-    this->_lastChangeInPercent             = 0;
-    this->_referenceValue                  = 0;
-}
-LightSensorButton::~LightSensorButton() {
-
-}
-boolean LightSensorButton::FingerUp() {
-
-    return this->_lastDifference < 0;
-}
-boolean LightSensorButton::FingerDown() {
-
-    return this->_lastDifference > 0;
-}
-String LightSensorButton::ToString() {
-    
-    return StringFormat.Format("LightSensorButton(%s:%d) { value:%d, diff:%d, diffPercent:%f%% }",
-        this->Name.c_str(),
-        this->_pin,
-        this->_lastValue,
-        this->_lastDifference,
-        this->_lastChangeInPercent
-        );
-}
 
 
 /*
@@ -950,11 +835,13 @@ void EEPROMClassEx::setMemPool(int base, int memSize) {
         _memSize = memSize;
 
 #ifdef _EEPROMEX_DEBUG    
+    #if defined(SERIAL_AVAILABLE)
     if (_nextAvailableaddress != _base)
         Serial.println("Cannot change base, addresses have been issued");
 
     if (memSize < _nextAvailableaddress)
         Serial.println("Cannot change ceiling, below issued addresses");
+    #endif
 #endif	
 
 }
@@ -972,7 +859,10 @@ int EEPROMClassEx::getAddress(int noOfBytes) {
 
 #ifdef _EEPROMEX_DEBUG    
     if (_nextAvailableaddress > _memSize) {
+
+        #if defined(SERIAL_AVAILABLE)
         Serial.println("Attempt to write outside of EEPROM memory");
+        #endif
         return -availableaddress;
     }
     else {
@@ -1149,12 +1039,16 @@ bool EEPROMClassEx::isWriteOk(int address)
 #ifdef _EEPROMEX_DEBUG    
     _writeCounts++;
     if (_allowedWrites == 0 || _writeCounts > _allowedWrites) {
+        #if defined(SERIAL_AVAILABLE)
         Serial.println("Exceeded maximum number of writes");
+        #endif
         return false;
     }
 
     if (address > _memSize) {
+        #if defined(SERIAL_AVAILABLE)
         Serial.println("Attempt to write outside of EEPROM memory");
+        #endif
         return false;
     }
     else {
@@ -1168,7 +1062,9 @@ bool EEPROMClassEx::isReadOk(int address)
 {
 #ifdef _EEPROMEX_DEBUG    
     if (address > _memSize) {
+        #if defined(SERIAL_AVAILABLE)
         Serial.println("Attempt to write outside of EEPROM memory");
+        #endif
         return false;
     }
     else {
@@ -1268,11 +1164,15 @@ void MemDB::ToSerial() {
 
     for (int t = 0; t < this->GetLength(); t++) {
         
+        #if defined(SERIAL_AVAILABLE)
         Serial.println(StringFormat.Format("%3d, %d", t, this->GetByteArray(t)));
         Serial.flush();
         Board.Delay(5);
+        #endif
     }
 }
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Piezo
@@ -1333,8 +1233,10 @@ int Piezo::GetValue() {
             int _8bitVal = map(maxVal, 0, this->_maxCalibratedValue, 0, this->MaxMidiVelocity);
             if (this->_debug) {
                 
+                #if defined(SERIAL_AVAILABLE)
                 Serial.println(StringFormat.Format("[%d] HeightByte:%d val:%d maxVal:%d buf:%s", this->_pin, _8bitVal, val, maxVal, buf.c_str()));
                 Serial.flush();
+                #endif
             }
             else {
                 delay(6);
@@ -1380,8 +1282,10 @@ int Piezo::GetTimeValue() {
         }
         if (this->_debug) {
 
+            #if defined(SERIAL_AVAILABLE)
             Serial.println(StringFormat.Format("_8bitVal:%d, val:%d, t:%d", _8bitVal, val, t));
             //Serial.flush();
+            #endif
         }
 
         return _8bitVal;
@@ -1528,7 +1432,6 @@ void Register74HC595_8Bit::DisplayNumberFrom0To8Reverse(int v) {
     this->Send8BitValue(v2);
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Register74HC595_16Bit
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1550,11 +1453,10 @@ void Register74HC595_16Bit::Send16BitValue(unsigned int v) {
     byte low  = (byte)(v & 0xff);
     byte high = (byte)((v >> 8) & 0xff);
     
-    // take the latchPin low so  the LEDs don't change while you're sending in bits:
     digitalWrite(this->_latchPin, LOW);
-    shiftOut(this->_dataPin, this->_clockPin, MSBFIRST, high); // shift out the bits:
-    shiftOut(this->_dataPin, this->_clockPin, MSBFIRST, low); // shift out the bits:
-    digitalWrite(this->_latchPin, HIGH); //take the latch pin high so the LEDs will light up:
+    shiftOut(this->_dataPin, this->_clockPin, MSBFIRST, high);
+    shiftOut(this->_dataPin, this->_clockPin, MSBFIRST, low);
+    digitalWrite(this->_latchPin, HIGH);
 }
 
 void Register74HC595_16Bit::AnimateOneLeftToRightAndRightToLeft2Leds(int waitTime, int count) {
@@ -1624,3 +1526,124 @@ void Register74HC595_16Bit::AnimateOneLeftToRightAndRightToLeft1Leds(int waitTim
         this->Send16BitValue(0);
     }
 }
+
+
+/**************************************************
+LightSensorButton
+
+- When used with a 1k resistor, simply passing the hand over the button
+will trigger the event.
+- When used with a 10k resistor, the user will have to put the finger on
+the light sensor
+- Possiblity to implement : Put the finger on the button (FingerDown),
+wait 3 seconds, remove finger
+
+https://learn.adafruit.com/photocells/using-a-photocell
+*/
+boolean LightSensorButton::Activated() {
+
+    static byte changeDetectedCounter;
+
+    if (this->ChangeDetected()) {
+
+#if defined(LIGHTSENSORBUTTON_DEBUG)
+        Board.Trace(StringFormat.Format("LightSensorButton(%d) Change detected %d", _pin, changeDetectedCounter));
+#endif
+
+        changeDetectedCounter++;
+        if (changeDetectedCounter > 2) {
+            Board.Delay(200);
+        }
+        if (changeDetectedCounter > 5) {
+            // Most likely the light has changed quickly in the room and it is not cause by a human
+            // passing the had in front of the light sensor.
+            // We better give up and request new light reference
+            Board.Trace(StringFormat.Format("LightSensorButton(%d) Permanent light change detected", _pin));
+            changeDetectedCounter = 0;
+            this->NeedReference = true;
+            return false;
+        }
+
+        Board.Delay(this->DETECTION_BACK_WAIT_TIME);
+
+        if (this->BackToReferenceValue()) {
+
+#if defined(LIGHTSENSORBUTTON_DEBUG)
+            Board.Trace("Returned to ref value -- Activated");
+#endif
+            changeDetectedCounter = 0;
+            return true;
+        }
+    }
+}
+boolean LightSensorButton::BackToReferenceValue() {
+
+    return Board.InBetween(analogRead(this->_pin), this->_referenceValue, this->DETECTION_PERCENT_BACK);
+}
+boolean LightSensorButton::ChangeDetected() {
+
+    _lastValue = analogRead(this->_pin);
+    _lastDifference = _referenceValue - _lastValue;
+    int expectedChange = _referenceValue * DETECTION_PERCENT / 100;
+    _lastChangeInPercent = ((1.0 * _lastValue / _referenceValue) - 1) * 100.0;
+    boolean r = abs(_lastDifference) >= expectedChange;
+    return r;
+}
+int LightSensorButton::UpdateReferences() {
+
+    int ref = 0;
+
+    for (int i = 0; i < MAX_REFERENCES; i++) {
+
+        ref += analogRead(this->_pin);
+        delay(REFERENCE_ACQUISITION_TIME);
+    }
+    _referenceValue = ref / MAX_REFERENCES;
+    this->NeedReference = false;
+    this->_lastReferenceTime = millis();
+    this->ChangeDetected();
+    return _referenceValue;
+}
+boolean LightSensorButton::ReferenceTimeOut() {
+
+    return (millis() - this->_lastReferenceTime) > this->UPDATE_REFERENCE_EVERY_X_SECONDS * 1000;
+}
+LightSensorButton::LightSensorButton(byte pin, char * name) {
+
+    this->Name = name;
+    this->UPDATE_REFERENCE_EVERY_X_SECONDS = 15; // Update light reference every 15 seconds
+    this->MAX_REFERENCES = 3;  // Capture the average of 3 light value to compute the lght reference
+    this->REFERENCE_ACQUISITION_TIME = 250;
+    this->DETECTION_PERCENT = 24; // If the light change more than +-24% we detected a possible change
+    this->DETECTION_PERCENT_BACK = 8;  // if the light go back +-ReferenceValue, the button was activated by a human (Hopefully, not 100% guaranteed)
+    this->DETECTION_BACK_WAIT_TIME = 250;// Wait time before we check if the light value went back to the reference value
+
+    this->_pin = pin;
+    this->NeedReference = true;
+    this->_lastReferenceTime = 0;
+    this->_lastDifference = 0;
+    this->_lastChangeInPercent = 0;
+    this->_referenceValue = 0;
+}
+LightSensorButton::~LightSensorButton() {
+
+}
+boolean LightSensorButton::FingerUp() {
+
+    return this->_lastDifference < 0;
+}
+boolean LightSensorButton::FingerDown() {
+
+    return this->_lastDifference > 0;
+}
+String LightSensorButton::ToString() {
+
+    return StringFormat.Format("LightSensorButton(%s:%d) { value:%d, diff:%d, diffPercent:%f%% }",
+        this->Name.c_str(),
+        this->_pin,
+        this->_lastValue,
+        this->_lastDifference,
+        this->_lastChangeInPercent
+        );
+}
+

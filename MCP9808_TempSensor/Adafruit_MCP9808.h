@@ -1,33 +1,33 @@
 /**************************************************************************/
-/*! 
-    @file     Adafruit_MCP9808.h
-    @author   K. Townsend (Adafruit Industries)
-	@license  BSD (see license.txt)
-	
-	This is a library for the Adafruit MCP9808 Temp Sensor breakout board
-	----> http://www.adafruit.com/products/1782
-	
-	Adafruit invests time and resources providing this open source code, 
-	please support Adafruit and open-source hardware by purchasing 
-	products from Adafruit!
+/*!
+@file     Adafruit_MCP9808.h
+@author   K. Townsend (Adafruit Industries)
+@license  BSD (see license.txt)
 
-	@section  HISTORY
+This is a library for the Adafruit MCP9808 Temp Sensor breakout board
+----> http://www.adafruit.com/products/1782
 
-    v1.0  - First release
+Adafruit invests time and resources providing this open source code,
+please support Adafruit and open-source hardware by purchasing
+products from Adafruit!
+
+@section  HISTORY
+
+v1.0  - First release
 */
 /**************************************************************************/
 
 #if ARDUINO >= 100
- #include "Arduino.h"
+#include "Arduino.h"
 #else
- #include "WProgram.h"
+#include "WProgram.h"
 #endif
 
 #ifdef __AVR_ATtiny85__
- #include "TinyWireM.h"
- #define Wire TinyWireM
+#include "TinyWireM.h"
+#define Wire TinyWireM
 #else
- #include <Wire.h>
+#include <Wire.h>
 #endif
 
 #define MCP9808_I2CADDR_DEFAULT        0x18
@@ -51,16 +51,16 @@
 #define MCP9808_REG_DEVICE_ID          0x07
 
 class Adafruit_MCP9808 {
- public:
-  Adafruit_MCP9808();
-  boolean begin(uint8_t a = MCP9808_I2CADDR_DEFAULT);  
-  float readTempF( void );
-  float readTempC( void );
+public:
+    Adafruit_MCP9808();
+    boolean begin(uint8_t a = MCP9808_I2CADDR_DEFAULT);
+    float readTempF(void);
+    float readTempC(void);
 
-  void write16(uint8_t reg, uint16_t val);
-  uint16_t read16(uint8_t reg);
+    void write16(uint8_t reg, uint16_t val);
+    uint16_t read16(uint8_t reg);
 
- private:
+private:
 
-  uint8_t _i2caddr;
+    uint8_t _i2caddr;
 };

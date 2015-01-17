@@ -1,46 +1,54 @@
+/**************************************************************************
 
-/**************************************************************************/
-/*!
 This is a demo for the Adafruit MCP9808 breakout
-----> http://www.adafruit.com/products/1782
-Adafruit invests time and resources providing this open source code,
-please support Adafruit and open-source hardware by purchasing
-products from Adafruit!
+http://www.adafruit.com/products/1782
 
-
-D:\DVT\Arduino\fArduino\MCP9808_TempSensor\MCP9808_TempSensor.ino
-
-https://learn.adafruit.com/adafruit-mcp9808-precision-i2c-temperature-sensor-guide/wiring
-
-r1:65535
-
-*/
-/**************************************************************************/
+*************************************************************************/
 
 #include <Wire.h>
 #include "Adafruit_MCP9808.h"
 #include "fArduino.h"
 
-// Create the MCP9808 temperature sensor object
 Adafruit_MCP9808 tempsensor = Adafruit_MCP9808();
+TimeOut _timeOut(1000L * 60 * 10);
+
+#define ON_BOARD_LED 13
+
+Led _onBoardLed(ON_BOARD_LED);
+
+void AcquireData() {
+
+    float c = tempsensor.readTempC();
+    float f = c * 9.0 / 5.0 + 32;
+    Board.Trace(StringFormat.Format("Celsius:%f, Fahrenheit:%f", c, f));
+}
 
 void setup() {
-    Serial.begin(9600);
-    Serial.println("MCP9808 demo");
+
+    Board.Delay(1500);
+    Board.InitializeComputerCommunication(9600, "Initializing...");
+    Board.TraceHeader("MCP9808 demo");
+    Board.SetPinMode(ON_BOARD_LED, OUTPUT);
+    _onBoardLed.SetBlinkMode(500);
 
     // Make sure the sensor is found, you can also pass in a different i2c
     // address with tempsensor.begin(0x19) for example
     if (!tempsensor.begin()) {
-        Serial.println("Couldn't find MCP9808!");
-        //while (1);
+        Board.Trace("[ERROR]Couldn't find MCP9808!");
+        while (1);
     }
+
+    Board.Trace(_timeOut.ToString());
+
+    AcquireData();
 }
 
+
 void loop() {
-    // Read and print out the temperature, then convert to *F
-    float c = tempsensor.readTempC();
-    float f = c * 9.0 / 5.0 + 32;
-    Serial.print("Temp: "); Serial.print(c); Serial.print("*C\t");
-    Serial.print(f); Serial.println("*F");
-    delay(1000);
+
+    _onBoardLed.Blink();
+
+    if (_timeOut.IsTimeOut()) {
+        AcquireData();
+    }
 }

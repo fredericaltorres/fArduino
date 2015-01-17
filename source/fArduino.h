@@ -12,7 +12,7 @@
 
     // --- fArduino LIBRARY COMPILATION MODE ---
 
-    // #define TRINKET 1
+    //#define TRINKET 1
     #define TRINKET_PRO 1
     // #define ARDUINO_UNO 1
 
@@ -579,6 +579,8 @@
             void StartBackgroundNote();
     };
 
+
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// LightSensorButton
     /// 
@@ -634,6 +636,8 @@
             boolean FingerUp();
             boolean FingerDown();
     };
+
+
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -696,4 +700,6 @@
         void AnimateOneLeftToRightAndRightToLeft2Leds(int waitTime, int count);
         void AnimateOneLeftToRightAndRightToLeft1Leds(int waitTime, int count);
     };
+
+
 #endif
