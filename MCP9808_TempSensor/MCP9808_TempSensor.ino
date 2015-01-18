@@ -9,7 +9,9 @@ http://www.adafruit.com/products/1782
 #include "Adafruit_MCP9808.h"
 #include "fArduino.h"
 
+// Arduino and Trinket Pro: I2C SCL (Clock) A5, I2C SDA (Data) A4
 Adafruit_MCP9808 tempsensor = Adafruit_MCP9808();
+
 TimeOut _timeOut(1000L * 60 * 10);
 
 #define ON_BOARD_LED 13
@@ -42,7 +44,6 @@ void setup() {
 
     AcquireData();
 }
-
 
 void loop() {
 
