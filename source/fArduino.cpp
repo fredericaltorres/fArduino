@@ -683,12 +683,15 @@ void SpeakerManager::StartSequenceBackGround(int size, int * noteDurationSequenc
     this->_backGroundNoteDurationSequenceSize = size;
     this->_backGroundNoteDurationIndex = 0;
     this->BackGroundOn = true;
-
     this->StartBackgroundNote();
 }
 void SpeakerManager::StartBackgroundNote() {
 
     this->Play(this->_backGroundNoteDurationSequence[this->_backGroundNoteDurationIndex], this->_backGroundNoteDurationSequence[this->_backGroundNoteDurationIndex + 1], SPEAKERMANAGER_PLAY_SEQUENCE_NORMAL);
+}
+void SpeakerManager::StopBackGroundSequence() {
+
+    this->BackGroundOn = false;    
 }
 boolean SpeakerManager::BackGroundUpdate() {
 
@@ -1647,3 +1650,48 @@ String LightSensorButton::ToString() {
         );
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// RadioShackPIRSensor
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+RadioShackPIRSensor::RadioShackPIRSensor(int pin){
+
+    this->_pin = pin;
+    Board.SetPinMode(pin, INPUT);
+}
+boolean RadioShackPIRSensor::MotionDetected(){
+
+    int val = digitalRead(this->_pin);
+    return digitalRead(this->_pin) == HIGH;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// PullUpButton
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+PullUpButton::PullUpButton(int pin) {
+
+    this->_pin           = pin;
+    this->_previousInput = HIGH;
+    Board.SetPinMode(this->_pin, INPUT_PULLUP);
+}
+boolean PullUpButton::IsPressed() {
+
+    boolean r = false;
+    int input = digitalRead(this->_pin);
+
+    if (this->_previousInput == HIGH && input == LOW) {
+
+        Board.Delay(50);
+        input = digitalRead(this->_pin);
+        r = input == LOW;
+    }
+    if (r) {
+        this->_previousInput = HIGH;
+    }
+    else {
+        this->_previousInput = input;
+    }
+    return r;
+}
