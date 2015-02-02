@@ -32,19 +32,19 @@
 #define GREEN_LED_2_PIN         6
 #define SWITCH_PIN              7
 
-// Define/Keep track of 4 states to display the 3 leds (1 Red Led and 2 Greens Led coupled together)
+// Define/Keep track of 11 states to display the 6 leds (2 Red Led, 2 Greens and 2 greens)
 int _ledStateIndex = 0; // 0..11
 
 // If we are not playing, let's animate the leds every x seconds
 #define ANIMATE_LED_EVERY_X_SECOND 6
 
-// Keep track if the last time we played the song or animate the led
+// Keep track of the last time we played the song or animate the leds
 long _lastTimePlayedOrAnimate = 0;
 
 // Define music to start or stop something
 #define FACTOR 4
-int musicStart[] = { NOTE_E4, 8 * FACTOR, NOTE_FS4, 8 * FACTOR, NOTE_A4, 8 * FACTOR, NOTE_B4, 8 * (FACTOR/2) };
-int musicEnd[]   = { NOTE_B4,  8 * FACTOR, NOTE_A4,  8 * FACTOR, NOTE_FS4, 8 * FACTOR, NOTE_E4,  8 * (FACTOR/2) };
+int musicStart[] = { NOTE_E4, 8 * FACTOR , NOTE_FS4, 8 * FACTOR, NOTE_A4 , 8 * FACTOR, NOTE_B4, 8 * (FACTOR/2) };
+int musicEnd[]   = { NOTE_B4,  8 * FACTOR, NOTE_A4 , 8 * FACTOR, NOTE_FS4, 8 * FACTOR, NOTE_E4, 8 * (FACTOR/2) };
 
 // We wish you a merry christmas (By the way I am not a beleiver)
 // http://www.unimusica-peru.com/partit21.gif
@@ -58,7 +58,7 @@ int musicEnd[]   = { NOTE_B4,  8 * FACTOR, NOTE_A4,  8 * FACTOR, NOTE_FS4, 8 * F
         NOTE_D3, 4, NOTE_B2, 4, NOTE_C3, 2,
     };
 #else
-    int WeWishYouAMerryChristmas[] = { // Sound bette on a Trinket at 8Mhz
+    int WeWishYouAMerryChristmas[] = { // Sound better on a Trinket at 8Mhz
     
         NOTE_G4, 4, NOTE_C5, 4, NOTE_C5, 8, NOTE_D5, 8, NOTE_C5, 8, NOTE_B4, 8, NOTE_A4, 2,
         NOTE_A4, 4, NOTE_D5, 4, NOTE_D5, 8, NOTE_E5, 8, NOTE_D5, 8, NOTE_C5, 8, NOTE_B4, 2, NOTE_G4, 4,
@@ -144,15 +144,16 @@ bool WaitForAnimation(int index) {
 }
 boolean LedsAnimationAllOnAllOff() {
 
+    boolean r = false;
     for (int i = 0; i < 10; i++) {
 
         PowerOff();
-        if (WaitForAnimation(i)) return true;
+        if (WaitForAnimation(i)) { r = true; break; }
         PowerOn();
-        if (WaitForAnimation(i)) return true;
+        if (WaitForAnimation(i)) { r = true; break; }
     }
     PowerOff();
-    return false;
+    return r;
 }
 boolean LedsRandomAnimation() {
   
@@ -162,9 +163,9 @@ boolean LedsRandomAnimation() {
     if(_counter == 0)
         r = LedsAnimationAllOnAllOff();
     else if(_counter == 1)
-        r = LedsAnimationAllOnAllOff();
+        r = LedsAnimationAllOnAllOff(); // TODO: Create new animation
     else if(_counter == 2)
-        r = LedsAnimationAllOnAllOff();
+        r = LedsAnimationAllOnAllOff(); // TODO: Create new animation
     
     if ((_counter++) > 2)
         _counter = 0;
@@ -195,7 +196,7 @@ void setup() {
 
     Board.Delay(1500);
     Board.InitializeComputerCommunication(9600, "Initializing...");
-    Board.TraceHeader("Christmas Tree");
+    Board.TraceHeader("Christmas Tree - v2");
 
     Board.SetPinMode(SPEAKER_PIN        , OUTPUT);
     Board.SetPinMode(RED_LED_ONBAORD_PIN, OUTPUT);
