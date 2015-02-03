@@ -12,7 +12,7 @@
 
     // --- fArduino LIBRARY COMPILATION MODE ---
 
-    //#define TRINKET 1
+    //#define TRINKET 1 // Pins information for Trinket https://learn.adafruit.com/introducing-trinket/pinouts
     //#define TRINKET_PRO 1
     #define ARDUINO_UNO 1
 
@@ -104,14 +104,14 @@
         {
             public:
                 EEPROMClassEx               (                     );
-                bool 	 isReady            (                     );
-                int 	 writtenBytes       (                     );
-                void 	 setMemPool         (int base, int memSize);
-                void  	 setMaxAllowedWrites(int allowedWrites    );
-                int 	 getAddress         (int noOfBytes        );
+                bool     isReady            (                     );
+                int      writtenBytes       (                     );
+                void     setMemPool         (int base, int memSize);
+                void     setMaxAllowedWrites(int allowedWrites    );
+                int      getAddress         (int noOfBytes        );
 
                 uint8_t  read               (int                  );
-                bool 	 readBit            (int, byte            );
+                bool     readBit            (int, byte            );
                 uint8_t  readByte           (int                  );
                 uint16_t readInt            (int                  );
                 uint32_t readLong           (int                  );
@@ -119,20 +119,20 @@
                 double   readDouble         (int                  );
 
                 bool     write              (int, uint8_t         );
-                bool 	 writeBit           (int, uint8_t, bool   );
+                bool     writeBit           (int, uint8_t, bool   );
                 bool     writeByte          (int, uint8_t         );
-                bool 	 writeInt           (int, uint16_t        );
-                bool 	 writeLong          (int, uint32_t        );
-                bool 	 writeFloat         (int, float           );
-                bool 	 writeDouble        (int, double          );
+                bool     writeInt           (int, uint16_t        );
+                bool     writeLong          (int, uint32_t        );
+                bool     writeFloat         (int, float           );
+                bool     writeDouble        (int, double          );
 
                 bool     update             (int, uint8_t         );
-                bool 	 updateBit          (int, uint8_t, bool   );
+                bool     updateBit          (int, uint8_t, bool   );
                 bool     updateByte         (int, uint8_t         );
-                bool 	 updateInt          (int, uint16_t        );
-                bool 	 updateLong         (int, uint32_t        );
-                bool 	 updateFloat        (int, float           );
-                bool 	 updateDouble       (int, double          );
+                bool     updateInt          (int, uint16_t        );
+                bool     updateLong         (int, uint32_t        );
+                bool     updateFloat        (int, float           );
+                bool     updateDouble       (int, double          );
 
                 // Use template for other data formats
 

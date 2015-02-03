@@ -24,13 +24,23 @@
 #include "fArduino.h"
 
 // Pins Usage
-
-#define RED_LED_ONBAORD_PIN     13
-#define SPEAKER_PIN             3 // Need PWM
-#define RED_LED_PIN             4
-#define GREEN_LED_1_PIN         5
-#define GREEN_LED_2_PIN         6
-#define SWITCH_PIN              7
+ 
+#if ARDUINO_UNO
+    #define RED_LED_ONBAORD_PIN     13
+    #define SPEAKER_PIN             3 // PWM, Purple wire
+    #define RED_LED_PIN             4 // Yellow wire
+    #define GREEN_LED_1_PIN         5 // Blue wire
+    #define GREEN_LED_2_PIN         6 // Orange wire
+    #define SWITCH_PIN              7 // White wire
+#endif
+#if TRINKET
+    
+    #define SPEAKER_PIN             0 // PWM, Purple wire
+    #define RED_LED_PIN             1 // Yellow wire
+    #define SWITCH_PIN              2 // White wire
+    #define GREEN_LED_1_PIN         3 // Blue wire
+    #define GREEN_LED_2_PIN         4 // Orange wire
+#endif
 
 // Define/Keep track of 11 states to display the 6 leds (2 Red Led, 2 Greens and 2 greens)
 int _ledStateIndex = 0; // 0..11
@@ -68,9 +78,12 @@ int musicEnd[]   = { NOTE_B4,  8 * FACTOR, NOTE_A4 , 8 * FACTOR, NOTE_FS4, 8 * F
 #endif
 
 SpeakerManager  _speakerManager(SPEAKER_PIN);
-Led             _onBoardLed(RED_LED_ONBAORD_PIN);
 PullUpButton    _button(SWITCH_PIN);
 
+#if ARDUINO_UNO
+    Led _onBoardLed(RED_LED_ONBAORD_PIN);
+#endif
+    
 #define LEDS_ALL_OFF  0
 #define LEDS_ALL_ON  10
 
@@ -136,7 +149,6 @@ bool WaitForAnimation(int index) {
     for (int i = 0; i < 5; i++) {
         Board.Delay(50);
         if (_button.IsPressed()) {
-            Board.Trace("Pressed A");
             return true;
         }
     }
@@ -145,7 +157,7 @@ bool WaitForAnimation(int index) {
 boolean LedsAnimationAllOnAllOff() {
 
     boolean r = false;
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 7; i++) {
 
         PowerOff();
         if (WaitForAnimation(i)) { r = true; break; }
@@ -155,6 +167,48 @@ boolean LedsAnimationAllOnAllOff() {
     PowerOff();
     return r;
 }
+boolean LedsAnimationUpAndDown() {
+
+    int upAndDownProgram[] = {        
+        1, // Red
+        4, // Red + Green1
+        10, // Red + Green1 + Green2
+        10, // Red + Green1 + Green2        
+        4, // Red + Green1
+        1, // Red
+        0, // All Off
+        0, // All Off
+    };
+
+    boolean r = false;
+
+    for (int count = 0; count < 3; count++) {
+
+        for (int i = 0; i < ArraySize(upAndDownProgram); i++) {
+
+            PowerLed(upAndDownProgram[i]);
+            if (WaitForAnimation(i)) { r = true; break; }
+        }
+    }
+    PowerOff();
+    return r;
+}
+
+boolean LedsAnimationAllOrMiddle() {
+
+    boolean r = false;
+    PowerOff();
+    for (int i = 0; i < 7; i++) {
+
+        PowerLed(2);
+        if (WaitForAnimation(i)) { r = true; break; }
+        PowerOn();
+        if (WaitForAnimation(i)) { r = true; break; }
+    }
+    PowerOff();
+    return r;
+}
+
 boolean LedsRandomAnimation() {
   
     static int _counter;
@@ -163,9 +217,9 @@ boolean LedsRandomAnimation() {
     if(_counter == 0)
         r = LedsAnimationAllOnAllOff();
     else if(_counter == 1)
-        r = LedsAnimationAllOnAllOff(); // TODO: Create new animation
+        r = LedsAnimationUpAndDown();
     else if(_counter == 2)
-        r = LedsAnimationAllOnAllOff(); // TODO: Create new animation
+        r = LedsAnimationAllOrMiddle(); // TODO: Create new animation
     
     if ((_counter++) > 2)
         _counter = 0;
@@ -183,7 +237,6 @@ void AnimateLedsWhilePaying() {
 }
 void StartMusicAnimation() {
 
-    Board.Trace("Start animation");
     PowerOff();
     _ledStateIndex = -1;
 
@@ -196,26 +249,34 @@ void setup() {
 
     Board.Delay(1500);
     Board.InitializeComputerCommunication(9600, "Initializing...");
+    #if ARDUINO_UNO
     Board.TraceHeader("Christmas Tree - v2");
+    #endif  
 
     Board.SetPinMode(SPEAKER_PIN        , OUTPUT);
-    Board.SetPinMode(RED_LED_ONBAORD_PIN, OUTPUT);
     Board.SetPinMode(RED_LED_PIN        , OUTPUT);
     Board.SetPinMode(GREEN_LED_1_PIN    , OUTPUT);
     Board.SetPinMode(GREEN_LED_2_PIN    , OUTPUT);
+    #if ARDUINO_UNO
+    Board.SetPinMode(RED_LED_ONBAORD_PIN, OUTPUT);
+    #endif
     // SWITCH_PIN is initialized already as pull up by consttructor of PullUpButton
 
     PowerOff();
 
+    #if ARDUINO_UNO
     _onBoardLed.SetBlinkMode(1000);
+    #endif
     _speakerManager.PlaySequence(ArraySize(musicStart), musicStart); // Annonce that setup is done
 }
 void loop() {
 
+    #if ARDUINO_UNO
     _onBoardLed.Blink(); // Blink every seconds
+    #endif
     
     if (_button.IsPressed()) {
-        
+
         if (_speakerManager.BackGroundOn) { // If playing stop playing
 
             _speakerManager.StopBackGroundSequence();
