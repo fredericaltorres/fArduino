@@ -21,16 +21,9 @@
     <ClInclude Include="Visual Micro\.TrinketChristmasTree.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="fArduino.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="fArduino.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="TrinketChristmasTree.ino" />
+    <None Include="Bu.ino" />
   </ItemGroup>
 </Project>

@@ -41,6 +41,5 @@ extern "C" void __cxa_pure_virtual() {;}
 #include "D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\cores\arduino\arduino.h"
 #include "D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\variants\standard\pins_arduino.h" 
 #include "D:\DVT\Arduino\fArduino\TrinketChristmasTree\TrinketChristmasTree.ino"
-#include "D:\DVT\Arduino\fArduino\TrinketChristmasTree\fArduino.cpp"
-#include "D:\DVT\Arduino\fArduino\TrinketChristmasTree\fArduino.h"
+#include "D:\DVT\Arduino\fArduino\TrinketChristmasTree\Bu.ino"
 #endif
