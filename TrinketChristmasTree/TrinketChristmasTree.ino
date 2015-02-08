@@ -1,23 +1,18 @@
 /*************************************************************************
 
     Christmas Tree Animation With A Trinket MicroController
-
-    Using 1 red led and 2 green leds, create a pseudo Christmas Tree animation with music.
     
     Functionality:
         (1) Play a short music when starting
         (2) While idle execute 3 differents leds animation every 6 seconds
-        (3) If user press button play "we wish you a merry christmas"
+        (3) If user press button play or stop "we wish you a merry christmas"
 
     Remarks:
-        - Must be compiled at 8Mhz
-        - Because my pin #2 was not working I plugged the 2 green leds to the same pin.
-
-    Torres Frederic 2014.12
+        - Must be compiled at 8Mhz on a Trinket mini
+        - Can be compiled on an Arduino Uno 
 
 
-    Transistor Amplification - Arduino Workshop Project Video #2
-    https://www.youtube.com/watch?v=cEz1i5xzGEE#t=14
+    Torres Frederic 2014.12, 2015.01
 
 ***************************************************************************/
 
