@@ -1,4 +1,5 @@
 // fArduino.h
+// Use the NewPing Library - v1.5 - 08/15/2012
 
 #ifndef _FARDUINO_h
 
@@ -728,5 +729,19 @@
             PullUpButton(int pin);
             boolean IsPressed();
     };
+
     
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// UltrasonicDistanceSensor
+    /// HcSr04
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    class UltrasonicDistanceSensor {
+        private:
+            uint8_t _triggerPin, _echoPin;
+            int MaxCmDistance;
+    public:
+        UltrasonicDistanceSensor(uint8_t triggerPin, uint8_t echoPin, int maxCmDistance = 400);
+        int Ping();
+    };
+        
 #endif

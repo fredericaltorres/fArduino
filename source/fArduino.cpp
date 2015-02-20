@@ -1695,3 +1695,33 @@ boolean PullUpButton::IsPressed() {
     }
     return r;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// UltrasonicDistanceSensor
+/// HcSr04
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+UltrasonicDistanceSensor::UltrasonicDistanceSensor(uint8_t triggerPin, uint8_t echoPin, int maxCmDistance) {
+
+    this->_triggerPin   = triggerPin;
+    this->_echoPin      = echoPin;
+    this->MaxCmDistance = maxCmDistance;
+}
+
+int UltrasonicDistanceSensor::Ping() {
+
+    long duration, distance;
+
+    digitalWrite(this->_triggerPin, LOW);
+    delayMicroseconds(2);
+    digitalWrite(this->_triggerPin, HIGH);
+
+    delayMicroseconds(10);
+
+    digitalWrite(this->_triggerPin, LOW);
+
+    duration = pulseIn(this->_echoPin, HIGH);
+    distance = (duration / 2) / 29.1;
+
+    return distance;
+}
