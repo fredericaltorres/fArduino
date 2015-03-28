@@ -1,0 +1,35 @@
+Timer 555, 2 LEDs Blinking Schematic:
+=====================================
+
+1. Pin1 to ground
+2. Pin2(trigger) to pin6(Threshold)
+3. Pin8(Vcc) to pin4(Reset)
+4. Pin7(Discharge) to pin8(Vcc) using 4.7k Ohm resistor
+5. Connect 47uF Capacitor negative pin to ground
+6. Connect 47uF Capacitor positive pin to pin6 (threshold)
+7. Connect 47uF Capacitor positive pin to pin7(Discharge) 
+		using 10k + 4.7k resistor
+		or using LightSensor + 4.7k resistor
+8. Connectpin3(Output) to Empty Row
+	8.1 2 red   led: Empty row -> 1k Ohm Resistor -> -RED-LED1+ -> -RED-LED2+ -> Vcc
+	8.2 1 green led: Empty row -> 100 Ohm Resistor -> +GREEN-LED2 -> GREEN-LED2-> Ground
+9. Connect Pin8(Vcc) to Power
+
+http://en.wikipedia.org/wiki/555_timer_IC
+
+Timer 555, Monostable Mode, one time timer
+========================================================
+var C = 470uF
+var Ra = 22k => 5.17 seconds
+
+1. Connect power and ground to pins 8 and 1 of the 555 timer (red and black wires).  
+2. Connect a 0.01uF capacitor between pins 5 and 1.  
+3. Connect a 470uF capacitor between pins 1 and 6, make sure that the negative lead of the capacitor is connected to pin 1.  
+4. Connect pins 6 and 7 with a jumper wire (green).  
+5. Connect a 47K resistor between pins 7 and 8.  
+		47K + 470uF = 25s of animation
+6. Connect pins 4 and to Vcc
+7. Connect LED+ to pin 3 and LED- to goun
+8. Connect an LED and current limiting resistor in series from the output of the 555 to ground.  
+9. Connect Wire the momentary push button switch in series with a 10K resistor between Vcc and ground.  		
+   Connect a wire (yellow) from the junction between the switch and resistor to the trigger pin 2
