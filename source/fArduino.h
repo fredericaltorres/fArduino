@@ -31,6 +31,8 @@
         #define TRACE_DELAY 10
     #endif
 
+    #define USE_EEPROM24LC256_I2C
+
 //1024 bytes on the ATmega328
 //512 bytes on the ATmega168 and ATmega8 
 //4 KB(4096 bytes) on the ATmega1280 and ATmega2560.
@@ -743,5 +745,30 @@
         UltrasonicDistanceSensor(uint8_t triggerPin, uint8_t echoPin, int maxCmDistance = 400);
         int Ping();
     };
-        
+
+    #define EEPROM24LC256_PAGE_SIZE 64
+    #define EEPROM24LC256_WIRE_LIB_BUFFER_LIMIT  (32-2)
+
+    #if defined(USE_EEPROM24LC256_I2C)
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// EEPROM24LC256_I2C
+    /// https://github.com/JChristensen/extEEPROM
+    /// http://www.hobbytronics.co.uk/arduino-external-eeprom
+    /// Wire.H.BUFFER_LENGTH must be set to 70
+    /// utility\twi.H.TWI_BUFFER_LENGTH must be set to 70
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    class EEPROM24LC256_I2C {
+        private:
+            int _deviceAddr, _maxByte;
+        public:
+            EEPROM24LC256_I2C(int deviceAddr, int maxByte);
+            int  ReadByte(int addr);
+            void WriteByte(int addr, byte b);
+            void WriteString(int addr, char * s);
+            bool ReadString(int addr, char * allocatedBuffer);
+            bool WriteBuffer(int addr, int len, byte * data);
+            bool ReadBuffer(int addr, unsigned int len, byte * allocatedBuffer);
+            bool __ReadBuffer(int addr, unsigned int len, byte * allocatedBuffer);
+    };
+    #endif        
 #endif

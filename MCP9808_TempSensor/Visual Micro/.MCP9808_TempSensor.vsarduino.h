@@ -43,4 +43,11 @@ extern "C" void __cxa_pure_virtual() {;}
 #include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\MCP9808_TempSensor.ino"
 #include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\Adafruit_MCP9808.cpp"
 #include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\Adafruit_MCP9808.h"
+#include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\I2cMaster.cpp"
+#include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\I2cMaster.h"
+#include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\JustAdafruitStuff.ino.ino"
+#include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\SoftI2CMaster.cpp"
+#include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\SoftI2CMaster.h"
+#include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\TwiMap.cpp"
+#include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\TwiMap.h"
 #endif

@@ -34,9 +34,6 @@ print("oneTimeDuration:"+oneTimeDuration);
 
 /*
 
-
-
-
 Timer 555, 1 LEDs Blinking Schematic:
 =====================================
 

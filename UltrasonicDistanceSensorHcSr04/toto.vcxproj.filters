@@ -18,6 +18,9 @@
     <ClInclude Include="Visual Micro\.toto.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Visual Micro\.UltrasonicDistanceSensorHcSr04.vsarduino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="toto.ino" />

@@ -68,16 +68,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="JustAdafruitStuff.ino.ino" />
     <None Include="MCP9808_TempSensor.ino">
       <FileType>CppCode</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Adafruit_MCP9808.h" />
+    <ClInclude Include="I2cMaster.h" />
+    <ClInclude Include="TwiMap.h" />
     <ClInclude Include="Visual Micro\.MCP9808_TempSensor.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Adafruit_MCP9808.cpp" />
+    <ClCompile Include="I2cMaster.cpp" />
+    <ClCompile Include="TwiMap.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,0 +1,5 @@
+Error: .include filename missing
+Circuit: * D:\DVT\Arduino\fArduino\LTSpice\Scematic01.asc
+
+Fatal Error: Unknown subcircuit called in:
+   xu1 n001 0 n002 opamp aol=100k gbw=10meg
