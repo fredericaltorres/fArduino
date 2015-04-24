@@ -31,7 +31,10 @@
         #define TRACE_DELAY 10
     #endif
 
-    #define USE_EEPROM24LC256_I2C
+    // Internal buffer used for temporary string manipulation
+    // Not great because not re entrant do not call StringFormat.GetProgMemString() nested
+    #define __fArduino_InternalCharBufferSize 128
+    
 
 //1024 bytes on the ATmega328
 //512 bytes on the ATmega168 and ATmega8 
@@ -253,6 +256,7 @@
     /// The formating follow the sprinf syntax http://www.tutorialspoint.com/c_standard_library/c_function_sprintf.htm
     /// with some extended syntax for unsigned int and long and boolean
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     class StringFormatClass {
         public:
             String Format(char *format, ...);
@@ -261,6 +265,8 @@
             String PadLeft(String source, char * padding, int max);
             String MakeString(char * padding, int max);
             boolean IsDigit(char *format);
+            char * GetProgMemString(const char *progMemString);
+            char * PM(const char *progMemString);
     };
     extern StringFormatClass StringFormat;
 
@@ -583,8 +589,6 @@
             void StopBackGroundSequence();
     };
 
-
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// LightSensorButton
     /// 
@@ -641,9 +645,6 @@
             boolean FingerDown();
     };
 
-
-
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// Piezo
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -687,7 +688,6 @@
         void AnimateEveryOther(int flashCount, int waitTime);
     };
    
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// Register74HC595_16Bit
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -731,7 +731,6 @@
             PullUpButton(int pin);
             boolean IsPressed();
     };
-
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// UltrasonicDistanceSensor
@@ -745,30 +744,5 @@
         UltrasonicDistanceSensor(uint8_t triggerPin, uint8_t echoPin, int maxCmDistance = 400);
         int Ping();
     };
-
-    #define EEPROM24LC256_PAGE_SIZE 64
-    #define EEPROM24LC256_WIRE_LIB_BUFFER_LIMIT  (32-2)
-
-    #if defined(USE_EEPROM24LC256_I2C)
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// EEPROM24LC256_I2C
-    /// https://github.com/JChristensen/extEEPROM
-    /// http://www.hobbytronics.co.uk/arduino-external-eeprom
-    /// Wire.H.BUFFER_LENGTH must be set to 70
-    /// utility\twi.H.TWI_BUFFER_LENGTH must be set to 70
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    class EEPROM24LC256_I2C {
-        private:
-            int _deviceAddr, _maxByte;
-        public:
-            EEPROM24LC256_I2C(int deviceAddr, int maxByte);
-            int  ReadByte(int addr);
-            void WriteByte(int addr, byte b);
-            void WriteString(int addr, char * s);
-            bool ReadString(int addr, char * allocatedBuffer);
-            bool WriteBuffer(int addr, int len, byte * data);
-            bool ReadBuffer(int addr, unsigned int len, byte * allocatedBuffer);
-            bool __ReadBuffer(int addr, unsigned int len, byte * allocatedBuffer);
-    };
-    #endif        
+   
 #endif

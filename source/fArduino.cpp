@@ -29,8 +29,11 @@
 #if defined(USE_EEPROM24LC256_I2C)
     #include <Wire.h>
 #endif
+    
+char __fArduino_InternalCharBuffer[__fArduino_InternalCharBufferSize];
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// http://linux.dd.com.au/wiki/Arduino_Static_Strings
 
 String StringFormatClass::MakeString(char * padding, int max) {
 
@@ -76,6 +79,16 @@ boolean StringFormatClass::IsDigit(char *format) {
 
     return (*format >= '0' && *format <= '9');
 }
+
+char * StringFormatClass::PM(const char *progMemString) {
+    return this->GetProgMemString(progMemString);
+}
+char * StringFormatClass::GetProgMemString(const char *progMemString) {
+
+    strcpy_P(__fArduino_InternalCharBuffer, (char*)progMemString);
+    return __fArduino_InternalCharBuffer;
+}
+
 // http://www.tutorialspoint.com/c_standard_library/c_function_sprintf.htm
 String StringFormatClass::Format(char *format, ...) {
 
@@ -1728,169 +1741,3 @@ int UltrasonicDistanceSensor::Ping() {
     return distance;
 }
 
-#if defined(USE_EEPROM24LC256_I2C)
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// EEPROM24LC256_I2C
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    EEPROM24LC256_I2C::EEPROM24LC256_I2C(int deviceAddr, int maxByte) {
-
-        this->_maxByte        = maxByte;
-        this->_deviceAddr     = deviceAddr;
-    }
-    void EEPROM24LC256_I2C::WriteByte(int addr, byte b) {
-
-        Wire.beginTransmission(this->_deviceAddr);
-        Wire.write((int)(addr >> 8));   // MSB
-        Wire.write((int)(addr & 0xFF)); // LSB
-        Wire.write(b);
-        Wire.endTransmission();
-        delay(5);
-    }
-
-    bool EEPROM24LC256_I2C::ReadBuffer(int addr, unsigned int len, byte * allocatedBuffer) {
-        
-        // Read the len byte in chunk of 3o due to the Wire.h limitation
-        if (len > EEPROM24LC256_WIRE_LIB_BUFFER_LIMIT) {
-
-            bool                    r = false;
-            unsigned int l          = len;
-            byte * buffer           = allocatedBuffer;
-            unsigned int byteToRead = EEPROM24LC256_WIRE_LIB_BUFFER_LIMIT;
-            int bufferIndex         = 0;
-            while (l > 0) {
-                if (this->__ReadBuffer(addr + bufferIndex, byteToRead, &buffer[bufferIndex])) {
-                    bufferIndex += byteToRead;
-                    l           -= byteToRead;
-                    r           = l == 0;
-                    if (l >= EEPROM24LC256_WIRE_LIB_BUFFER_LIMIT)
-                        byteToRead = EEPROM24LC256_WIRE_LIB_BUFFER_LIMIT;
-                    else
-                        byteToRead = l;
-                }
-            }
-            return r;
-        }
-        else return this->__ReadBuffer(addr, len, allocatedBuffer);
-    }
-
-    bool EEPROM24LC256_I2C::__ReadBuffer(int addr, unsigned int len, byte * allocatedBuffer) {
-
-        if (addr % EEPROM24LC256_PAGE_SIZE != 0)
-            return false; // Addr must be on a 64 byte boundarie
-
-        memset(allocatedBuffer, 0, len);
-        Wire.beginTransmission(this->_deviceAddr);
-        Wire.write((int)(addr >> 8));   // MSB
-        Wire.write((int)(addr & 0xFF)); // LSB
-        uint8_t rxStatus = Wire.endTransmission();
-        if (rxStatus != 0) return rxStatus;
-
-        Wire.requestFrom(this->_deviceAddr, len);
-
-        unsigned int i = 0;
-        while(i < len){
-            int v = Wire.read();
-            if (v == -1)
-                return v; // read error
-            allocatedBuffer[i] = (byte)v;
-            i += 1;
-        }
-        return i == len;
-    }
-    // This method require that the Wire.H.BUFFER_LENGTH to be set to 66
-    bool EEPROM24LC256_I2C::WriteBuffer(int addr, int len, byte * data) {
-
-        if (addr % EEPROM24LC256_PAGE_SIZE != 0) 
-            return false; // Addr must be on a 64 byte boundarie
-
-        //Board.SendWindowsConsoleCommand(StringFormat.Format("write buffer addr:%d, len:%d", addr, len), true);
-
-       /* for (int x = 0; x < len; x++) {
-            this->WriteByte(addr + x, data[x]);
-        }
-        return true;*/
-
-        int cursor = 0;
-        bool done  = false;
-
-        while (true) {
-
-            Wire.beginTransmission(this->_deviceAddr);
-            int a = cursor + addr;
-            Wire.write((int)(a >> 8));     // MSB
-            Wire.write((int)(a & 0xFF));   // LSB
-
-            for (int i = 0; i < EEPROM24LC256_PAGE_SIZE; i++) {
-
-                byte b = (byte)data[cursor + i];
-                Wire.write(b);
-                //Board.SendWindowsConsoleCommand(StringFormat.Format("write[%d] = %d, cursor:%d", (a+cursor+i), b, cursor), true);
-                if (cursor + i >= len) {
-                    done = true; break;
-                }
-            } 
-            //Board.SendWindowsConsoleCommand("SavePage", true);
-            Wire.endTransmission();
-            delay(6); // needed
-            
-            cursor += EEPROM24LC256_PAGE_SIZE; // move to next page
-
-            if ((done) || (cursor >= len))
-                return true;
-        }
-    }
-
-    // Return -1 in case of error
-    int EEPROM24LC256_I2C::ReadByte(int addr) {
-
-        int r = -1;
-        Wire.beginTransmission(this->_deviceAddr);
-        Wire.write((int)(addr >> 8));   // MSB
-        Wire.write((int)(addr & 0xFF)); // LSB    
-        Wire.endTransmission();
-
-        Wire.requestFrom((int)this->_deviceAddr, 1);
-
-        if (Wire.available()) 
-            r = (int)Wire.read();
-
-        return r;
-    }
-
-    bool EEPROM24LC256_I2C::ReadString(int addr, char * allocatedBuffer) {
-
-        int len = ReadByte(addr); // First byte is string len
-        int r   = -1;
-        addr   += 1; // skip string len
-        Wire.beginTransmission(this->_deviceAddr);
-        Wire.write((int)(addr >> 8));   // MSB
-        Wire.write((int)(addr & 0xFF)); // LSB    
-        Wire.endTransmission();
-
-        Wire.requestFrom((int)this->_deviceAddr, len);
-
-        int i = 0;
-
-        if (Wire.available()) {
-            while (Wire.available()) {
-                allocatedBuffer[i] = (int)Wire.read();
-                i += 1;
-            }
-        }
-        allocatedBuffer[i] = 0;
-        return i == len;
-    }
-
-    void EEPROM24LC256_I2C::WriteString(int addr, char *s) {
-
-        int len = strlen(s);
-        WriteByte(addr, (byte)len);
-        addr += 1;
-
-        for (int i = 0; i < len; i++) {
-            WriteByte(addr + i, (byte)s[i]);
-        }
-    }
-
-#endif
