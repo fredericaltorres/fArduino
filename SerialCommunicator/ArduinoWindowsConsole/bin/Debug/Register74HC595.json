@@ -1,0 +1,37 @@
+{
+    "PortName": "COM4",
+    "DeviceName": "Arduino Uno - Register74HC595",
+    
+  "ComCommands": [
+    {
+      "Caption": "H)elp",
+      "Command": null,
+      "CommandType": 0,
+      "ConsoleKey": 72
+    },
+    {
+      "Caption": "Q)uit",
+      "Command": null,
+      "CommandType": 1,
+      "ConsoleKey": 81
+    },
+    {
+        "Caption": "L)oop to 0.32",
+        "Command": "loop64",
+        "CommandType": 2,
+        "ConsoleKey": 76
+    },
+    {
+      "Caption": "R)eset",
+      "Command": "reset",
+      "CommandType": 2,
+      "ConsoleKey": 82
+    },
+    {
+        "Caption": "A)nimations",
+        "Command": "animations",
+        "CommandType": 2,
+        "ConsoleKey": 65
+    }    
+  ]
+}

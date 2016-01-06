@@ -17,6 +17,7 @@
   <ItemGroup>
     <None Include="rdSummitArduino.ino" />
     <None Include="bu.ino" />
+    <None Include="rfid.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Visual Micro\.rdSummitArduino.vsarduino.h">

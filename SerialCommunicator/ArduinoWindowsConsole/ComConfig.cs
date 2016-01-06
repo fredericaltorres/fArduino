@@ -29,6 +29,7 @@ namespace ArduinoWindowsConsole
     public class ComConfig : JSonPersistedObject
     {
         public string PortName;
+        public int BaudRate;
         public string DeviceName;
         public List<ComCommand> ComCommands = new List<ComCommand>();
 
@@ -36,6 +37,8 @@ namespace ArduinoWindowsConsole
         {
             ComConfig o = JSonPersistedObject.Load<ComConfig>(fileName);
             o.FileName = fileName;
+            if (o.BaudRate == 0)
+                o.BaudRate = 9600;
             return o;
         }
         public string GetMenu()

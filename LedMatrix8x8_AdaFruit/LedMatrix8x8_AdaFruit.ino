@@ -1,10 +1,11 @@
 /***************************************************
 This is a library for our I2C LED Backpacks
 
-Designed specifically to work with the Adafruit LED Matrix backpacks
-----> http://www.adafruit.com/products/872
-----> http://www.adafruit.com/products/871
-----> http://www.adafruit.com/products/870
+Designed specifically to work with the Adafruit LED 7-Segment backpacks
+----> http://www.adafruit.com/products/881
+----> http://www.adafruit.com/products/880
+----> http://www.adafruit.com/products/879
+----> http://www.adafruit.com/products/878
 
 These displays use I2C to communicate, 2 pins are required to
 interface. There are multiple selectable I2C addresses. For backpacks
@@ -19,191 +20,68 @@ Written by Limor Fried/Ladyada for Adafruit Industries.
 BSD license, all text above must be included in any redistribution
 ****************************************************/
 
-#include <Wire.h>
+// Enable one of these two #includes and comment out the other.
+// Conditional #include doesn't work due to Arduino IDE shenanigans.
+#include <Wire.h> // Enable this line if using Arduino Uno, Mega, etc.
+//#include <TinyWireM.h> // Enable this line if using Adafruit Trinket, Gemma, etc.
+
 #include "Adafruit_LEDBackpack.h"
 #include "Adafruit_GFX.h"
 
-Adafruit_8x8matrix matrix = Adafruit_8x8matrix();
+Adafruit_7segment matrix = Adafruit_7segment();
 
 void setup() {
+#ifndef __AVR_ATtiny85__
     Serial.begin(9600);
-    Serial.println("8x8 LED Matrix Test");
-
-    matrix.begin(0x70);  // pass in the address
-}
-
-static const uint8_t PROGMEM
-smile_bmp[] =
-{ B00111100,
-B01000010,
-B10100101,
-B10000001,
-B10100101,
-B10011001,
-B01000010,
-B00111100 },
-neutral_bmp[] =
-{ B00111100,
-B01000010,
-B10100101,
-B10000001,
-B10111101,
-B10000001,
-B01000010,
-B00111100 },
-frown_bmp[] =
-{ B00111100,
-B01000010,
-B10100101,
-B10000001,
-B10011001,
-B10100101,
-B01000010,
-B00111100 };
-
-int wait = 200;
-
-void IncreaseDecreaseBrigthness() {
-    for (byte b = 0; b < 3; b++) {
-        matrix.setBrightness(b + 1);
-        delay(wait / 2);
-    }
-    for (byte b = 2; b > 0; b--) {
-        matrix.setBrightness(b + 1);
-        delay(wait*2);
-    }
-}
-
-
-void Intro() {
-
-    matrix.clear();
-    matrix.writeDisplay();  // write the changes we just made to the display
-    matrix.drawRect(0, 0, 8, 8, LED_ON);
-    matrix.setBrightness(0);
-    matrix.writeDisplay();  // write the changes we just made to the display
-    delay(wait);
-
-    int wait2 = wait;
-
-    for (byte z = 0; z < 5; z++) {
-
-        matrix.clear();
-        matrix.drawRect(0, 0, 8, 8, LED_ON);
-        matrix.drawRect(2, 2, 4, 4, LED_ON);
-        matrix.writeDisplay();  // write the changes we just made to the display
-        delay(wait2); wait2 -= 15;
-        matrix.clear();
-        matrix.drawRect(0, 0, 8, 8, LED_ON);
-        matrix.fillRect(3, 3, 2, 2, LED_ON);
-        matrix.writeDisplay();  // write the changes we just made to the display
-        delay(wait2); wait2 -= 15;
-    }
-    matrix.clear();
-    matrix.drawRect(0, 0, 8, 8, LED_ON);
-    matrix.drawRect(1, 1, 6, 6, LED_ON);
-    matrix.writeDisplay();  // write the changes we just made to the display
-    delay(wait / 4);
-    matrix.fillRect(0, 0, 8, 8, LED_ON);
-    matrix.writeDisplay();  // write the changes we just made to the display
-    delay(wait);
-
-    IncreaseDecreaseBrigthness();
-
-    matrix.clear();
-    matrix.writeDisplay();  // write the changes we just made to the display
-    delay(wait * 2);
-}
-
-#define SCROLLTEXT_SPEED 60//90
-
-void ScrollText(char *text, int8_t step) {
-
-    matrix.setTextSize(0);
-    matrix.setTextWrap(false);  // we dont want text to wrap so it scrolls nicely
-    matrix.setTextColor(LED_ON);
-
-    for (int8_t x = 0; x >= -127; x--) {
-        matrix.clear();
-        matrix.setCursor(x, 0);
-        matrix.print(text);
-        matrix.writeDisplay();
-        delay(SCROLLTEXT_SPEED);
-    }
-    /*for (int8_t x = -127; x <= 0; x++) {
-        matrix.clear();
-        matrix.setCursor(x, 0);
-        matrix.print(text);
-        matrix.writeDisplay();
-        delay(SCROLLTEXT_SPEED/3);
-    }*/
+    Serial.println("7 Segment Backpack Test");
+#endif
+    matrix.begin(0x70 + 2);
 }
 
 void loop() {
+    // try to print a number thats too long
+    matrix.print(10000, DEC);
+    matrix.writeDisplay();
+    delay(500);
 
-    matrix.setBrightness(3);
-    matrix.clear();
-    matrix.writeDisplay();  // write the changes we just made to the display
-    Intro();    
-    char * text = " RESONE - Suite 2015 ";
-    ScrollText(text, 127);
-    delay(1000);
-    text = " Service Store ";
-    ScrollText(text, 90);
-    delay(1000);
-    text = " Workspace ";
-    ScrollText(text, 90);
-    delay(1000);
-    text = " Automation ";
-    ScrollText(text, 90);
-    delay(1000);    
+    // print a hex number
+    matrix.print(0xBEEF, HEX);
+    matrix.writeDisplay();
+    delay(500);
+
+    // print a floating point 
+    matrix.print(12.34);
+    matrix.writeDisplay();
+    delay(500);
+
+    // print with print/println
+    for (uint16_t counter = 0; counter < 9999; counter += 10) {
+        matrix.println(counter);
+        matrix.writeDisplay();
+        delay(200);
+    }
+
+    // method #2 - draw each digit
+    uint16_t blinkcounter = 0;q
+    boolean drawDots = false;
+    for (uint16_t counter = 0; counter < 9999; counter++) {
+        matrix.writeDigitNum(0, (counter / 1000), drawDots);
+        matrix.writeDigitNum(1, (counter / 100) % 10, drawDots);
+        matrix.drawColon(drawDots);
+        matrix.writeDigitNum(3, (counter / 10) % 10, drawDots);
+        matrix.writeDigitNum(4, counter % 10, drawDots);
+
+        blinkcounter += 50;
+        if (blinkcounter < 500) {
+            drawDots = false;
+        }
+        else if (blinkcounter < 1000) {
+            drawDots = true;
+        }
+        else {
+            blinkcounter = 0;
+        }
+        matrix.writeDisplay();
+        delay(10);
+    }
 }
-
-/*matrix.setRotation(3);
-for (int8_t x = 7; x >= -36; x--) {
-matrix.clear();
-matrix.setCursor(x, 0);
-matrix.print("World");
-matrix.writeDisplay();
-delay(100);
-}
-matrix.setRotation(0);*/
-
-/*
-
-matrix.clear();
-matrix.drawCircle(3, 3, 3, LED_ON);
-matrix.writeDisplay();  // write the changes we just made to the display
-delay(500);
-
-*/
-
-/*matrix.clear();
-
-matrix.drawBitmap(0, 0, smile_bmp, 8, 8, LED_ON);
-matrix.writeDisplay();
-delay(500);
-
-matrix.clear();
-matrix.drawBitmap(0, 0, neutral_bmp, 8, 8, LED_ON);
-matrix.writeDisplay();
-delay(500);
-
-matrix.clear();
-matrix.drawBitmap(0, 0, frown_bmp, 8, 8, LED_ON);
-matrix.writeDisplay();
-delay(500);*/
-
-
-//for (int r = 0; r < 8; r++) {
-//    for (int c = 0; c < 8; c++) {
-//        matrix.drawPixel(r, c, LED_ON);
-//        matrix.writeDisplay();  // write the changes we just made to the display
-//        delay(6);
-//    }
-//}
-// 
-//matrix.clear();
-//matrix.drawLine(0, 0, 7, 7, LED_ON);
-//matrix.writeDisplay();  // write the changes we just made to the display
-//delay(500);

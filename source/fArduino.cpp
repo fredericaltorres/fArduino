@@ -63,6 +63,9 @@ String StringFormatClass::PadLeft(String source, char * padding, int max) {
         return r;
     }
 }
+
+const char GetTime_FORMAT[]        PROGMEM = { "%02d:%02d:%2d" };
+
 String StringFormatClass::GetTime() {
 
     unsigned long secSinceStart = millis() / 1000;
@@ -71,8 +74,8 @@ String StringFormatClass::GetTime() {
     int minutes                 = secSinceStart / 60;
     secSinceStart              -= minutes * 60;
     int seconds                 = secSinceStart;
-    String formated             = this->Format("%02d:%02d:%2d", hours, minutes, seconds);
-
+    //String formated             = this->Format(_PM_(GetTime_FORMAT), hours, minutes, seconds);
+    String formated = this->Format("%02d:%02d:%2d", hours, minutes, seconds);
     return formated;
 }
 boolean StringFormatClass::IsDigit(char *format) {
@@ -81,6 +84,7 @@ boolean StringFormatClass::IsDigit(char *format) {
 }
 
 char * StringFormatClass::PM(const char *progMemString) {
+
     return this->GetProgMemString(progMemString);
 }
 char * StringFormatClass::GetProgMemString(const char *progMemString) {
@@ -299,15 +303,15 @@ void BoardClass::Trace(char * msg, boolean printTime /*= true*/) {
         if (printTime) {
 
             Serial.print("[");
-            Serial.flush();
+            //Serial.flush();
             Serial.print(StringFormat.GetTime());
-            Serial.flush();
+            //Serial.flush();
             Serial.print("]");
             Serial.flush();
         }
         Serial.println(msg);
         Serial.flush();
-        Board.Delay(TRACE_DELAY);
+        Board.Delay(TRACE_DELAY+5);
     }
     #endif
 }
@@ -836,7 +840,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // Boards with ATmega168, Lilypad, old Nano, Diecimila  – 512 bytes
 // By default we choose conservative settings
 EEPROMClassEx::EEPROMClassEx()
-    : _allowedWrites(100)
+    : _allowedWrites(10000)
 {
 }
 
@@ -867,6 +871,7 @@ void EEPROMClassEx::setMemPool(int base, int memSize) {
 }
 
 void EEPROMClassEx::setMaxAllowedWrites(int allowedWrites) {
+
 #ifdef _EEPROMEX_DEBUG
     _allowedWrites = allowedWrites;
 #endif			
@@ -874,7 +879,7 @@ void EEPROMClassEx::setMaxAllowedWrites(int allowedWrites) {
 
 int EEPROMClassEx::getAddress(int noOfBytes) {
 
-    int availableaddress = _nextAvailableaddress;
+    int availableaddress   = _nextAvailableaddress;
     _nextAvailableaddress += noOfBytes;
 
 #ifdef _EEPROMEX_DEBUG    
@@ -892,17 +897,18 @@ int EEPROMClassEx::getAddress(int noOfBytes) {
     return availableaddress;
 }
 
-
 bool EEPROMClassEx::isReady() {
+
     return eeprom_is_ready();
 }
 
-uint8_t EEPROMClassEx::read(int address)
-{
+uint8_t EEPROMClassEx::read(int address) {
+
     return readByte(address);
 }
 
 bool EEPROMClassEx::readBit(int address, byte bit) {
+
     if (bit> 7) return false;
     if (!isReadOk(address + sizeof(uint8_t))) return false;
     byte byteVal = eeprom_read_byte((unsigned char *)address);
@@ -960,10 +966,10 @@ bool EEPROMClassEx::write(int address, uint8_t value)
 }
 
 bool EEPROMClassEx::writeBit(int address, uint8_t bit, bool value) {
+
     updateBit(address, bit, value);
     return true;
 }
-
 
 bool EEPROMClassEx::writeByte(int address, uint8_t value)
 {
@@ -992,6 +998,14 @@ bool EEPROMClassEx::writeLong(int address, uint32_t value)
     if (!isWriteOk(address + sizeof(uint32_t))) return false;
     eeprom_write_dword((unsigned long *)address, value);
     return true;
+}
+
+bool EEPROMClassEx::writeBuffer(int address, char * buffer, int len)
+{
+    if (!isWriteOk(address + len)) return 0;
+    ABOUT_TO_CALL_EEPROM_API;
+    eeprom_write_block((void*)buffer, (void*)address, len);
+    DONE_CALLING_EEPROM_API;
 }
 
 bool EEPROMClassEx::writeFloat(int address, float value)
@@ -1099,6 +1113,7 @@ int EEPROMClassEx::_memSize              = 512;
 int EEPROMClassEx::_nextAvailableaddress = 0;
 int EEPROMClassEx::_writeCounts          = 0;
 
+/*
 EEPROMClassEx EEPROM;
 
 //////////////////////////////////////////////////////
@@ -1191,7 +1206,7 @@ void MemDB::ToSerial() {
         #endif
     }
 }
-
+*/
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1741,3 +1756,25 @@ int UltrasonicDistanceSensor::Ping() {
     return distance;
 }
 
+PinLogicAnalyser::PinLogicAnalyser(uint8_t analysedPin, uint8_t ledPin){
+    
+    this->_analysedPin = analysedPin;
+    this->_ledPin      = ledPin;
+    this->State       = false;
+
+    Board.SetPinMode(this->_analysedPin, INPUT);
+    Board.SetPinMode(this->_ledPin, OUTPUT);
+}
+
+
+void PinLogicAnalyser::Process(){
+
+    if (digitalRead(this->_analysedPin) == HIGH && this->State == false){
+        this->State = true;
+        Board.LedOn(this->_ledPin, true);
+    }
+    else if (digitalRead(this->_analysedPin) == LOW && this->State == true){
+        this->State = false;
+        Board.LedOn(this->_ledPin, false);
+    }
+}

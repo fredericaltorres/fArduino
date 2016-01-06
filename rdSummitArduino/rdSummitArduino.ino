@@ -59,21 +59,36 @@ void setup() {
     Serial.println(F("Scan PICC to see UID, type, and data blocks..."));
 }
 
+#define Flush Serial.flush(); delay(10);
+
 void loop() {
     // Look for new cards
     if (!mfrc522.PICC_IsNewCardPresent()) {
         return;
     }
 
-    Serial.println(F("DETECTED"));
 
     // Select one of the cards
     if (!mfrc522.PICC_ReadCardSerial()) {
         return;
     }
 
+    Serial.print("mfrc522.uid.size:");
+    Serial.println(mfrc522.uid.size);
+    Flush;
+
+    Serial.print("PICC_GetUidAsLong:");
+    Serial.println(mfrc522.PICC_GetUidAsLong());
+    Flush;
+
+    byte type = mfrc522.PICC_GetType(mfrc522.uid.sak);
+    Serial.println(mfrc522.PICC_GetTypeName(type));
+    Flush;
+
+    delay(1000 * 2);
+
     // Dump debug info about the card; PICC_HaltA() is automatically called
-    mfrc522.PICC_DumpToSerial(&(mfrc522.uid));
+    //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));
 }
 
 void ShowReaderDetails() {

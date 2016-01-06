@@ -1,16 +1,23 @@
-﻿ using System;
- using System.Data;
- using System.IO;
- using System.IO.Ports;
- using System.Reflection;
- using ArduinoLibrary;
- using ArduinoWindowsConsole;
+﻿using System;
+using System.Data;
+using System.IO;
+using System.IO.Ports;
+using System.Reflection;
+using ArduinoLibrary;
+using ArduinoWindowsConsole;
 using DynamicSugar;
+using System.Runtime.InteropServices;
 
 namespace test
  {
     class Program
     {
+        // http://stackoverflow.com/questions/3549605/add-winlogon-login-method-using-c-sharp-and-yubikey
+        [DllImport("user32.dll")]
+        public static extern bool LockWorkStation();
+        // https://medium.com/@tylermenezes/rfid-credential-provider-d0bf8ef29b16
+        // https://github.com/tylermenezes/Rfid-Credential-Provider
+
         private static ComConfig _comConfig;
 
         static void WriteLine(string text, ConsoleColor c)
@@ -68,7 +75,7 @@ namespace test
 
             PrintHelp();
 
-            using (var ac = new ArduinoConnection(_comConfig.PortName))
+            using (var ac = new ArduinoConnection(_comConfig.PortName, _comConfig.BaudRate))
             {
                 Console.WriteLine("Port Open");
                 while (goOn)
@@ -89,6 +96,8 @@ namespace test
                     {
                         var message = ac.ReceivedMessages.Dequeue();
                         WriteLine(message, message.StartsWith("<") ? ConsoleColor.Green : ConsoleColor.DarkGreen);
+                        //if (message.Contains("<MotionDetected>"))
+                        //    LockWorkStation();
                     }
                 }
             }

@@ -13,10 +13,14 @@
 
     // --- fArduino LIBRARY COMPILATION MODE ---
 
-    //#define TRINKET 1 // Pins information for Trinket https://learn.adafruit.com/introducing-trinket/pinouts
+    //#define TRINKET  // Pins information for Trinket https://learn.adafruit.com/introducing-trinket/pinouts
     //#define TRINKET_PRO 1
     #define ARDUINO_UNO 1
+    //#define FEATHER_32u4 1
 
+    #if defined(FEATHER_32u4) // ATMega 32u4 is similar to an ATMega328p with more hardware feature
+        #define ARDUINO_UNO 1
+    #endif
     #if defined(TRINKET)
         #define EEPROM_SIZE 512
     #endif
@@ -33,9 +37,12 @@
 
     // Internal buffer used for temporary string manipulation
     // Not great because not re entrant do not call StringFormat.GetProgMemString() nested
-    #define __fArduino_InternalCharBufferSize 128
+    #if defined(TRINKET)
+        #define __fArduino_InternalCharBufferSize 16
+    #else
+        #define __fArduino_InternalCharBufferSize 128
+    #endif
     
-
 //1024 bytes on the ATmega328
 //512 bytes on the ATmega168 and ATmega8 
 //4 KB(4096 bytes) on the ATmega1280 and ATmega2560.
@@ -140,6 +147,8 @@
                 bool     updateFloat        (int, float           );
                 bool     updateDouble       (int, double          );
 
+                bool     writeBuffer        (int address, char * buffer, int len);
+
                 // Use template for other data formats
 
                 template <class T> int readBlock(int address, const T value[], int items)
@@ -218,6 +227,7 @@
 
     #endif
 
+    /*
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// MemDB
     /// - Manage byte array saved in EEPROM
@@ -249,6 +259,7 @@
             String ToString();
             void ToSerial();
     };
+    */
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// StringFormatClass
@@ -744,5 +755,21 @@
         UltrasonicDistanceSensor(uint8_t triggerPin, uint8_t echoPin, int maxCmDistance = 400);
         int Ping();
     };
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// PinLogicAnalyser
+    /// 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    class PinLogicAnalyser {
+    private:
+        uint8_t _analysedPin, _ledPin;
+    public:
+        bool State;
+        PinLogicAnalyser(uint8_t _analysedPin, uint8_t _ledPin);
+        void Process();
+    };
+
    
+#define _PM_(s) StringFormat.PM(s)
+
 #endif

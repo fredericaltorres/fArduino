@@ -16,6 +16,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="LedMatrix8x8_AdaFruit.ino" />
+    <None Include="bu.ino" />
+    <None Include="SevenSegment.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Visual Micro\.LedMatrix8x8_AdaFruit.vsarduino.h">

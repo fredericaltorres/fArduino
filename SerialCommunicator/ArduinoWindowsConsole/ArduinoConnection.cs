@@ -8,7 +8,6 @@ using System.Threading;
 
 namespace ArduinoLibrary
 {
-
     /// <summary>
     /// provides very low level access to the serial _serialPort that an ardiuno is plugged in to
     /// </summary>
@@ -21,9 +20,9 @@ namespace ArduinoLibrary
         public int BaudRate     { get; set; }
         public Queue<String> ReceivedMessages = new Queue<string>();
 
-        public ArduinoConnection(string portName)
+        public ArduinoConnection(string portName, int baud)
         {
-            this.BaudRate       = 9600;
+            this.BaudRate       = baud;
             _serialPort         = new SerialPort(portName);
             this.PortName       = portName;
             _serialPort.ErrorReceived += new SerialErrorReceivedEventHandler(port_ErrorReceived);
@@ -47,6 +46,15 @@ namespace ArduinoLibrary
             {
                 try
                 {
+                    this._serialPort.BaudRate = this.BaudRate;
+                    this._serialPort.Parity   = Parity.None;
+                    this._serialPort.StopBits = StopBits.One;
+                    var d = this._serialPort.DataBits;
+                    var s = this._serialPort.NewLine;
+                    var size = this._serialPort.ReadBufferSize;
+                    var timeout = this._serialPort.ReadTimeout;
+                    this._serialPort.ReadTimeout = 2000;
+
                     this._serialPort.Open();
                     return true;
                 }

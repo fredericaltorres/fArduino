@@ -1,0 +1,25 @@
+{
+    "PortName": "COM4",
+    "DeviceName": "Arduino Uno",
+    
+  "ComCommands": [
+    {
+      "Caption": "H)elp",
+      "Command": null,
+      "CommandType": 0,
+      "ConsoleKey": 72
+    },
+    {
+      "Caption": "Q)uit",
+      "Command": null,
+      "CommandType": 1,
+      "ConsoleKey": 81
+    },
+    {
+      "Caption": "T)est Midi",
+      "Command": "testMidi", 
+      "CommandType": 2,
+      "ConsoleKey": 84
+    }   
+  ]
+}

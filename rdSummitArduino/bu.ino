@@ -1,35 +1,33 @@
 ///***********************************************************************
 //
-//Acquiring and storing temperature with Arduino and a DS18B20 sensor
-//
-//- Acquiring temperature data every 6 minutes.
-//- Store the data into an EPROM Array. Sore 3 days of data on 512 bytes of EPROM.
-//- Api to communicate with a Windows Console to
-//- resetData
-//- getData: Send acquired data as CSV to the WindowsConsole (Serial port)
-//- acquireData
-//- Use fArduino library to write clean and readable code
-//
-//- User interface on the arduino:
-//Use on board led, to express that the application state:
-//1) if blinking on/off every 1/2 second, the application is waiting, normal state
-//2) if blinking on/off for 1.6 second quickly, the application just acquire a new temperature
-//3) if blinking on/off for 4 seconds semi-quickly repeatedly, There is an issue with the sensor
-//
 //***********************************************************************/
 //
+//// RFDI RC522
+////* Typical pin layout used:
+////* -----------------------------------------------------------------------------------------
+////*             MFRC522      Arduino       Arduino   Arduino    Arduino          Arduino
+////*             Reader/PCD   Uno           Mega      Nano v3    Leonardo/Micro   Pro Micro
+////* Signal      Pin          Pin           Pin       Pin        Pin              Pin
+////* -----------------------------------------------------------------------------------------
+////* RST/Reset   RST          9             5         D9         RESET/ICSP-5     RST
+////* SPI SS      SDA(SS)      10            53        D10        10               10
+////* SPI MOSI    MOSI         11 / ICSP-4   51        D11        ICSP-4           16
+////* SPI MISO    MISO         12 / ICSP-1   50        D12        ICSP-1           14
+////* SPI SCK     SCK          13 / ICSP-3   52        D13        ICSP-3           15
 //
+//
+//#include <SPI.h>
 //#include <MFRC522.h>
 //#include <fArduino.h>
 //
-//#define ON_BOARD_LED 13
+//#define ON_BOARD_LED 2
 //Led _onBoardLed(ON_BOARD_LED);
 //TimeOut _monitorTimeOut(1000);
 //
-//#define PIR_MOTION_SENSOR_LED 12
+//#define PIR_MOTION_SENSOR_LED 3
 //Led _motionSensorLed(PIR_MOTION_SENSOR_LED);
 //
-//#define PIR_MOTION_SENSOR 11
+//#define PIR_MOTION_SENSOR 4
 //#define PIR_MOTION_SENSOR_RESET_TIME 3 * 1000 
 //RadioShackPIRSensor _motionSensor(PIR_MOTION_SENSOR);
 //
@@ -54,7 +52,6 @@
 //
 //    _onBoardLed.SetBlinkMode(1000);
 //}
-//
 //
 //bool _motionDetected = false;
 //

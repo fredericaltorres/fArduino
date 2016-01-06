@@ -18,7 +18,6 @@ Led _exLed1(EX_LED1);
 Led _exLed2(EX_LED2);
 
 
-int PHOTO_CELL_PIN = 5;
 
 void setup() {
 
@@ -41,8 +40,6 @@ void loop() {
     _onBoardLed.Blink();
     _exLed1.Blink();
     _exLed2.Blink();
-    
-    Board.Trace(StringFormat.Format("photocellPin(%d):%d", PHOTO_CELL_PIN, analogRead(PHOTO_CELL_PIN)));
  
     Board.Delay(400);
 }

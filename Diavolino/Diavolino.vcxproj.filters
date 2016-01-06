@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Diavolino.ino" />
+    <None Include="bu.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Visual Micro\.Diavolino.vsarduino.h">

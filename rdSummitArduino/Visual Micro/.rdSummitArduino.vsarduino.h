@@ -42,4 +42,5 @@ extern "C" void __cxa_pure_virtual() {;}
 #include "D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\variants\standard\pins_arduino.h" 
 #include "D:\DVT\Arduino\fArduino\rdSummitArduino\rdSummitArduino.ino"
 #include "D:\DVT\Arduino\fArduino\rdSummitArduino\bu.ino"
+#include "D:\DVT\Arduino\fArduino\rdSummitArduino\rfid.ino"
 #endif

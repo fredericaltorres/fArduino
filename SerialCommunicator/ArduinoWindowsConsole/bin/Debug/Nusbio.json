@@ -1,0 +1,32 @@
+{
+    "PortName": "COM60",
+    "BaudRate": 9600,
+    "DeviceName": "Arduino",
+    
+  "ComCommands": [
+    {
+      "Caption": "H)elp",
+      "Command": null,
+      "CommandType": 0,
+      "ConsoleKey": 72
+    },
+    {
+      "Caption": "Q)uit",
+      "Command": null,
+      "CommandType": 1,
+      "ConsoleKey": 81
+    },
+    {
+        "Caption": "AnalogRead0",
+        "Command": "analogRead0",
+        "CommandType": 2,
+        "ConsoleKey": 65
+    },
+    {
+        "Caption": "D)igitalRead10",
+        "Command": "digitalRead10",
+        "CommandType": 2,
+        "ConsoleKey": 68
+    }
+  ]
+}

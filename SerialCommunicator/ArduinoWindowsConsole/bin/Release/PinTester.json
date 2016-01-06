@@ -1,0 +1,43 @@
+{
+    "PortName": "COM5",
+    "DeviceName": "Arduino Uno - Register74HC595",
+    
+  "ComCommands": [
+    {
+      "Caption": "H)elp",
+      "Command": null,
+      "CommandType": 0,
+      "ConsoleKey": 72
+    },
+    {
+      "Caption": "Q)uit",
+      "Command": null,
+      "CommandType": 1,
+      "ConsoleKey": 81
+    },
+    {
+        "Caption": "+)Inc Output Pin",
+        "Command": "incPin",
+        "CommandType": 2,
+        "ConsoleKey": 107
+    },
+    {
+        "Caption": "-)Dec Output Pin",
+        "Command": "decPin",
+        "CommandType": 2,
+        "ConsoleKey": 109
+    },
+    {
+        "Caption": "T)est Out Pin",
+        "Command": "testOut",
+        "CommandType": 2,
+        "ConsoleKey": 84
+    },
+    {
+        "Caption": "P)WM Test Out Pin",
+        "Command": "testOutPWM",
+        "CommandType": 2,
+        "ConsoleKey": 80
+    }
+  ]
+}

@@ -18,6 +18,9 @@
 #define __avr__
 #define F_CPU 16000000L
 #define __cplusplus
+#define GCC_VERSION 40302
+#define ARDUINO_ARCH_AVR
+#define ARDUINO_AVR_UNO
 #define __inline__
 #define __asm__(x)
 #define __extension__
@@ -27,27 +30,45 @@
 #define __asm__ 
 #define __volatile__
 
-#define __builtin_va_list
+typedef void *__builtin_va_list;
 #define __builtin_va_start
 #define __builtin_va_end
-#define __DOXYGEN__
+//#define __DOXYGEN__
 #define __attribute__(x)
 #define NOINLINE __attribute__((noinline))
 #define prog_void
 #define PGM_VOID_P int
+
+#define NEW_H
             
 typedef unsigned char byte;
 extern "C" void __cxa_pure_virtual() {;}
-#include "D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\cores\arduino\arduino.h"
-#include "D:\DVT\Arduino\arduino-1.0.6\hardware\arduino\variants\standard\pins_arduino.h" 
-#include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\MCP9808_TempSensor.ino"
-#include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\Adafruit_MCP9808.cpp"
-#include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\Adafruit_MCP9808.h"
-#include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\I2cMaster.cpp"
-#include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\I2cMaster.h"
-#include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\JustAdafruitStuff.ino.ino"
-#include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\SoftI2CMaster.cpp"
-#include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\SoftI2CMaster.h"
-#include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\TwiMap.cpp"
-#include "D:\DVT\Arduino\fArduino\MCP9808_TempSensor\TwiMap.h"
+#include <arduino.h>
+#include <pins_arduino.h> 
+#undef F
+#define F(string_literal) ((const PROGMEM char *)(string_literal))
+#undef PSTR
+#define PSTR(string_literal) ((const PROGMEM char *)(string_literal))
+#undef cli
+#define cli()
+#define pgm_read_byte(address_short)
+#define pgm_read_word(address_short)
+#define pgm_read_word2(address_short)
+#define digitalPinToPort(P)
+#define digitalPinToBitMask(P) 
+#define digitalPinToTimer(P)
+#define analogInPinToBit(P)
+#define portOutputRegister(P)
+#define portInputRegister(P)
+#define portModeRegister(P)
+#include <MCP9808_TempSensor.ino>
+#include <Adafruit_MCP9808.cpp>
+#include <Adafruit_MCP9808.h>
+#include <I2cMaster.cpp>
+#include <I2cMaster.h>
+#include <JustAdafruitStuff.ino.ino>
+#include <SoftI2CMaster.cpp>
+#include <SoftI2CMaster.h>
+#include <TwiMap.cpp>
+#include <TwiMap.h>
 #endif

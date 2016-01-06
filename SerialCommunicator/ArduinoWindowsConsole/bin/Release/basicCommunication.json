@@ -1,0 +1,31 @@
+{
+    "PortName": "COM5",
+    "DeviceName": "TRINKET PRO",
+    
+  "ComCommands": [
+    {
+      "Caption": "H)elp",
+      "Command": null,
+      "CommandType": 0,
+      "ConsoleKey": 72
+    },
+    {
+      "Caption": "Q)uit",
+      "Command": null,
+      "CommandType": 1,
+      "ConsoleKey": 81
+    },
+    {
+        "Caption": "G)et Data",
+        "Command": "getData",
+        "CommandType": 2,
+        "ConsoleKey": 71
+    },
+    {
+      "Caption": "R)eset",
+      "Command": "resetData",
+      "CommandType": 2,
+      "ConsoleKey": 82
+    },    
+  ]
+}

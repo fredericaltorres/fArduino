@@ -21,7 +21,7 @@ void setup() {
     Board.Delay(1500); // Wait one second so after plug in the USB port, I can start the ArduinoWindowsConsole
 
     Board.InitializeComputerCommunication(9600, "Initializing...");
-    Board.TraceHeader("Serial Communicator With EEPROM");   
+    Board.TraceHeader("Serial Communicator **");   
     Board.SetPinMode(ON_BOARD_LED, OUTPUT);
     _onBoardLed.SetBlinkMode(1000);
 }

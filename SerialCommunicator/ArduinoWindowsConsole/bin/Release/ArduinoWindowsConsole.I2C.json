@@ -1,0 +1,31 @@
+{
+    "PortName": "COM4",
+    "DeviceName": "Arduino",
+    
+  "ComCommands": [
+    {
+      "Caption": "H)elp",
+      "Command": null,
+      "CommandType": 0,
+      "ConsoleKey": 72
+    },
+    {
+      "Caption": "Q)uit",
+      "Command": null,
+      "CommandType": 1,
+      "ConsoleKey": 81
+    },
+    {
+        "Caption": "R)ead",
+        "Command": "read",
+        "CommandType": 2,
+        "ConsoleKey": 82
+    },
+    {
+      "Caption": "W)rite",
+      "Command": "write",
+      "CommandType": 2,
+      "ConsoleKey": 87
+    }    
+  ]
+}

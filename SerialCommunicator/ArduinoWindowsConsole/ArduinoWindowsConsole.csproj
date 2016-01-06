@@ -58,6 +58,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Nusbio.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ArduinoWindowsConsole.EEPROM.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="ArduinoWindowsConsole.I2C.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

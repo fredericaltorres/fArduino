@@ -31,6 +31,9 @@
     <ClInclude Include="I2cMaster.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SoftI2CMaster.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Adafruit_MCP9808.cpp">
@@ -40,6 +43,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="I2cMaster.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftI2CMaster.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

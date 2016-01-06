@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("ArduinoWindowsConsole")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("RES Software")]
+[assembly: AssemblyCompany("MadeInTheUSB LLC")]
 [assembly: AssemblyProduct("ArduinoWindowsConsole")]
-[assembly: AssemblyCopyright("Copyright © RES Software 2014")]
+[assembly: AssemblyCopyright("Copyright © MadeInTheUSB 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
