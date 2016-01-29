@@ -37,10 +37,10 @@ class EEPROM_25AA256
 {
 public:
     EEPROM_25AA256(byte clock, byte ssPin, SPISettings * spiSettings);
-    void select(bool transaction);
-    void unselect(bool transaction);
-    char read_byte(int address);
-    char write_byte(int address, char data_byte);    
+    void Select(bool transaction);
+    void Unselect(bool transaction);
+    char ReadByte(int address);
+    char WriteByte(int address, char data_byte);    
     bool Read64ByteBuffer(int address, int size, byte *buffer);
     bool Write64ByteBuffer(int address, int size, byte *buffer);
 private:
