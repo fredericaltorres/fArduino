@@ -24,10 +24,12 @@
 #include <fArduino.h>
 
 #define SS_PIN 10
+
 #define EEPROM_25AA256_MAX_SPEED (10 * 1000 * 1000) // 10000000/8/1024/1024 ~=> 1.2 Mb/s
 
 SPISettings spiSettings(EEPROM_25AA256_MAX_SPEED, MSBFIRST, SPI_MODE0);
-EEPROM_25AA256 eeprom(0, SS_PIN, &spiSettings);
+
+EEPROM_25AA256 eeprom(32*1024, SS_PIN, &spiSettings);
 
 const char EepromInitializationMessage[]        PROGMEM = { "Initializing EEPROM maxBlock:%d, maxBytes:%ui for testing" };
 const char EepromVerification23kFastMessage[]   PROGMEM = { "Verify 32k fast" };
@@ -42,12 +44,10 @@ const char AppTitle[]                           PROGMEM = { "MadeInTheUSB - GDev
 const char ProcessedInMessage[]                 PROGMEM = { "Processed in %l" };
 const char PageXMessage[]                       PROGMEM = { "Page %d" };
 
-#define EEPROM_25AA256_PAGE_SIZE 64
-byte refbuf[EEPROM_25AA256_PAGE_SIZE]; // Init a 64 byte block
+byte refbuf   [EEPROM_25AA256_PAGE_SIZE]; // Init a 64 byte block
 byte refbuf129[EEPROM_25AA256_PAGE_SIZE]; // Init a 64 byte block
 byte refbuf255[EEPROM_25AA256_PAGE_SIZE]; // Init a 64 byte block
-unsigned int maxBytes = 1024 * 32;
-int maxPage = maxBytes / EEPROM_25AA256_PAGE_SIZE;
+
 #define REF_VALUE_2 (128+1) // 10000001
 #define REF_VALUE_3 (170)   // 10101010
 
@@ -76,11 +76,13 @@ void InitializeReferenceBuffer() {
 void WriteEEPROM() {
 
     InitializeReferenceBuffer();
-    Board.SendWindowsConsoleCommand(StringFormat.Format(StringFormat.PM(EepromInitializationMessage), maxPage, maxBytes), true);
+
+    Board.SendWindowsConsoleCommand(StringFormat.Format(StringFormat.PM(EepromInitializationMessage), eeprom.MaxPage, eeprom.SizeInKb), true);
+
     unsigned long t = millis();
     bool r = false;
 
-    for (int p = 0; p < maxPage; p++) { // Write the all 32k for the eeprom
+    for (int p = 0; p < eeprom.MaxPage; p++) { // Write the all 32k for the eeprom
 
         // eeprom.WriteBuffer() support the 30 byte Wire.h limitation by making 2 call to write the 64 bytes  :(
         // WriteBufferOneByteAtTheTime Write64ByteBuffer
@@ -111,12 +113,17 @@ void ReadEEPROM() {
 
     byte buf2[EEPROM_25AA256_PAGE_SIZE]; // Init a 64 byte block
 
+    if (eeprom.SizeInKb < 0)
+        Board.SendWindowsConsoleCommand("SOMETHING WRONG", true);
+
     Board.SendWindowsConsoleCommand(StringFormat.PM(EepromVerification23kFastMessage), true);
+        
     unsigned long t = millis();
 
-    for (int p = 0; p < maxPage; p++) { // Write the all 32k for the eeprom
+    for (int p = 0; p < eeprom.MaxPage; p++) { // Write the all 32k for the eeprom
 
-        if (p % 256 == 0) Board.SendWindowsConsoleCommand(StringFormat.Format(StringFormat.PM(PageXMessage), p), true);
+        if (p % 256 == 0) 
+            Board.SendWindowsConsoleCommand(StringFormat.Format(StringFormat.PM(PageXMessage), p), true);
 
         unsigned int ad = p * EEPROM_25AA256_PAGE_SIZE;
         // Read64ByteBufferOneAtTheTime Read64ByteBuffer
@@ -160,6 +167,8 @@ void setup(void)
     Board.TraceHeader("25AA256 EEPROM Testing");
 
     InitializeReferenceBuffer();
+    
+    Board.SendWindowsConsoleCommand(StringFormat.Format("maxPage:%d, SizeInKb:%ui", eeprom.MaxPage, eeprom.SizeInKb));
 
     //WriteEEPROM();
     ReadEEPROM();
