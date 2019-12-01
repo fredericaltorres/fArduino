@@ -1,5 +1,4 @@
 // fArduino.h
-// Use the NewPing Library - v1.5 - 08/15/2012
 
 #ifndef _FARDUINO_h
 
@@ -86,7 +85,7 @@
             #include <WProgram.h> 
         #endif
         #include <inttypes.h>
-        #include <avr/eeprom.h>
+        //#include <avr/eeprom.h>
 
         // Boards with ATmega328, Duemilanove, Uno, UnoSMD, Lilypad - 1024 bytes (1 kilobyte)
         // Boards with ATmega1280 or 2560, Arduino Mega series ? 4096 bytes (4 kilobytes)
@@ -113,6 +112,7 @@
         #define EEPROMSizeTeensy2pp   EEPROMSizeAT90USB1286
         #define EEPROMSizeTeensy3     EEPROMSizeMK20DX128
 
+		#ifndef SAMD_SERIES
         class EEPROMClassEx
         {
             public:
@@ -224,6 +224,7 @@
         };
 
         extern EEPROMClassEx EEPROM;
+		#endif
 
     #endif
 
@@ -276,8 +277,8 @@
             String PadLeft(String source, char * padding, int max);
             String MakeString(char * padding, int max);
             boolean IsDigit(char *format);
-            char * GetProgMemString(const char *progMemString);
-            char * PM(const char *progMemString);
+            char * GetProgMemString(char *progMemString);
+            char * ProgMem(char *progMemString);
     };
     extern StringFormatClass StringFormat;
 

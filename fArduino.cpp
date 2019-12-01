@@ -1,4 +1,7 @@
 #include <fArduino.h>
+#ifdef SAMD_SERIES
+#include <avr/dtostrf.h> // Needed for  dtostrf()
+#endif
 ///////////////////////////////////////////////////////////////////////////////
 //  
 // fArduino.cpp
@@ -83,11 +86,11 @@ boolean StringFormatClass::IsDigit(char *format) {
     return (*format >= '0' && *format <= '9');
 }
 
-char * StringFormatClass::PM(const char *progMemString) {
+char * StringFormatClass::ProgMem(char * progMemString) {
 
     return this->GetProgMemString(progMemString);
 }
-char * StringFormatClass::GetProgMemString(const char *progMemString) {
+char * StringFormatClass::GetProgMemString(char *progMemString) {
 
     strcpy_P(__fArduino_InternalCharBuffer, (char*)progMemString);
     return __fArduino_InternalCharBuffer;
@@ -839,6 +842,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // Boards with ATmega1280 or 2560, Arduino Mega series – 4096 bytes (4 kilobytes)
 // Boards with ATmega168, Lilypad, old Nano, Diecimila  – 512 bytes
 // By default we choose conservative settings
+
+#ifndef SAMD_SERIES
+
 EEPROMClassEx::EEPROMClassEx()
     : _allowedWrites(10000)
 {
@@ -1112,6 +1118,7 @@ int EEPROMClassEx::_base                 = 0;
 int EEPROMClassEx::_memSize              = 512;
 int EEPROMClassEx::_nextAvailableaddress = 0;
 int EEPROMClassEx::_writeCounts          = 0;
+#endif
 
 /*
 EEPROMClassEx EEPROM;
