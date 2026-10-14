@@ -177,7 +177,6 @@ void loop()
         //
         /*
         String url = String("https://wwwqaz1..com//webservices_mobile/session.ashx");
-        String body = String("{'username':'IntegrationTesting_Converters_Cheetah_Company_06_Admin','password':'moxie','login_dir':'IntegrationTesting_Converters_Cheetah_Company_06','detailedlogging':true}");
         body.replace("'", "\"");
         _screenManager.DrawText("url:" + url);
         _screenManager.DrawText("body:" + body);
