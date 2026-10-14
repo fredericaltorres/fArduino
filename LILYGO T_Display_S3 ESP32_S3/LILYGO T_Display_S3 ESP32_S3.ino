@@ -1,6 +1,6 @@
 #include "Arduino.h"
 // #include "TFT_eSPI.h"/* Please use the TFT library provided in the library. */
-#include "C:\Users\ftorres\OneDrive - Brainshark, Inc\Documents\Arduino\libraries\TFT_eSPI\TFT_eSPI.h"/* Please use the TFT library provided in the library. */
+#include "C:\Users\ftorres\OneDrive - , Inc\Documents\Arduino\libraries\TFT_eSPI\TFT_eSPI.h"/* Please use the TFT library provided in the library. */
 #include <WiFi.h>
 #include "time.h"
 #include <HTTPClient.h>
@@ -87,7 +87,7 @@ void setup(void) {
     Trace("Starting...");
 
     _screenManager.Init();
-    _screenManager.DrawWindow("Brainshark Presentation MicroController");
+    _screenManager.DrawWindow(" Presentation MicroController");
     _screenManager.DrawText("Initializing");
 
     _onBoardLed.SetBlinkMode(1 * 1000);
@@ -157,7 +157,7 @@ void loop()
             }
         }
         
-        //if (_httpManager.Get(url, "Brainshark-STok", sessionToken))
+        //if (_httpManager.Get(url, "-STok", sessionToken))
         //{
         //     /*JSONVar myObject = JSON.parse(_httpManager.Content);
         //     _screenManager.DrawText("OK");
@@ -176,7 +176,7 @@ void loop()
         //}
         //
         /*
-        String url = String("https://wwwqaz1.brainshark.com/brainshark/webservices_mobile/session.ashx");
+        String url = String("https://wwwqaz1..com//webservices_mobile/session.ashx");
         String body = String("{'username':'IntegrationTesting_Converters_Cheetah_Company_06_Admin','password':'moxie','login_dir':'IntegrationTesting_Converters_Cheetah_Company_06','detailedlogging':true}");
         body.replace("'", "\"");
         _screenManager.DrawText("url:" + url);

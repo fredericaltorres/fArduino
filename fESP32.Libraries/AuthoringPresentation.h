@@ -14,7 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// AuthoringPresentation
 ///
-/// C:\Users\ftorres\OneDrive - Brainshark, Inc\Documents\Arduino\libraries\Arduino_JSON\examples\JSONObject\JSONObject.ino
+/// C:\Users\ftorres\OneDrive - , Inc\Documents\Arduino\libraries\Arduino_JSON\examples\JSONObject\JSONObject.ino
 class AuthoringPresentation {
 
 private:

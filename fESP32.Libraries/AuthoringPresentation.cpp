@@ -41,8 +41,8 @@ bool AuthoringPresentation::GetSessionToken() {
 
 bool AuthoringPresentation::Get(int pid) {
 
-   String url = "https://wwwqaz1.brainshark.com/brainshark/brainshark.services.authoring/presentation/"+String(pid);
-   if (_httpManager->Get(url, "Brainshark-STok", this->_sessionToken))
+   String url = "https://www.b.com/b/b.services.authoring/presentation/"+String(pid);
+   if (_httpManager->Get(url, "b-STok", this->_sessionToken))
    {
        JSONVar myObject = JSON.parse(_httpManager->Content);
 
@@ -63,7 +63,6 @@ bool AuthoringPresentation::Get(int pid) {
 
 bool AuthoringPresentation::GetThumbnail() {
 
-   //String url = "https://wwwqaz1.brainshark.com/brainshark/brainshark.services.authoring/image/presentation/" + String(this->presentationId);
    String url = "https://fredcloud.blob.core.windows.net/public/image.png";
    if (_httpManager->GetImage(url, "", ""))
    {
